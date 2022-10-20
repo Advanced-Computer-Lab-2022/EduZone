@@ -37,7 +37,7 @@
   "lint-staged": {
     "*.js": [
       "eslint",
-      "prettier --write"
+      "npm run format"
     ]
   },
   "husky": {
