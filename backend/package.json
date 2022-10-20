@@ -10,7 +10,6 @@
     "dev": "nodemon -e ts  --exec \"npm run compile\""
   },
   "keywords": [],
-  "proxy": "http://localhost:4000",
   "author": "",
   "license": "ISC",
   "devDependencies": {

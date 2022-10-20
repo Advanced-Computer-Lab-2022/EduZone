@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "start": "npm run build && vite preview"
   },
+  "proxy": "http://localhost:4000",
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.6",
     "react": "^18.2.0",
