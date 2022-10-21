@@ -31,8 +31,8 @@
   "homepage": "https://github.com/Advanced-Computer-Lab-2022/Hakim#readme",
   "devDependencies": {
     "concurrently": "^7.4.0",
-    "prettier": "2.7.1",
-    "husky": "^8.0.0"
+    "husky": "^8.0.0",
+    "prettier": "2.7.1"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
@@ -44,5 +44,8 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "dependencies": {
+    "express": "^4.18.2"
   }
 }
