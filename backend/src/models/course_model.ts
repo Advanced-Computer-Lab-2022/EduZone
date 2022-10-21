@@ -12,15 +12,20 @@ const courseSchema = new Schema({
   },
   //TODO change to refrence a user with role instructor
   instructor: {
-    type: String,
+    type: Schema.Types.ObjectId,
     require: true,
   },
   rating: {
     type: Number,
+    min: 0,
+    max: 5,
   },
   subject: {
     type: String,
     require: true,
+  },
+  subtitles: {
+    type: Array,
   },
 });
 
