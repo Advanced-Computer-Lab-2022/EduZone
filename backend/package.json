@@ -7,7 +7,9 @@
     "start": "node dist/app.js",
     "test": "jest",
     "compile": "tsc && node dist/app.js",
-    "dev": "nodemon -e ts  --exec \"npm run compile\""
+    "dev": "nodemon -e ts  --exec \"npm run compile\"",
+    "check:types": "tsc --pretty --noEmit",
+    "check:format": "prettier --check ."
   },
   "keywords": [],
   "author": "",
