@@ -24,11 +24,11 @@ npm run check:format ||
 
 )
 
-npm run lint || 
-(
-    echo '🙎🏻‍♂️  Failed lint check! 🙎🏻‍♂️
-            ESLint Check failed. Make the required changes mentioned above and try commiting again';
-    false;
-)
+# npm run lint || 
+# (
+#     echo '🙎🏻‍♂️  Failed lint check! 🙎🏻‍♂️
+#             ESLint Check failed. Make the required changes mentioned above and try commiting again';
+#     false;
+# )
 
 echo '🤩 ..Alright.. Your code is committed ⚙️'
