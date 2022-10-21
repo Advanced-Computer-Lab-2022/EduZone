@@ -2,3 +2,6 @@
 package.json
 package-lock.json
 dist
+tailwind.config.cjs
+tsconfig.json
+postcss.config.cjs
