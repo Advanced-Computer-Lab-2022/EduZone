@@ -17,7 +17,13 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "check:types:frontend": " cd frontend && npm run check:types",
+    "check:types:backend": " cd backend && npm run check:types",
+    "check:types": "concurrently \"npm run check:types:frontend\" \"npm run check:types:backend\"",
+    "check:format:frontend": " cd frontend && npm run check:format",
+    "check:format:backend": " cd backend && npm run check:format",
+    "check:format": "concurrently \"npm run check:format:frontend\" \"npm run check:format:backend\""
   },
   "repository": {
     "type": "git",
@@ -30,22 +36,10 @@
   },
   "homepage": "https://github.com/Advanced-Computer-Lab-2022/Hakim#readme",
   "devDependencies": {
-    "concurrently": "^7.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
+    "@typescript-eslint/parser": "^5.40.1",
+    "eslint": "^8.25.0",
     "husky": "^8.0.0",
     "prettier": "2.7.1"
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
-      "eslint",
-      "npm run format"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "dependencies": {
-    "express": "^4.18.2"
   }
 }

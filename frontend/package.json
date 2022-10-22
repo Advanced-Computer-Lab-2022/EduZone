@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "start": "npm run build && vite preview"
+    "start": "npm run build && vite preview",
+    "check:types": "tsc --pretty --noEmit",
+    "check:format": "prettier --check ."
   },
   "proxy": "http://localhost:4000",
   "dependencies": {
