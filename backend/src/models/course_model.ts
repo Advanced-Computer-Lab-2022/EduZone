@@ -27,6 +27,10 @@ const courseSchema = new Schema({
   subtitles: {
     type: Array,
   },
+  summary: {
+    type: String,
+    require: true,
+  },
 });
 
 const CourseModel = mongoose.model('Course', courseSchema);
