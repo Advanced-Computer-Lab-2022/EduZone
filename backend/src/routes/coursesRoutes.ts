@@ -1,35 +1,30 @@
 import express from 'express';
-import coursesController from '../controllers/coursesController';
+import { addCourse, getCourseById, updateCourseById } from '../controllers';
 
 const router = express.Router();
 
 //Add new Course Route
-router.post('/addCourse', async (req, res) => {
-  res
-    .status(200)
-    .json(
-      await coursesController.addCourse(req.body.instructor, req.body.title)
-    );
+router.post('/', async (req, res) => {
+  const { title, instructor } = req.body;
+  if (!title || !instructor) {
+    return res.status(400).json({
+      message: 'Please fill all the fields',
+    });
+  }
+  return res.status(201).json(await addCourse(instructor, title));
 });
 
 //get Course By ID Route
-router.get('/getCourse/:id', async (req, res, next) => {
-  var id = req.params.id;
-  res.status(200).json(await coursesController.getCourseById(id));
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  res.status(200).json(await getCourseById(id));
 });
 
 //Update Course By ID Route
-router.patch('/updateCourse/:id', async (req, res, next) => {
-  var id = req.params.id;
-  res
-    .status(200)
-    .json(
-      await coursesController.updateCourseById(
-        id,
-        req.body.instructor,
-        req.body.title
-      )
-    );
+router.patch('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { title, instructor } = req.body;
+  res.status(200).json(await updateCourseById(id, instructor, title));
 });
 
-export default { router };
+export default router;

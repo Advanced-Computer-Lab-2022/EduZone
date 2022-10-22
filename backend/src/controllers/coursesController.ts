@@ -1,16 +1,8 @@
 //import from the Courses Model
 
 //Add a new Course
-const addCourse = (instructor: string, title: string) => {
-  return (
-    'Instructor: ' +
-    instructor +
-    '\n' +
-    ' title : ' +
-    title +
-    '\n' +
-    ' added successfully'
-  );
+export const addCourse = (instructor: string, title: string) => {
+  return { Instructor: instructor, Title: title };
   // const course = new Courses({   TODO: Waiting Schema
   //    instructor: instructor,
   //    title: title
@@ -18,13 +10,19 @@ const addCourse = (instructor: string, title: string) => {
   //return await course.save();
 };
 // Get Course By ID
-const getCourseById = (id: string) => {
+export const getCourseById = (id: string) => {
   //return Courses.findById(id);  TODO: Waiting Schema
-  return 'Maths';
+  return {
+    id: id,
+  };
 };
 
 //Update Course By ID
-const updateCourseById = (id: string, instructor: string, title: string) => {
+export const updateCourseById = (
+  id: string,
+  instructor: string,
+  title: string
+) => {
   //return Courses.findByIdAndUpdate(id, { instructor: instructor, title: title });  TODO: Waiting Schema
   return (
     'id ' +
@@ -39,4 +37,3 @@ const updateCourseById = (id: string, instructor: string, title: string) => {
     'updated successfully'
   );
 };
-export default { addCourse, getCourseById, updateCourseById };
