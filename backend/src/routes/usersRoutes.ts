@@ -1,4 +1,5 @@
 import express from 'express';
+import { addUser } from '../controllers';
 
 const router = express.Router();
 
@@ -7,13 +8,25 @@ router.post('/', async (req, res) => {
   try {
     const data = req.body as any;
     if (!data) {
-      return res.status(400).json({
-        message: 'Please fill all the fields',
+      return res.status(400).json(await addUser(data));
+    }
+    return res.status(201).json(await addUser(data));
+  } catch (error) {
+    return res.status(500).json({ message: (error as any).message });
+  }
+});
+
+//get User By ID Route
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = { name: 'john Doe' }; //await getUserById(id);
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
       });
     }
-    return res.status(201).json({
-      message: 'User created successfully',
-    });
+    res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ message: (error as any).message });
   }
