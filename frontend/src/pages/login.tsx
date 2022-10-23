@@ -2,7 +2,7 @@ import React, { FormEventHandler } from 'react';
 import InputField from '../components/common/InputField';
 import Hero from './../assets/illustrations/login-hero-with-corner.svg';
 import { MdEmail } from 'react-icons/md';
-import { FaLock, FaKey } from 'react-icons/fa';
+import { FaKey } from 'react-icons/fa';
 import axios from 'axios';
 const onSubmit: FormEventHandler = (e) => {
   e.preventDefault();
