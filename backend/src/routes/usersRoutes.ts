@@ -13,7 +13,9 @@ router.post('/', async (req, res) => {
   try {
     const data = req.body as any;
     if (!data) {
-      return res.status(400).json(await addUser(data));
+      return res.status(400).json({
+        message: 'Bad Request Body',
+      });
     }
     return res.status(201).json(await addUser(data));
   } catch (error) {
