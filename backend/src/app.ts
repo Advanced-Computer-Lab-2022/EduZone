@@ -2,7 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import { coursesRoutes, usersRoutes } from './routes';
+import { coursesRoutes, usersRoutes,authRoutes } from './routes';
+
 dotenv.config();
 
 const PORT = process.env.PORT || 4000;
@@ -18,7 +19,9 @@ app.get('/', (req, res) => {
 /* Routes */
 
 app.use('/courses', coursesRoutes);
+app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
+
 
 /* Error Handlers */
 app.use((req, res) => {
