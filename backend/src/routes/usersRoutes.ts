@@ -1,5 +1,10 @@
 import express from 'express';
-import { addUser } from '../controllers';
+import {
+  addUser,
+  getAllUsers,
+  getUserById,
+  getUserByName,
+} from '../controllers';
 
 const router = express.Router();
 
@@ -20,7 +25,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const user = { name: 'john Doe' }; //await getUserById(id);
+    const user = await getUserById(id);
     if (!user) {
       return res.status(404).json({
         message: 'User not found',
@@ -31,14 +36,25 @@ router.get('/:id', async (req, res) => {
     return res.status(500).json({ message: (error as any).message });
   }
 });
-
+//get user by name Route
+router.get('/:name', async (req, res) => {
+  try {
+    const { name } = req.params;
+    const user = await getUserByName(name);
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: (error as any).message });
+  }
+});
 //Read all users Route
 router.get('/', async (req, res) => {
   try {
-    res.status(200).json({
-      name: 'John Doe',
-      email: 'example@example.com',
-    });
+    res.status(200).json(await getAllUsers());
   } catch (error) {
     res.status(500).json({ message: (error as any).message });
   }
