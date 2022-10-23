@@ -50,7 +50,7 @@ export const register = async (
     gender: gender,
   });
 
-  //generate access token
+  //generate access and refresh tokens
 
   const { accessToken, refreshToken } = getTokens(user);
 
