@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { coursesRoutes } from './routes';
+import {authRoutes} from './routes';
 dotenv.config();
 
 const PORT = process.env.PORT || 4000;
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 /* Routes */
 
 app.use('/courses', coursesRoutes);
+app.use('/auth', authRoutes);
 
 /* Error Handlers */
 app.use((req, res) => {

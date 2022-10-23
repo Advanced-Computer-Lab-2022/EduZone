@@ -37,6 +37,7 @@ const userSchema = new Schema({
     enum: ['male', 'female'],
     required: true,
   },
+  
 });
 
 const UserModel = mongoose.model('User', userSchema);
