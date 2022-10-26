@@ -52,7 +52,7 @@ export const register = async (
 
   //generate access and refresh tokens
 
-  const { accessToken, refreshToken } = getTokens(user);
+  const { accessToken, refreshToken } = getTokens(newUser);
 
   // encrypt refresh token
   const encryptedRefreshToken = await bcrypt.hash(refreshToken, 10);
