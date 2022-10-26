@@ -1,5 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
-
+const SubtitleSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  duration: {
+    type: Number,
+    required: true,
+  },
+});
 const courseSchema = new Schema({
   title: {
     type: String,
@@ -13,6 +22,7 @@ const courseSchema = new Schema({
   //TODO change to refrence a user with role instructor
   instructor: {
     type: Schema.Types.ObjectId,
+    ref: 'User',
     require: true,
   },
   rating: {
@@ -25,7 +35,8 @@ const courseSchema = new Schema({
     require: true,
   },
   subtitles: {
-    type: Array,
+    type: [SubtitleSchema],
+    required: false,
   },
   summary: {
     type: String,

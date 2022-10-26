@@ -29,8 +29,9 @@ router.post('/register', async (req, res) => {
   try {
     //TODO: check DTO
     const tokens = await register(name, username, email, password, gender);
-    return res.status(200).json({ message: 'Login successful', ...tokens });
+    return res.status(200).json({ message: 'Register successful', ...tokens });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({ message: (error as any).message });
   }
 });
@@ -41,6 +42,7 @@ router.post('/logout', async (req, res) => {
     await logout(id);
     return res.status(200).json({ message: 'Logout successful' });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({ message: (error as any).message });
   }
 });
