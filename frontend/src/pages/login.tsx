@@ -3,9 +3,9 @@ import InputField from '../components/common/InputField';
 import Hero from './../assets/illustrations/login-hero-with-corner.svg';
 import { MdEmail } from 'react-icons/md';
 import { FaKey } from 'react-icons/fa';
-import axios from 'axios';
+
 import { Link, useNavigate } from 'react-router-dom';
-import useApi from '../hooks/useApi';
+import { axios } from '../utils';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -15,21 +15,22 @@ const LoginPage = () => {
     const formData = new FormData(form);
     const username = formData.get('username');
     const password = formData.get('password');
-    const { data, loading, error } = await useApi({
-      url: `/auth/login`,
-      method: 'POST',
-      data: {
-        username,
-        password,
-      },
-    });
+    try {
+      const res = await axios({
+        url: `/auth/login`,
+        method: 'POST',
+        data: {
+          username,
+          password,
+        },
+      });
 
-    if (error) {
-      console.log(error);
-      alert(error);
-    }
-    if (data) {
-      navigate('/dashboard');
+      if (res.status === 200) {
+        console.log(res.data);
+        // navigate('/');
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
   return (
