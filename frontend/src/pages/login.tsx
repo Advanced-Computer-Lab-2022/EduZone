@@ -4,22 +4,34 @@ import Hero from './../assets/illustrations/login-hero-with-corner.svg';
 import { MdEmail } from 'react-icons/md';
 import { FaKey } from 'react-icons/fa';
 import axios from 'axios';
-const onSubmit: FormEventHandler = (e) => {
-  e.preventDefault();
-  const form = e.target as HTMLFormElement;
-  const formData = new FormData(form);
-  const username = formData.get('username');
-  const password = formData.get('password');
-  const res = axios({
-    url: `/auth/login`,
-    method: 'POST',
-    data: {
-      username,
-      password,
-    },
-  });
-};
+import { Link, useNavigate } from 'react-router-dom';
+import useApi from '../hooks/useApi';
+
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const onSubmit: FormEventHandler = async (e) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const username = formData.get('username');
+    const password = formData.get('password');
+    const { data, loading, error } = await useApi({
+      url: `/auth/login`,
+      method: 'POST',
+      data: {
+        username,
+        password,
+      },
+    });
+
+    if (error) {
+      console.log(error);
+      alert(error);
+    }
+    if (data) {
+      navigate('/dashboard');
+    }
+  };
   return (
     <div className="h-screen from-secondary-dark to-primary bg-gradient-to-br flex">
       <div className="relative h-full  w-2/5">
@@ -31,29 +43,51 @@ const LoginPage = () => {
       </div>
       <div className="w-3/5  flex justify-center items-center">
         <form
-          className="bg-white w-1/2 h-2/3 rounded-lg shadow-lg p-10 py-16"
+          className="bg-white w-1/2 h-2/3 rounded-lg shadow-lg p-10 py-16 flex flex-col justify-evenly"
           onSubmit={onSubmit}
         >
-          <p className="text-3xl text-primary font-medium">Welcome back...</p>
-          <p className="text-gray-600">
-            Please enter your username and password
-          </p>
-          <InputField
-            placeholder="example@hakim.com"
-            icon={
-              <MdEmail size={25} className=" text-gray-500 absolute ml-1" />
-            }
-            name="username"
-          />
-          <InputField
-            placeholder="Enter Password"
-            type="password"
-            icon={<FaKey size={23} className=" text-gray-500 absolute ml-1" />}
-            name="password"
-          />
-          <button className="bg-primary text-white w-full py-3 rounded-sm mt-6">
-            Login
-          </button>
+          <div className="">
+            <p className="text-3xl text-primary font-medium">Welcome back...</p>
+            <p className="text-gray-600">
+              Please enter your username and password
+            </p>
+          </div>
+          <div>
+            <InputField
+              placeholder="Enter your username"
+              icon={
+                <MdEmail size={25} className=" text-gray-500 absolute ml-1" />
+              }
+              name="username"
+            />
+            <InputField
+              placeholder="Enter your password"
+              type="password"
+              icon={
+                <FaKey size={23} className=" text-gray-500 absolute ml-1" />
+              }
+              name="password"
+            />
+            <button className="bg-primary text-white w-full py-3 rounded-sm ">
+              Login
+            </button>
+            <p className="text-center mt-4 text-zinc-500 hover:underline underline-offset-1">
+              <Link to={'/forget-password'}>Forgot Password</Link>
+            </p>
+          </div>
+          <div>
+            {/* <div className="flex items-center gap-2 text-zinc-500 font-medium">
+              <hr className="border-t border-t-zinc-500 grow" />
+              OR
+              <hr className="border-t border-t-zinc-500 grow" />
+            </div> */}
+            <p className="text-center mt-4 text-gray-500">
+              Don't have an account?{' '}
+              <Link to={'/register'} className="text-blue-600 hover:underline">
+                Register
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>

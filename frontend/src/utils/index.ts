@@ -1,1 +1,1 @@
-export const text = 'Hello';
+export { default as axios } from './axios';
