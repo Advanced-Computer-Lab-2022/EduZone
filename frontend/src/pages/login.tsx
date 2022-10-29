@@ -5,10 +5,15 @@ import { MdEmail } from 'react-icons/md';
 import { FaKey } from 'react-icons/fa';
 
 import { Link, useNavigate } from 'react-router-dom';
-import { axios } from '../utils';
+import { axios, decodeToken } from '../utils';
+import { setCookie } from 'cookies-next';
+import { AxiosResponse } from 'axios';
+import { useDispatch } from 'react-redux';
+import { login } from '../redux/features/auth.reducer';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const onSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -16,7 +21,9 @@ const LoginPage = () => {
     const username = formData.get('username');
     const password = formData.get('password');
     try {
-      const res = await axios({
+      const res:
+        | AxiosResponse<{ accessToken: string; refreshToken: string }, any>
+        | any = await axios({
         url: `/auth/login`,
         method: 'POST',
         data: {
@@ -26,8 +33,13 @@ const LoginPage = () => {
       });
 
       if (res.status === 200) {
-        console.log(res.data);
-        // navigate('/');
+        setCookie('access-token', res.data?.accessToken);
+        setCookie('refresh-token', res.data?.refreshToken);
+        const user = decodeToken(res.data?.accessToken);
+        dispatch(login(user));
+        navigate('/');
+      } else {
+        console.log(res);
       }
     } catch (err) {
       console.log(err);
