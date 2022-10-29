@@ -5,65 +5,53 @@ export const getAllCourses = async (
   page?: string,
   limit?: string
 ) => {
-  const { title, subject, instructor, price, rating, maxPrice, minPrice } =
-    filters;
+  const { price, rating, maxPrice, minPrice, query } = filters;
+  console.log(filters);
+
+  // const search_query = [
+  //   ...(title && { title: { $regex: title, $options: 'i' } }),
+  //   ...(subject && { subject: { $regex: subject, $options: 'i' } }),
+  //   ...(instructor && { instructor: instructorId._id }),
+  //   ...(price && { price: price }),
+  //   ...(rating && { rating: { $gte: rating } }),
+  //   ...(maxPrice && { price: { $lte: maxPrice } }),
+  //   ...(minPrice && { price: { $gte: minPrice } }),
+  // ];
+  let search_query: any = [
+    { title: { $regex: query, $options: 'i' } },
+    { subject: { $regex: query, $options: 'i' } },
+  ];
+
   let instructorId: any = '';
-  if (instructor) {
+  if (query) {
     //get instructor id by name
     instructorId = await UserModel.findOne({
-      name: { $regex: instructor, $options: 'i' },
+      name: { $regex: query, $options: 'i' },
     }).select('_id');
+    search_query = [...search_query, { instructor: instructorId?._id }];
   }
 
-  const query = {
-    ...(title && { title: { $regex: title, $options: 'i' } }),
-    ...(subject && { subject: { $regex: subject, $options: 'i' } }),
-    ...(instructor && { instructor: instructorId._id }),
+  const filter_query = {
     ...(price && { price: price }),
     ...(rating && { rating: { $gte: rating } }),
     ...(maxPrice && { price: { $lte: maxPrice } }),
     ...(minPrice && { price: { $gte: minPrice } }),
   };
-  const courses = CourseModel.aggregate([
-    {
-      $match: query,
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'instructor',
-        foreignField: '_id',
-        as: 'instructor',
-      },
-    },
-    {
-      $unwind: {
-        path: '$instructor',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        title: 1,
-        subject: 1,
-        instructor: {
-          _id: 1,
-          username: 1,
-          name: 1,
-          avatar: 1,
-        },
-        price: 1,
-        rating: 1,
-        createdAt: 1,
-      },
-    },
+
+  const full_query = { $or: search_query, ...filter_query };
+
+  const courses = CourseModel.find(full_query).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
   ]);
 
   if (page && limit) {
     const currentPage = parseInt(page);
     const pageSize = parseInt(limit);
     const skip = (currentPage - 1) * pageSize;
-    const total = await CourseModel.countDocuments(query);
+    const total = await CourseModel.countDocuments(full_query);
     const totalPages = Math.ceil(total / pageSize);
     const results = await courses.skip(skip).limit(pageSize).exec();
     return {
