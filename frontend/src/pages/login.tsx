@@ -1,4 +1,4 @@
-import React, { FormEventHandler } from 'react';
+import React, { FormEventHandler, useState } from 'react';
 import InputField from '../components/common/InputField';
 import Hero from './../assets/illustrations/login-hero-with-corner.svg';
 import { MdEmail } from 'react-icons/md';
@@ -10,12 +10,15 @@ import { setCookie } from 'cookies-next';
 import { AxiosResponse } from 'axios';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/features/auth.reducer';
+import CircularLoadingIndicator from '../components/common/CircularLoadingIndicator';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const onSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     const username = formData.get('username');
@@ -37,6 +40,7 @@ const LoginPage = () => {
         setCookie('refresh-token', res.data?.refreshToken);
         const user = decodeToken(res.data?.accessToken);
         dispatch(login(user));
+        setLoading(false);
         navigate('/');
       } else {
         console.log(res);
@@ -81,7 +85,8 @@ const LoginPage = () => {
               }
               name="password"
             />
-            <button className="bg-primary text-white w-full py-3 rounded-sm ">
+            <button className="bg-primary text-white w-full py-3 rounded-sm flex items-center justify-center">
+              <CircularLoadingIndicator loading={loading} />
               Login
             </button>
             <p className="text-center mt-4 text-zinc-500 hover:underline underline-offset-1">
