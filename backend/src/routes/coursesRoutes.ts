@@ -5,7 +5,7 @@ import {
   getAllCourses,
   getCourseById,
   updateCourseById,
-} from '../controllers';
+} from '../services';
 
 const router = express.Router();
 

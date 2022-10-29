@@ -1,7 +1,7 @@
 import Express from 'express';
 
 const router = Express.Router();
-import { login, logout, register } from '../controllers';
+import { login, logout, register } from '../services';
 
 router.post('/login', async (req, res) => {
   try {

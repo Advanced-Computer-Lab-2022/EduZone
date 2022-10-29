@@ -23,7 +23,8 @@
     "check:types": "concurrently \"npm run check:types:frontend\" \"npm run check:types:backend\"",
     "check:format:frontend": " cd frontend && npm run check:format",
     "check:format:backend": " cd backend && npm run check:format",
-    "check:format": "concurrently \"npm run check:format:frontend\" \"npm run check:format:backend\""
+    "check:format": "concurrently \"npm run check:format:frontend\" \"npm run check:format:backend\"",
+    "install:all": "concurrently \"cd backend && npm install \" \" cd frontend && npm install \" "
   },
   "repository": {
     "type": "git",
