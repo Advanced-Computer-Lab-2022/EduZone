@@ -4,7 +4,7 @@ import { FaPlay } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Avatar from '../../components/common/Avatar';
-import Layout from '../../components/layout/Layout';
+import Layout from '../../components/layout/Trainee/Layout';
 import { RootState } from '../../redux/store';
 import { Course } from '../../types/entities/Course';
 import { Section } from '../../types/entities/Section';

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrency } from '../../../redux/features/currency.reducer';
-import { RootState } from '../../../redux/store';
-import currencies from '../../../utils/currencies';
+import { setCurrency } from '../../../../redux/features/currency.reducer';
+import { RootState } from '../../../../redux/store';
+import currencies from '../../../../utils/currencies';
 
 const CurrencyConverter = () => {
   const [loading, setLoading] = useState(false);
