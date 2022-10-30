@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '../../../redux/features/auth.reducer';
-import { RootState } from '../../../redux/store';
-import Avatar from '../../common/Avatar';
+import { logout } from '../../../../redux/features/auth.reducer';
+import { RootState } from '../../../../redux/store';
+import Avatar from '../../../common/Avatar';
 import CurrencyConverter from './CurrencyConverter';
 import SearchBar from './SearchBar';
 
