@@ -3,6 +3,7 @@ import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 import thunk from 'redux-thunk';
 import authReducer from './features/auth.reducer';
+import currencyReducer from './features/currency.reducer';
 
 const persistConfig = {
   key: 'root',
@@ -12,9 +13,12 @@ const persistConfig = {
 // persist state: const persistedReducer = persistReducer(persistConfig, userReducer)
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const persistedCurrencyReducer = persistReducer(persistConfig, currencyReducer);
+
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
+    currency: persistedCurrencyReducer,
   },
   middleware: [thunk],
 });

@@ -1,25 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCurrency } from '../../../redux/features/currency.reducer';
+import { RootState } from '../../../redux/store';
 import currencies from '../../../utils/currencies';
 
 const CurrencyConverter = () => {
   const [loading, setLoading] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState('');
-  useEffect(() => {
-    if (window !== undefined && !localStorage.getItem('currency')) {
-      localStorage.setItem('currency', 'USD');
-      setLoading(false);
-    } else if (window !== undefined && localStorage.getItem('currency')) {
-      setSelectedCurrency(localStorage.getItem('currency') as string);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, []);
+
+  const { currency: currentCurrency } = useSelector(
+    (state: RootState) => state.currency
+  );
+  const dispatch = useDispatch();
 
   const handleChangeCurrency = async (currency: string) => {
-    const saved = localStorage.getItem('currency');
-    if (saved && saved !== currency) {
-      localStorage.setItem('currency', currency);
+    if (currentCurrency && currentCurrency !== currency) {
       let rate = 1;
       if (currency !== 'USD') {
         rate = await fetch(
@@ -27,30 +21,39 @@ const CurrencyConverter = () => {
         )
           .then((res) => res.json())
           .then((data) => data.conversion_rates[currency]);
+
+        dispatch(
+          setCurrency({
+            currency,
+            conversion_rate: rate,
+          })
+        );
+      } else {
+        dispatch(
+          setCurrency({
+            currency,
+            conversion_rate: rate,
+          })
+        );
       }
-      // redis.set(`${currency}`, rate);
-      localStorage.setItem('conversionRate', `${rate}`);
     }
   };
   return (
     <div>
       <select
         className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1"
-        defaultValue="USD"
+        defaultValue={currentCurrency}
         onChange={(e) => handleChangeCurrency(e.target.value)}
       >
-        <option value={selectedCurrency}>{selectedCurrency}</option>
         {!loading &&
-          currencies
-            .filter((currency) => currency.code !== selectedCurrency)
-            .map((currency) => (
-              <option key={currency.code} value={currency.code}>
-                {currency.code}
-              </option>
-            ))}
+          currencies.map((currency) => (
+            <option key={currency.code} value={currency.code}>
+              {currency.code}
+            </option>
+          ))}
       </select>
     </div>
-  )
-}
+  );
+};
 
-export default CurrencyConverter
+export default CurrencyConverter;
