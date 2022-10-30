@@ -17,10 +17,12 @@ export const getAllCourses = async (
   //   ...(maxPrice && { price: { $lte: maxPrice } }),
   //   ...(minPrice && { price: { $gte: minPrice } }),
   // ];
-  let search_query: any = [
-    { title: { $regex: query, $options: 'i' } },
-    { subject: { $regex: query, $options: 'i' } },
-  ];
+  let search_query: any = query
+    ? [
+        { title: { $regex: query, $options: 'i' } },
+        { subject: { $regex: query, $options: 'i' } },
+      ]
+    : [];
 
   let instructorId: any = '';
   if (query) {
@@ -38,7 +40,9 @@ export const getAllCourses = async (
     ...(minPrice && { price: { $gte: minPrice } }),
   };
 
-  const full_query = { $or: search_query, ...filter_query };
+  const full_query = query
+    ? { $or: search_query, ...filter_query }
+    : filter_query;
 
   const courses = CourseModel.find(full_query).populate('instructor', [
     'name',
