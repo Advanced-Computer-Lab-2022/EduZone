@@ -42,6 +42,14 @@ const courseSchema = new Schema({
     type: String,
     require: true,
   },
+  thumbnail: {
+    type: String,
+    required: false,
+  },
+  preview_video: {
+    type: String,
+    required: false,
+  },
 });
 
 const CourseModel = mongoose.model('Course', courseSchema);

@@ -24,7 +24,7 @@ const Layout = ({ children }: { children: JSX.Element | JSX.Element[] }) => {
             </Link>
           </div>
         )} */}
-        <div className="mx-auto container max-w-7xl">{children}</div>
+        <div className="mx-auto md:max-w-5xl xl:max-w-7xl px-6">{children}</div>
       </div>
     </div>
   );

@@ -16,7 +16,6 @@ const Home = () => {
             </button>
           </Link>
         </div>
-
         <CategoryCards />
         <div>
           <p className="text-2xl font-medium text-gray-600 my-2">Placeholder</p>
