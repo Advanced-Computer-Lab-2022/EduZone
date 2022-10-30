@@ -161,7 +161,12 @@ export const addCourse = (data: typeof CourseModel) => {
 };
 // Get Course By ID
 export const getCourseById = async (id: string) => {
-  const course = await CourseModel.findById(id);
+  const course = await CourseModel.findById(id).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+  ]);
   return course;
 };
 

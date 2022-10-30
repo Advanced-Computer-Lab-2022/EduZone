@@ -50,6 +50,12 @@ const courseSchema = new Schema({
     type: String,
     required: false,
   },
+  discount: {
+    type: Number,
+    min: 0,
+    max: 100,
+    required: false,
+  },
 });
 
 const CourseModel = mongoose.model('Course', courseSchema);
