@@ -9,7 +9,8 @@ export declare type Course = {
   instructor: string | Partial<User>;
   rating: number;
   subject: string;
-  subtitles: Section[];
+  subtitles?: Section[];
   summary: string;
   preview_video?: string;
+  discount?: number;
 };

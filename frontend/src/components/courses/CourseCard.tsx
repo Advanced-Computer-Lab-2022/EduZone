@@ -30,7 +30,12 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         <div className="flex justify-between w-full ">
           <div className="text-2xl font-bold ">{course.title}</div>
           <div className="text-xl font-medium ">
-            {Number(course?.price * conversion_rate).toFixed(2)} {currency}
+            {Number(
+              course?.price *
+                (1 - (course?.discount ?? 0) / 100) *
+                conversion_rate
+            ).toFixed(2)}{' '}
+            {currency}
           </div>
         </div>
         <div className="flex justify-between w-full ">

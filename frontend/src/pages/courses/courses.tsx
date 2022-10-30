@@ -63,9 +63,15 @@ const Courses = () => {
         <div className="flex justify-between mt-4  gap-4 items-center">
           {searchParams.get('query') && (
             <div className="grow">
-              Search Results for "{searchParams?.get('query')}" -- Total:{' '}
+              <p className="text-2xl">
+                Search results for{' '}
+                <span className="font-medium">
+                  "{searchParams.get('query')}"
+                </span>
+              </p>
+              {/* Search Results for "{searchParams?.get('query')}" -- Total:{' '}
               {pagination?.total} -- Page: {pagination?.currentPage} -- Limit:{' '}
-              {pagination?.pageSize}
+              {pagination?.pageSize} */}
             </div>
           )}
           {courses && (
