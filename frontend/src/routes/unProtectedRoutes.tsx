@@ -1,3 +1,4 @@
+import CreateCourse from '../pages/courses/CreateCourse';
 import Courses from '../pages/courses/courses';
 import SingleCourse from '../pages/courses/singleCourse';
 import Home from '../pages/home';
@@ -35,6 +36,11 @@ const UnProtectedRoutes: RouteType[] = [
     path: '/register',
     parent: false,
     element: <h1>Register</h1>,
+  },
+  {
+    path: 'courses/create',
+    element: <CreateCourse />,
+    parent: false,
   },
 ];
 
