@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CategoryCards from '../../components/courses/CategoryCards';
-import Layout from '../../components/layout/Layout';
+import Layout from '../../components/layout/Trainee/Layout';
 import { axios } from '../../utils';
 import { FaFilter } from 'react-icons/fa';
 import Truncate from '../../components/common/Truncate';
