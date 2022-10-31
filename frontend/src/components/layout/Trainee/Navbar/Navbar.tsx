@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '../../../redux/features/auth.reducer';
-import { RootState } from '../../../redux/store';
-import Avatar from '../../common/Avatar';
+import { logout } from '../../../../redux/features/auth.reducer';
+import { RootState } from '../../../../redux/store';
+import Avatar from '../../../common/Avatar';
 import CurrencyConverter from './CurrencyConverter';
 import SearchBar from './SearchBar';
 
@@ -14,7 +14,7 @@ const Navbar = () => {
 
   return (
     <div className="h-14 bg-white flex items-center justify-center shadow-md fixed w-full z-30">
-      <div className="container max-w-7xl flex items-center justify-between mx-auto h-full">
+      <div className="container xl:max-w-7xl md:max-w-5xl flex items-center justify-between mx-auto h-full px-6 ">
         <Link to="/" className="text-lg text-primary font-medium ">
           Placeholder
         </Link>

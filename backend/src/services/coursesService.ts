@@ -5,7 +5,7 @@ export const getAllCourses = async (
   page?: string,
   limit?: string
 ) => {
-  const { price, rating, maxPrice, minPrice, query } = filters;
+  const { price, rating, maxPrice, minPrice, query, subject } = filters;
   console.log(filters);
 
   // const search_query = [
@@ -17,10 +17,12 @@ export const getAllCourses = async (
   //   ...(maxPrice && { price: { $lte: maxPrice } }),
   //   ...(minPrice && { price: { $gte: minPrice } }),
   // ];
-  let search_query: any = [
-    { title: { $regex: query, $options: 'i' } },
-    { subject: { $regex: query, $options: 'i' } },
-  ];
+  let search_query: any = query
+    ? [
+        { title: { $regex: query, $options: 'i' } },
+        { subject: { $regex: query, $options: 'i' } },
+      ]
+    : [];
 
   let instructorId: any = '';
   if (query) {
@@ -36,9 +38,12 @@ export const getAllCourses = async (
     ...(rating && { rating: { $gte: rating } }),
     ...(maxPrice && { price: { $lte: maxPrice } }),
     ...(minPrice && { price: { $gte: minPrice } }),
+    ...(subject && { subject: { $regex: subject, $options: 'i' } }),
   };
 
-  const full_query = { $or: search_query, ...filter_query };
+  const full_query = query
+    ? { $or: search_query, ...filter_query }
+    : filter_query;
 
   const courses = CourseModel.find(full_query).populate('instructor', [
     'name',
@@ -156,7 +161,12 @@ export const addCourse = (data: typeof CourseModel) => {
 };
 // Get Course By ID
 export const getCourseById = async (id: string) => {
-  const course = await CourseModel.findById(id);
+  const course = await CourseModel.findById(id).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+  ]);
   return course;
 };
 
