@@ -23,7 +23,6 @@ const AdminCreateUser = () => {
         method: 'POST',
         data,
       });
-
       if (res.status === 201) {
         navigate(`/instructors/${instructorId}/courses`);
       }
@@ -81,7 +80,7 @@ const AdminCreateUser = () => {
               rows={10}
               className="w-full p-4 rounded-md"
               placeholder="Please Enter the Course Description"
-              name="Price"
+              name="summary"
             />
           </div>
           <div>

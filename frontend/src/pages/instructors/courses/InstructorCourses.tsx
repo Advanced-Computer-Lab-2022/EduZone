@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import CourseCard from '../../../components/courses/CourseCard';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
 import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
 import { axios } from '../../../utils';
@@ -45,23 +46,16 @@ const InstructorCourses = () => {
           }}
         />
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Course Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {courses &&
-            courses.map((course) => {
-              return (
-                <tr key={course._id}>
-                  <td>{course.title}</td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </table>
+      <div className="w-2/3 space-y-4">
+        {courses &&
+          courses.map((course) => {
+            return (
+              <tr key={course._id}>
+                <CourseCard course={course} />
+              </tr>
+            );
+          })}
+      </div>
     </AdminLayout>
   );
 };
