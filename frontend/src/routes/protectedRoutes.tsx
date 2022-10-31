@@ -2,6 +2,9 @@ import AdminDashboard from '../pages/admin/dashboard';
 import AdminUsers from '../pages/admin/users/AdminUsers';
 import AdminCreateUser from '../pages/admin/users/AdminCreateUsers';
 import { RouteType } from '../types';
+import InstructorDashboard from '../pages/instructors/InstructorDashboard';
+import InstructorCourses from '../pages/instructors/courses/InstructorCourses';
+import CreateCourse from '../pages/courses/CreateCourse';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -22,6 +25,21 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'admin/users/create',
     element: <AdminCreateUser />,
+    parent: false,
+  },
+  {
+    path: 'instructors/:id',
+    element: <InstructorDashboard />,
+    parent: false,
+  },
+  {
+    path: 'instructors/:id/courses',
+    element: <InstructorCourses />,
+    parent: false,
+  },
+  {
+    path: 'courses/create',
+    element: <CreateCourse />,
     parent: false,
   },
 ];

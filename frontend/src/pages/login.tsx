@@ -69,7 +69,7 @@ const LoginPage = () => {
               Please enter your username and password
             </p>
           </div>
-          <div>
+          <div className="space-y-4">
             <InputField
               placeholder="Enter your username"
               icon={

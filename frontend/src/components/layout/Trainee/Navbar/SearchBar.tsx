@@ -1,14 +1,13 @@
 import React, { FormEventHandler } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SearchBar = () => {
-  const navigate = useNavigate();
-  const onSubmit: FormEventHandler = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const query = formData.get('query');
-    navigate(`/courses?query=${query}`);
-  };
+const SearchBar: React.FC<{ onSubmit: FormEventHandler }> = ({ onSubmit }) => {
+  // const onSubmit: FormEventHandler = (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData(e.target as HTMLFormElement);
+  //   const query = formData.get('query');
+  //   navigate(`/courses?query=${query}`);
+  // };
   return (
     <form className="w-full" onSubmit={onSubmit}>
       {/*Search bar */}

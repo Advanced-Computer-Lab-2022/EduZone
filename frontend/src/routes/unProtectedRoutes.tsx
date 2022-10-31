@@ -37,11 +37,6 @@ const UnProtectedRoutes: RouteType[] = [
     parent: false,
     element: <h1>Register</h1>,
   },
-  {
-    path: 'courses/create',
-    element: <CreateCourse />,
-    parent: false,
-  },
 ];
 
 export default UnProtectedRoutes;

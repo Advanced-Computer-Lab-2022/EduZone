@@ -11,7 +11,7 @@ const Navbar = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
-
+  const navigate = useNavigate();
   return (
     <div className="h-14 bg-white flex items-center justify-center shadow-md fixed w-full z-30">
       <div className="container xl:max-w-7xl md:max-w-5xl flex items-center justify-between mx-auto h-full px-6 ">
@@ -19,7 +19,14 @@ const Navbar = () => {
           Placeholder
         </Link>
         <div className="w-3/5">
-          <SearchBar />
+          <SearchBar
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const query = formData.get('query');
+              navigate(`/courses?query=${query}`);
+            }}
+          />
         </div>
         {isAuthenticated ? (
           // <button

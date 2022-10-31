@@ -5,7 +5,8 @@ export const getAllCourses = async (
   page?: string,
   limit?: string
 ) => {
-  const { price, rating, maxPrice, minPrice, query, subject } = filters;
+  const { price, rating, maxPrice, minPrice, query, subject, instructor } =
+    filters;
   console.log(filters);
 
   // const search_query = [
@@ -39,6 +40,7 @@ export const getAllCourses = async (
     ...(maxPrice && { price: { $lte: maxPrice } }),
     ...(minPrice && { price: { $gte: minPrice } }),
     ...(subject && { subject: { $regex: subject, $options: 'i' } }),
+    ...(instructor && { instructor: instructor }),
   };
 
   const full_query = query
