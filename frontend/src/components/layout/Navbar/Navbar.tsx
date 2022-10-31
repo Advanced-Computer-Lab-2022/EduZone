@@ -8,12 +8,9 @@ import CurrencyConverter from './CurrencyConverter';
 import SearchBar from './SearchBar';
 
 const Navbar = () => {
-
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
-
-
 
   return (
     <div className="h-14 bg-white flex items-center justify-center shadow-md fixed w-full z-30">

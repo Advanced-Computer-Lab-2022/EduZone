@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import currencies from '../../../utils/currencies';
 
 const CurrencyConverter = () => {
@@ -50,7 +50,7 @@ const CurrencyConverter = () => {
             ))}
       </select>
     </div>
-  )
-}
+  );
+};
 
-export default CurrencyConverter
+export default CurrencyConverter;
