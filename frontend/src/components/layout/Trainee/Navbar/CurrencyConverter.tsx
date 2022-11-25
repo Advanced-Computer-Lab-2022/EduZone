@@ -41,14 +41,14 @@ const CurrencyConverter = () => {
   return (
     <div>
       <select
-        className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1"
+        className="bg-gray-100 border border-gray-300 rounded-md px-2 py-1 w-52"
         defaultValue={currentCurrency}
         onChange={(e) => handleChangeCurrency(e.target.value)}
       >
         {!loading &&
           currencies.map((currency) => (
-            <option key={currency.code} value={currency.code}>
-              {currency.code}
+            <option key={currency.code} value={currency.code} className="wrap">
+              {currency.country}
             </option>
           ))}
       </select>
