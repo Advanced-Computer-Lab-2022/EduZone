@@ -24,23 +24,22 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleLogout = async () => {
-    axios
-      .post(
-        '/auth/logout',
-        {},
-        {
-          headers: {
-            Authorization: 'Bearer ' + getCookie('access-token'),
-            'content-type': 'application/json',
-          },
-        }
-      )
-      .then(() => {
-        deleteCookie('access-token');
-        deleteCookie('refresh-token');
-        dispatch(logout());
-        navigate('/login', { replace: true });
-      });
+    console.log('Logout');
+    const res = await axios({
+      url: '/auth/logout',
+      headers: {
+        Authorization: 'Bearer ' + getCookie('access-token'),
+        'Content-type': 'application/json',
+      },
+      method: 'POST',
+      data: {},
+    });
+    if (res.status == 200) {
+      deleteCookie('access-token');
+      deleteCookie('refresh-token');
+      dispatch(logout());
+      navigate('/login');
+    }
   };
   return (
     <div

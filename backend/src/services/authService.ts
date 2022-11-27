@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models';
+import { getUserById } from './usersService';
 export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
@@ -72,6 +73,50 @@ export const logout = async (id: string) => {
   }
   user.refreshToken = '';
   await user.save();
+
+  return true;
+};
+
+export const refreshTokens = async (userId: string, refreshToken: string) => {
+  const user = await getUserById(userId);
+  if (!user || !user.refreshToken)
+    throw new Error('Access Denied, Please login again');
+  const refreshTokenMatches = await bcrypt.compare(
+    refreshToken,
+    user.refreshToken
+  );
+  if (!refreshTokenMatches) throw new Error('Access Denied');
+  const tokens = await getTokens(user);
+  await updateRefreshToken(user.id, tokens.refreshToken);
+  return tokens;
+};
+
+const updateRefreshToken = async (userId: string, refreshToken: string) => {
+  const hashedRefreshToken = await hashData(refreshToken);
+  const user = await UserModel.findById(userId);
+  if (user) {
+    user.refreshToken = hashedRefreshToken;
+    await user.save();
+  } else throw new Error('User not found');
+  // delete user.password;
+  // return user;
+};
+
+const updateLastLoginAndRefreshToken = async (
+  userId: string,
+  refreshToken: string
+) => {
+  const hashedRefreshToken = await hashData(refreshToken);
+  const user = await UserModel.findById(userId);
+  if (user) {
+    user.refreshToken = hashedRefreshToken;
+    user.lastLogin = new Date();
+    await user.save();
+  } else throw new Error('User not found');
+};
+
+const hashData = async (data: string) => {
+  return await bcrypt.hash(data, 10);
 };
 
 const getTokens = (user: any) => {
@@ -87,10 +132,7 @@ const getTokens = (user: any) => {
 
   const accessToken = jwt.sign(
     accessPayload,
-    process.env.JWT_ACCESS_SECRET as string,
-    {
-      expiresIn: '15m',
-    }
+    process.env.JWT_ACCESS_SECRET as string
   );
 
   //generate Refresh token

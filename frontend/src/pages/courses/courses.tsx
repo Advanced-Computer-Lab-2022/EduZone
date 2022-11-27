@@ -18,7 +18,9 @@ const Courses = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [loading, setLoading] = useState(false);
   const getCourses = async () => {
+    setLoading(true);
     const query = searchParams.get('query') || undefined;
     const price = searchParams.get('price') || undefined;
     const minPrice = searchParams.get('minPrice') || undefined;
@@ -42,9 +44,9 @@ const Courses = () => {
         method: 'GET',
         params: params,
       });
-      console.log(res.data);
       setCourses(res.data?.courses);
       setPagination(res.data?.pagination);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -100,9 +102,14 @@ const Courses = () => {
                   <CourseCard course={course} key={course._id.toString()} />
                 ))}
 
-              {courses.length === 0 && (
-                <div className="text-2xl text-gray-500">No Courses Found</div>
-              )}
+              {courses.length === 0 &&
+                (!loading ? (
+                  <div className="text-2xl text-gray-500">No Courses Found</div>
+                ) : (
+                  <div className="text-2xl text-gray-500">
+                    Loading Courses ....
+                  </div>
+                ))}
             </div>
           }
           {filterOpen && (

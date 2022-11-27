@@ -58,7 +58,7 @@ function App() {
             );
           })
         ) : (
-          <Navigate to="/login" />
+          <Route path="/auth" element={<Navigate to="/login" />}></Route>
         )}
         <Route path="*" element={<h1>404</h1>} />
         {/* <Route path="login" element={<LoginPage />} /> */}

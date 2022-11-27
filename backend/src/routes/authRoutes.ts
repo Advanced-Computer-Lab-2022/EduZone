@@ -1,7 +1,8 @@
 import Express from 'express';
+import { JWTAccessDecoder, JWTRefreshDecoder } from '../middlewares/jwt';
 
 const router = Express.Router();
-import { login, logout, register } from '../services';
+import { login, logout, refreshTokens, register } from '../services';
 
 router.post('/login', async (req, res) => {
   try {
@@ -35,15 +36,32 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ message: (error as any).message });
   }
 });
-router.post('/logout', async (req, res) => {
+router.post('/logout', JWTAccessDecoder, async (req, res) => {
   // remove refresh token from db  (to be done)
   try {
     const { id } = req.body.token;
-    await logout(id);
+    const success = await logout(id);
     return res.status(200).json({ message: 'Logout successful' });
   } catch (error) {
     console.log(error);
-    return res.status(400).json({ message: (error as any).message });
+    return res.status(400).json({ message: (error as Error).message });
+  }
+});
+
+router.get('/refresh', JWTRefreshDecoder, async (req, res) => {
+  try {
+    const id = req.body.refreshToken.id as string;
+    const oldRefreshToken = req.headers.authorization?.split(' ')[1];
+    const { accessToken, refreshToken } = await refreshTokens(
+      id,
+      oldRefreshToken || ''
+    );
+    return res
+      .status(200)
+      .json({ message: 'Refresh successful', accessToken, refreshToken });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: (error as Error).message });
   }
 });
 
