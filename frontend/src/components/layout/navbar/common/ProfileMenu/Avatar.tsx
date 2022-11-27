@@ -1,5 +1,5 @@
 import React from 'react';
-import { AvatarProps } from '../../types';
+import { AvatarProps } from '../../../../../types';
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   ({ img, name, onClick }, ref) => {

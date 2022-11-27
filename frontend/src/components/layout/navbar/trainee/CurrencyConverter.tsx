@@ -47,7 +47,11 @@ const CurrencyConverter = () => {
       >
         {!loading &&
           currencies.map((currency) => (
-            <option key={currency.code} value={currency.code} className="wrap">
+            <option
+              key={currency.country}
+              value={currency.code}
+              className="wrap"
+            >
               {currency.country}
             </option>
           ))}

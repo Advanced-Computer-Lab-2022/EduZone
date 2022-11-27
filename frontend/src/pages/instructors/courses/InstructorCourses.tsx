@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import CourseCard from '../../../components/courses/CourseCard';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
-import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
+import SearchBar from '../../../components/layout/navbar/trainee/SearchBar';
+// import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
 import { axios } from '../../../utils';
 
 const InstructorCourses = () => {

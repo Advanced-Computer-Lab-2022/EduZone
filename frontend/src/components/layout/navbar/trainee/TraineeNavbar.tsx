@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../../../../redux/features/auth.reducer';
 import { RootState } from '../../../../redux/store';
-import Avatar from '../../../common/Avatar';
+import Avatar from '../common/ProfileMenu/Avatar';
+import ProfileMenu from '../common/ProfileMenu/ProfileMenu';
 import CurrencyConverter from './CurrencyConverter';
 import SearchBar from './SearchBar';
 
-const Navbar = () => {
+const TraineeNavbar = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
@@ -39,10 +40,11 @@ const Navbar = () => {
           // </button>
           <div className="flex gap-4 items-center">
             <CurrencyConverter />
-            <Avatar
+            {/* <Avatar
               name={user?.name}
               img="https://avatars.githubusercontent.com/u/30694445?v=4"
-            />
+            /> */}
+            <ProfileMenu />
           </div>
         ) : (
           <Link to="/login">Login</Link>
@@ -52,4 +54,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default TraineeNavbar;
