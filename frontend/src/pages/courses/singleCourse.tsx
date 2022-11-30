@@ -7,7 +7,7 @@ import Avatar from '../../components/layout/navbar/common/ProfileMenu/Avatar';
 import Layout from '../../components/layout/Trainee/Layout';
 import { RootState } from '../../redux/store';
 import { Course } from '../../types/entities/Course';
-import { Section } from '../../types/entities/Section';
+import { Subtitle } from '../../types/entities/Subtitle';
 import { axios } from '../../utils';
 
 const SingleCourse = () => {
@@ -84,7 +84,7 @@ const SingleCourse = () => {
               <p className="text-2xl font-medium my-2">Course Sections</p>
               <hr />
               <div className="mt-2">
-                {course?.subtitles?.map((section: Section, index) => (
+                {course?.subtitles?.map((section: Subtitle, index) => (
                   <div className="my-2" key={index}>
                     <p className="text-lg font-medium">{section.title}</p>
                     <p className="text-sm text-gray-500">

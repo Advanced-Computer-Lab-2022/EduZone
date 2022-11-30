@@ -7,7 +7,7 @@ import { RootState } from '../../redux/store';
 const InstructorDashboard = () => {
   const { id } = useParams();
   const { user } = useSelector((state: RootState) => state.auth);
-  console.log(user)
+  console.log(user);
   const navigate = useNavigate();
   return (
     <AdminLayout>
@@ -20,7 +20,6 @@ const InstructorDashboard = () => {
           <p className="text-2xl">Courses</p>
         </div>
       </div>
-      
     </AdminLayout>
   );
 };
