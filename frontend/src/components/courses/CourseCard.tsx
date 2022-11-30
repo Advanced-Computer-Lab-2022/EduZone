@@ -56,11 +56,13 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
           <Truncate text={course.summary || ''} length={40} more />
         </div>
         <div className="mt-2 text-sm text-gray-500 font-medium">
-          Duration :{' '}
+          Duration ≈{' '}
           {course.subtitles &&
-            course?.subtitles?.reduce(
-              (acc: any, curr: any) => acc + curr.duration,
-              0
+            Math.ceil(
+              course?.subtitles?.reduce(
+                (acc: any, curr: any) => acc + curr.duration,
+                0
+              )
             ) + ' hrs'}
         </div>
       </div>

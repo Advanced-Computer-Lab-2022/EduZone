@@ -1,4 +1,5 @@
 import express from 'express';
+import { JWTAccessDecoder } from '../middlewares/jwt';
 import {
   addCourse,
   deleteCourseById,
@@ -20,12 +21,12 @@ router.get('/', async (req, res) => {
     );
     res.status(200).json(courses);
   } catch (error) {
-    res.status(500).json({ error: (error as any).message });
+    res.status(500).json({ error: (error as any).message, stack: error });
   }
 });
 
 //Add new Course Route
-router.post('/', async (req, res) => {
+router.post('/', JWTAccessDecoder, async (req, res) => {
   try {
     const data = req.body as any;
     if (!data) {
@@ -35,7 +36,9 @@ router.post('/', async (req, res) => {
     }
     return res.status(201).json(await addCourse(data));
   } catch (error) {
-    return res.status(500).json({ message: (error as any).message });
+    return res
+      .status(500)
+      .json({ message: (error as any).message, stack: error });
   }
 });
 

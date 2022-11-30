@@ -1,4 +1,6 @@
+import axios from 'axios';
 import { CourseModel, UserModel } from '../models';
+import durationConverter from '../utils/duration_converter';
 
 export const getAllCourses = async (
   filters: any,
@@ -47,12 +49,9 @@ export const getAllCourses = async (
     ? { $or: search_query, ...filter_query }
     : filter_query;
 
-  const courses = CourseModel.find(full_query).populate('instructor', [
-    'name',
-    'username',
-    '_id',
-    'email',
-  ]);
+  const courses = CourseModel.find(full_query)
+    .populate('instructor', ['name', 'username', '_id', 'email'])
+    .sort({ createdAt: -1 });
 
   if (page && limit) {
     const currentPage = parseInt(page);
@@ -155,10 +154,51 @@ const getPriceQuery = (price: string) => {
 // return courses;
 // };
 
-//Add a new Course
-export const addCourse = (data: typeof CourseModel) => {
-  const course = CourseModel.create(data);
+const getVideoDuration = async (subtitles_ids: string[]) => {
+  const durations: any[] = [];
+  // fetch each 10 id at a time
+  for (let i = 0; i < subtitles_ids.length; i += 10) {
+    const ids = subtitles_ids.slice(i, i + 10);
+    let url = 'https://www.googleapis.com/youtube/v3/videos?';
+    for (let j = 0; j < 10; j++) {
+      url += `id=${ids[j]}&`;
+    }
+    url += `&part=contentDetails&key=${process.env.YOUTUBE_API_KEY}`;
 
+    const { data: duration_fetch } = await axios({ url, method: 'GET' });
+    (duration_fetch as any).items.map((item: any) => {
+      console.log(item.contentDetails.duration);
+      durations.push(
+        Number(durationConverter(item.contentDetails.duration)).toFixed(2)
+      );
+    });
+    // durations = [...durations, ...subtitles.map((s) => s.duration)];
+  }
+  return durations;
+};
+
+//Add a new Course
+
+export const addCourse = async (data: typeof CourseModel & { token: any }) => {
+  const { token, ...courseData } = data;
+  const durations = await getVideoDuration(
+    (courseData as any).subtitles.map((s: any) => s.youtube_url.split('v=')[1])
+  );
+
+  const modifiedCourseData = {
+    ...courseData,
+    instructor: token.id,
+    subtitles: (courseData as any).subtitles.map(
+      (subtitle: any, index: number) => ({
+        ...subtitle,
+        price: Number(subtitle.price),
+        youtube_url: subtitle.youtube_url,
+        duration: durations[index],
+      })
+    ),
+  };
+  console.log(modifiedCourseData);
+  const course = CourseModel.create(modifiedCourseData);
   return course;
 };
 // Get Course By ID
