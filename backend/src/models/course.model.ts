@@ -8,6 +8,18 @@ const SubtitleSchema = new Schema({
     type: Number,
     required: true,
   },
+  youtube_url: {
+    type: String,
+    required: true,
+  },
+  order: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
 });
 const courseSchema = new Schema({
   title: {
@@ -48,13 +60,17 @@ const courseSchema = new Schema({
   },
   preview_video: {
     type: String,
-    required: false,
+    required: true,
   },
   discount: {
     type: Number,
     min: 0,
     max: 100,
     required: false,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 

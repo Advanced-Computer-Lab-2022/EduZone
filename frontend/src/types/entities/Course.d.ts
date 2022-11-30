@@ -1,4 +1,4 @@
-import { Section } from './Section';
+import { Subtitle } from './Subtitle';
 
 export declare type Course = {
   _id: string;
@@ -9,7 +9,7 @@ export declare type Course = {
   instructor: string | Partial<User>;
   rating: number;
   subject: string;
-  subtitles?: Section[];
+  subtitles?: Subtitle[];
   summary: string;
   preview_video?: string;
   discount?: number;
