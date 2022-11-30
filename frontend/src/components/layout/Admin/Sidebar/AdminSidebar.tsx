@@ -26,7 +26,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({
       <div
         className={`${
           isOpen ? 'min-w-[12rem] w-fit' : 'w-[4rem]'
-        } h-full  border-r bg-zinc-300 duration-700 ease-in-out `}
+        } h-full  border-r bg-red-800  duration-700 ease-in-out `}
       >
         <AdminSidebarHeader
           isOpen={isOpen}
