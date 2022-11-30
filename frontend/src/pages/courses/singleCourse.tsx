@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -15,17 +15,20 @@ const SingleCourse = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as Course | undefined);
   const [videoReady, setVideoReady] = useState(false);
-
+  const [withPromotion, setWithPromotion] = useState(false);
+  const [addPromotionOpen, setAddPromotionOpen] = useState(false);
+  // const [promotionAmount, setPromotionAmount] = useState(0)
+  const promotionRef = React.useRef<HTMLInputElement>(null);
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     // access to player in all event handlers via event.target
     setVideoReady(true);
-    event.target.playVideo();
+    event.target.pauseVideo();
   };
 
   const opts: YouTubeProps['opts'] = {
     height: '384',
     playerVars: {
-      autoplay: 1,
+      autoplay: 0,
       muted: 0,
     },
   };
@@ -45,9 +48,26 @@ const SingleCourse = () => {
     }
   };
 
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  const onAddPromotion: FormEventHandler = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+    console.log(data);
+    try {
+      console.log('add promotion', data.amount);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (!course) getCourse();
-  }, []);
+    setWithPromotion(
+      (course?.discount && course?.discount.validUntil > new Date()) || false
+    );
+  }, [course]);
   return (
     <Layout>
       <div className="my-4 space-y-4  ">
@@ -122,7 +142,7 @@ const SingleCourse = () => {
               <div>
                 <p className="text-lg font-medium">{course?.title}</p>
                 <p className="text-sm text-gray-500">
-                  Rating: {course?.rating}
+                  Rating: {course?.rating || 'No Rating yet'}
                 </p>
               </div>
 
@@ -130,20 +150,70 @@ const SingleCourse = () => {
                 {course &&
                   Number(
                     course?.price *
-                      (1 - (course?.discount ?? 0) / 100) *
+                      (1 - (course?.discount?.amount ?? 0) / 100) *
                       conversion_rate
                   ).toFixed(2)}{' '}
                 {currency}
               </p>
 
-              <div className=" w-full space-y-2">
-                <button className="w-full bg-primary text-white rounded-md py-2">
-                  Buy Now
-                </button>
-                <button className="w-full border border-primary text-primary rounded-md py-2 hover:text-white hover:bg-primary">
-                  Add to Cart
-                </button>
-              </div>
+              {user.id !== course?.instructor?._id ? (
+                <div className=" w-full space-y-2">
+                  <button className="w-full bg-primary text-white rounded-md py-2">
+                    Buy Now
+                  </button>
+                  <button className="w-full border border-primary text-primary rounded-md py-2 hover:text-white hover:bg-primary">
+                    Add to Cart
+                  </button>
+                </div>
+              ) : (
+                <div className=" w-full space-y-2">
+                  <p>
+                    Promotion :{' '}
+                    {withPromotion ? (
+                      <div>
+                        <span className="text-green-500">Active</span>
+                        <p>
+                          <span> {course?.discount?.amount}% off </span>
+                        </p>
+                        <span className="text-gray-500">
+                          until{' '}
+                          {new Date(
+                            course?.discount?.validUntil || ''
+                          ).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-red-500">Inactive</span>
+                    )}
+                  </p>
+                  {!addPromotionOpen &&
+                    (withPromotion ? (
+                      <span className="w-full bg-primary text-white rounded-md py-2">
+                        Edit Promotion
+                      </span>
+                    ) : (
+                      <button
+                        className="w-full bg-primary text-white rounded-md py-2"
+                        onClick={() => setAddPromotionOpen(true)}
+                      >
+                        Add Promotion
+                      </button>
+                    ))}
+                  {addPromotionOpen && (
+                    <form onSubmit={onAddPromotion}>
+                      <input
+                        type="number"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
+                        placeholder="Discount Amount"
+                        name="amount"
+                      />
+                      <button className="w-full bg-primary text-white rounded-md py-2">
+                        Save
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

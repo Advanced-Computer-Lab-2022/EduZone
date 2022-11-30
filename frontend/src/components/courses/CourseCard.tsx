@@ -32,7 +32,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
           <div className="text-xl font-medium ">
             {Number(
               course?.price *
-                (1 - (course?.discount ?? 0) / 100) *
+                (1 - (course?.discount?.amount ?? 0) / 100) *
                 conversion_rate
             ).toFixed(2)}{' '}
             {currency}
