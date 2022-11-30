@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 
-const FilterBox = () => {
+const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
   const [searchParams] = useSearchParams();
   const price = searchParams.get('price') || undefined;
   const [priceValue, setPriceValue] = useState(price);
@@ -54,7 +54,7 @@ const FilterBox = () => {
     };
     console.log(filter);
     navigate(
-      `/courses?${Object.keys(filter)
+      `/${navigate_path}?${Object.keys(filter)
         .map((key) => `${key}=${(filter as any)[key]}`)
         .join('&')}`
     );

@@ -114,7 +114,7 @@ const Courses = () => {
           }
           {filterOpen && (
             <div>
-              <FilterBox />
+              <FilterBox navigate_path="courses" />
             </div>
           )}
         </div>
