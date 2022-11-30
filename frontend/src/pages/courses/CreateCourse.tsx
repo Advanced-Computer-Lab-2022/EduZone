@@ -5,6 +5,7 @@ import AdminLayout from '../../components/layout/Admin/AdminLayout';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { axios } from '../../utils';
 import { Subtitle } from '../../types/entities/Subtitle';
+import { getCookie } from 'cookies-next';
 
 //import axios from '../utils';
 
@@ -22,21 +23,7 @@ const AdminCreateUser = () => {
       order: 1,
     },
   ] as Subtitle[]);
-  const [currentSubtitle, setCurrentSubtitle] = useState(0);
-  const selectSubtitle = (value: string) => {
-    const index = value.split('-')[2];
-    setCurrentSubtitle(parseInt(index) - 1);
-  };
   const subtitlesContainer = useRef<HTMLDivElement>(null);
-  const onChangeInput = (name: string, value: string) => {
-    // const input = e.target as HTMLInputElement;
-    alert(name + ' ' + value);
-    const index = name.split('-')[2];
-    const newSubtitles = [...subtitles];
-    newSubtitles[parseInt(index) - 1].title = value;
-    setSubtitles(newSubtitles);
-  };
-
   const addSubtitle = () => {
     setSubtitles([
       ...subtitles,
@@ -61,29 +48,37 @@ const AdminCreateUser = () => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-    const data = { ...Object.fromEntries(formData), instructor: instructorId };
-    console.log(
-      Object.entries(Object.fromEntries(formData)).map(([key, value]) => {
-        if (key.startsWith('subtitle')) {
-          return { subtitle: value };
-        }
-        return value;
-      })
+    // const data = all entries except those who contain the word subtitle
+    const formDataObject = Object.fromEntries(
+      [...formData.entries()].filter(([key]) => !key.includes('subtitle'))
     );
+    const data = { ...formDataObject, subtitles };
+    // const data = { ...Object.fromEntries(formData), instructor: instructorId };
+    // console.log(
+    //   Object.entries(Object.fromEntries(formData)).map(([key, value]) => {
+    //     if (key.startsWith('subtitle')) {
+    //       return { subtitle: value };
+    //     }
+    //     return value;
+    //   })
+    // );
 
-    console.log(subtitles);
-    // try {
-    //   const res = await axios({
-    //     url: `/courses`,
-    //     method: 'POST',
-    //     data,
-    //   });
-    //   if (res.status === 201) {
-    //     navigate(`/instructors/${instructorId}/courses`);
-    //   }
-    // } catch (err) {
-    //   console.log(err);
-    // }
+    try {
+      const res = await axios({
+        url: `/courses`,
+        method: 'POST',
+        data,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+      });
+      if (res.status === 201) {
+        navigate(`/instructors/${instructorId}/courses`);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
