@@ -3,4 +3,5 @@ export declare type Subtitle = {
   duration: number;
   youtube_url: string;
   order: number;
+  description: string;
 };

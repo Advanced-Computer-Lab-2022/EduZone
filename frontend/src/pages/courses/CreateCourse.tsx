@@ -32,6 +32,7 @@ const AdminCreateUser = () => {
         duration: 0,
         youtube_url: '',
         order: subtitlesCount + 1,
+        description: '',
       },
     ]);
     setSubtitlesCount(subtitlesCount + 1);
@@ -153,7 +154,7 @@ const AdminCreateUser = () => {
             </div>
           </div>
           <div>
-            <div ref={subtitlesContainer} className="children:">
+            <div>
               {subtitles.map((subtitle, index) => (
                 <div key={index}>
                   <p>Subtitle {index + 1}</p>
@@ -182,6 +183,19 @@ const AdminCreateUser = () => {
                       setSubtitles(newSubtitles);
                     }}
                     value={subtitle.youtube_url}
+                  />
+                  <textarea
+                    rows={2}
+                    className="w-full p-4 rounded-md border border-gray-300 mt-2 text-sm"
+                    placeholder="Please Enter the Subtitle Description"
+                    name={`subtitle-description-${subtitlesCount}`}
+                    onChange={(e) => {
+                      const input = e.target as HTMLTextAreaElement;
+                      const newSubtitles = [...subtitles];
+                      newSubtitles[index].description = input.value;
+                      setSubtitles(newSubtitles);
+                    }}
+                    value={subtitle.description}
                   />
                 </div>
               ))}

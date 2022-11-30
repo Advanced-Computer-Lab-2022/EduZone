@@ -16,6 +16,10 @@ const SubtitleSchema = new Schema({
     type: Number,
     required: true,
   },
+  description: {
+    type: String,
+    required: true,
+  },
 });
 const courseSchema = new Schema({
   title: {
