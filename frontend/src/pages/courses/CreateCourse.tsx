@@ -19,7 +19,7 @@ const AdminCreateUser = () => {
       title: '',
       duration: 0,
       youtube_url: '',
-      order: 0,
+      order: 1,
     },
   ] as Subtitle[]);
   const [currentSubtitle, setCurrentSubtitle] = useState(0);
@@ -38,55 +38,22 @@ const AdminCreateUser = () => {
   };
 
   const addSubtitle = () => {
-    subtitlesContainer.current!.innerHTML += `<div>
-    <p>Subtitle ${subtitlesCount + 1}</p>
-    <input
-    type="text"
-    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mb-2"
-    placeholder="Subtitle"
-    required
-    name='subtitle-title-${subtitlesCount + 1}'
-    onchange="onChangeInput(this.name, this.value)"
-    />
-    <input  
-      type="text"
-      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
-      placeholder="Youtube Link"
-      name='subtitle-link-${subtitlesCount + 1}'
-      />
-    </div>`;
-
-    for (let i = 0; i < subtitles.length; i++) {
-      const subtitle = subtitles[i];
-      const titleInput = document.getElementsByName(
-        `subtitle-title-${i + 1}`
-      )[0] as HTMLInputElement;
-      const linkInput = document.getElementsByName(
-        `subtitle-link-${i + 1}`
-      )[0] as HTMLInputElement;
-      titleInput.value = subtitle.title;
-      linkInput.value = subtitle.youtube_url;
-    }
-    setSubtitlesCount(subtitlesCount + 1);
     setSubtitles([
       ...subtitles,
       {
         title: '',
         duration: 0,
         youtube_url: '',
-        order: 0,
+        order: subtitlesCount + 1,
       },
     ]);
-
-    //refill all input with values from subtitles array
+    setSubtitlesCount(subtitlesCount + 1);
   };
 
   const removeSubtitle = () => {
     if (subtitlesCount > 1) {
-      subtitlesContainer.current!.lastChild!.remove();
       setSubtitlesCount(subtitlesCount - 1);
     }
-    //set subtitles to remove last Element
     setSubtitles(subtitles.slice(0, -1));
   };
   const onSubmit: FormEventHandler = async (e) => {
@@ -160,15 +127,6 @@ const AdminCreateUser = () => {
                     name="subject"
                   />
                 </div>
-                {/* <div>
-                  <p>Section</p>
-                  <input
-                    type="text"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 p-3 "
-                    placeholder="Please Enter Your Section"
-                    name="Price"
-                  />
-                </div> */}
                 <div>
                   <p>Price</p>
                   <input
@@ -192,39 +150,37 @@ const AdminCreateUser = () => {
           </div>
           <div>
             <div ref={subtitlesContainer} className="children:">
-              <div>
-                <p>Subtitle {subtitlesCount}</p>
-                <input
-                  type="text"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mb-2"
-                  placeholder="Title"
-                  name={`subtitle-title-${subtitlesCount}`}
-                  // onFocus={(e) => {
-                  //   const input = e.target as HTMLInputElement;
-                  //   selectSubtitle(input.name);
-                  // }}
-                  onChange={(e) => {
-                    const input = e.target as HTMLInputElement;
-                    const index = input.name.split('-')[2];
-                    const newSubtitles = [...subtitles];
-                    newSubtitles[parseInt(index) - 1].title = input.value;
-                    setSubtitles(newSubtitles);
-                  }}
-                />
-                <input
-                  type="text"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
-                  placeholder="Youtube Link"
-                  name={`subtitle-link-${subtitlesCount}`}
-                  onChange={(e) => {
-                    const input = e.target as HTMLInputElement;
-                    const index = input.name.split('-')[2];
-                    const newSubtitles = [...subtitles];
-                    newSubtitles[parseInt(index) - 1].youtube_url = input.value;
-                    setSubtitles(newSubtitles);
-                  }}
-                />
-              </div>
+              {subtitles.map((subtitle, index) => (
+                <div key={index}>
+                  <p>Subtitle {index + 1}</p>
+                  <input
+                    type="text"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3 mb-2"
+                    placeholder="Title"
+                    name={`subtitle-title-${index + 1}`}
+                    onChange={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      const newSubtitles = [...subtitles];
+                      newSubtitles[index].title = input.value;
+                      setSubtitles(newSubtitles);
+                    }}
+                    value={subtitle.title}
+                  />
+                  <input
+                    type="text"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
+                    placeholder="Youtube Link"
+                    name={`subtitle-link-${subtitlesCount}`}
+                    onChange={(e) => {
+                      const input = e.target as HTMLInputElement;
+                      const newSubtitles = [...subtitles];
+                      newSubtitles[index].youtube_url = input.value;
+                      setSubtitles(newSubtitles);
+                    }}
+                    value={subtitle.youtube_url}
+                  />
+                </div>
+              ))}
             </div>
             <div className="flex justify-end gap-4">
               <div
