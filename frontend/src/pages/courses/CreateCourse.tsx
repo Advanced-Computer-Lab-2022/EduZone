@@ -102,7 +102,7 @@ const AdminCreateUser = () => {
             </div>
           </div>
           <div>
-            <div className="">
+            <div className=" space-y-4">
               <div className="">
                 <p>Course title</p>
                 <input
@@ -112,7 +112,7 @@ const AdminCreateUser = () => {
                   name="title"
                 />
               </div>
-              <div className=" flex flex-col justify-between">
+              <div className=" flex flex-col justify-between space-y-4">
                 <div>
                   <p>Subject</p>
                   <input
@@ -131,12 +131,21 @@ const AdminCreateUser = () => {
                     name="price"
                   />
                 </div>
+                <div>
+                  <p>Preview Video</p>
+                  <input
+                    type="text"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-3"
+                    placeholder="Preview Video Youtube Link"
+                    name="preview_video"
+                  />
+                </div>
               </div>
               <div>
                 <p>Description </p>
                 <textarea
                   rows={10}
-                  className="w-full p-4 rounded-md"
+                  className="w-full p-4 rounded-md border border-gray-300"
                   placeholder="Please Enter the Course Description"
                   name="summary"
                 />

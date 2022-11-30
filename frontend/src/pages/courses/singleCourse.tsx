@@ -9,10 +9,26 @@ import { RootState } from '../../redux/store';
 import { Course } from '../../types/entities/Course';
 import { Subtitle } from '../../types/entities/Subtitle';
 import { axios } from '../../utils';
+import YouTube, { YouTubeProps } from 'react-youtube';
 
 const SingleCourse = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as Course | undefined);
+  const [videoReady, setVideoReady] = useState(false);
+
+  const onPlayerReady: YouTubeProps['onReady'] = (event) => {
+    // access to player in all event handlers via event.target
+    setVideoReady(true);
+    event.target.playVideo();
+  };
+
+  const opts: YouTubeProps['opts'] = {
+    height: '384',
+    playerVars: {
+      autoplay: 1,
+      muted: 0,
+    },
+  };
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
@@ -39,23 +55,21 @@ const SingleCourse = () => {
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2">
             <div
-              className="w-full bg-gray-300 h-96 rounded-md flex justify-center items-center after:absolute after:inset-0 after:bg-black after:bg-opacity-50 after:content-[''] after:z-10 relative overflow-hidden"
+              className="w-full bg-gray-300 h-96 rounded-md flex justify-center items-center "
+              // after:absolute after:inset-0 after:bg-black after:bg-opacity-50 after:content-[''] after:z-10 relative overflow-hidden"
               style={{
                 backgroundImage: `url(${course?.thumbnail})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
             >
-              <div className="absolute z-20">
-                <button
-                  className="
-                  bg-primary w-24 rounded-full aspect-square flex items-center justify-center text-white hover:bg-dark
-                "
-                >
-                  {/* play button */}
-                  <FaPlay size={30} className="translate-x-1" />
-                </button>
-              </div>
+              {
+                <YouTube
+                  videoId={course?.preview_video?.split('v=')[1]}
+                  opts={opts}
+                  onReady={onPlayerReady}
+                />
+              }
             </div>
 
             <div className="mt-2 flex items-center py-2">
@@ -67,12 +81,14 @@ const SingleCourse = () => {
               </div>
             </div>
             <p className="text-gray-400 font-bold">
-              Duration :{' '}
+              Duration ≈{' '}
               {course?.subtitles &&
-                course?.subtitles?.reduce(
-                  (acc: any, curr: any) => acc + curr.duration,
-                  0
-                ) + ' hrs'}{' '}
+                Math.ceil(
+                  course?.subtitles?.reduce(
+                    (acc: any, curr: any) => acc + curr.duration,
+                    0
+                  )
+                )}{' '}
               hours
             </p>
             <div className="mt-4">

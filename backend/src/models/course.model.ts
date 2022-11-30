@@ -56,7 +56,7 @@ const courseSchema = new Schema({
   },
   preview_video: {
     type: String,
-    required: false,
+    required: true,
   },
   discount: {
     type: Number,
