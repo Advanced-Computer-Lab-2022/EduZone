@@ -12,5 +12,9 @@ export declare type Course = {
   subtitles?: Subtitle[];
   summary: string;
   preview_video?: string;
-  discount?: number;
+  discount?: {
+    amount: number;
+    validUntil: Date;
+  };
+  createdAt: Date;
 };

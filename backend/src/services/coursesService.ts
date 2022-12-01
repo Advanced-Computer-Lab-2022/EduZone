@@ -217,7 +217,12 @@ export const updateCourseById = async (
   id: string,
   data: Partial<typeof CourseModel>
 ) => {
-  return await CourseModel.findByIdAndUpdate(id, data);
+  return await CourseModel.findByIdAndUpdate(id, data).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+  ]);
 };
 
 export const deleteCourseById = async (id: string) => {

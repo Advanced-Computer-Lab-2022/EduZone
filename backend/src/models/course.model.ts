@@ -62,15 +62,21 @@ const courseSchema = new Schema({
     type: String,
     required: true,
   },
-  discount: {
-    type: Number,
-    min: 0,
-    max: 100,
-    required: false,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  discount: {
+    type: {
+      amount: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 100,
+      },
+      validUntil: Date,
+    },
+    required: false,
   },
 });
 
