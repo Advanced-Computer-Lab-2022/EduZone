@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import React, { FormEventHandler, useEffect, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Avatar from '../../components/layout/navbar/common/ProfileMenu/Avatar';
 import Layout from '../../components/layout/Trainee/Layout';
 import { RootState } from '../../redux/store';
@@ -16,14 +16,12 @@ import 'react-datepicker/dist/react-datepicker.css';
 const SingleCourse = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as Course | undefined);
-  const [videoReady, setVideoReady] = useState(false);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
-    setVideoReady(true);
     event.target.pauseVideo();
   };
 
@@ -43,7 +41,6 @@ const SingleCourse = () => {
         url: '/courses/' + id,
         method: 'GET',
       });
-      console.log(res.data);
       setCourse(res.data);
     } catch (error) {
       console.log(error);
@@ -57,8 +54,21 @@ const SingleCourse = () => {
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
     try {
-      console.log('add promotion', data.amount);
-      console.log('Valid until, ', promotionExpiryDate);
+      const res: AxiosResponse<any, any> = await axios({
+        url: '/courses/' + id,
+        method: 'PATCH',
+        data: {
+          discount: {
+            amount: data.amount,
+            validUntil: promotionExpiryDate,
+          },
+        },
+      });
+      setCourse({
+        ...res.data,
+        discount: { amount: data.amount, validUntil: promotionExpiryDate },
+      });
+      setAddPromotionOpen(false);
     } catch (error) {
       console.log(error);
     }
@@ -67,7 +77,13 @@ const SingleCourse = () => {
   useEffect(() => {
     if (!course) getCourse();
     setWithPromotion(
-      (course?.discount && course?.discount.validUntil > new Date()) || false
+      (course?.discount &&
+        new Date(course?.discount.validUntil) > new Date()) ||
+        false
+    );
+
+    setPromotionExpiryDate(
+      new Date(course?.discount?.validUntil || new Date())
     );
   }, [course]);
   return (
@@ -170,37 +186,38 @@ const SingleCourse = () => {
               ) : (
                 <div className=" w-full space-y-2">
                   <p>
-                    Promotion :{' '}
                     {withPromotion ? (
                       <div>
-                        <span className="text-green-500">Active</span>
                         <p>
-                          <span> {course?.discount?.amount}% off </span>
+                          Promotion:
+                          <span className="text-green-700"> Active </span> -
+                          <span className="font-medium">
+                            {' '}
+                            {course?.discount?.amount}% off{' '}
+                          </span>
                         </p>
                         <span className="text-gray-500">
-                          until{' '}
+                          Valid until{' '}
                           {new Date(
                             course?.discount?.validUntil || ''
                           ).toLocaleDateString()}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-red-500">Inactive</span>
+                      <div>
+                        Promotion:
+                        <span className="text-red-700">Inactive</span>
+                      </div>
                     )}
                   </p>
-                  {!addPromotionOpen &&
-                    (withPromotion ? (
-                      <span className="w-full bg-primary text-white rounded-md py-2">
-                        Edit Promotion
-                      </span>
-                    ) : (
-                      <button
-                        className="w-full bg-primary text-white rounded-md py-2"
-                        onClick={() => setAddPromotionOpen(true)}
-                      >
-                        Add Promotion
-                      </button>
-                    ))}
+                  {!addPromotionOpen && (
+                    <button
+                      className="w-full bg-primary text-white rounded-md py-2"
+                      onClick={() => setAddPromotionOpen(true)}
+                    >
+                      {withPromotion ? 'Edit Promotion' : 'Add Promotion'}
+                    </button>
+                  )}
                   {addPromotionOpen && (
                     <form onSubmit={onAddPromotion}>
                       <label htmlFor="amount">Discount Amount</label>
