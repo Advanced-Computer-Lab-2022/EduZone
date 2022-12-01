@@ -10,6 +10,8 @@ import { Course } from '../../types/entities/Course';
 import { Subtitle } from '../../types/entities/Subtitle';
 import { axios } from '../../utils';
 import YouTube, { YouTubeProps } from 'react-youtube';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const SingleCourse = () => {
   const { id } = useParams();
@@ -17,10 +19,10 @@ const SingleCourse = () => {
   const [videoReady, setVideoReady] = useState(false);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
-  // const [promotionAmount, setPromotionAmount] = useState(0)
-  const promotionRef = React.useRef<HTMLInputElement>(null);
+  const [promotionExpiryDate, setPromotionExpiryDate] = useState(
+    null as Date | null
+  );
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
-    // access to player in all event handlers via event.target
     setVideoReady(true);
     event.target.pauseVideo();
   };
@@ -54,9 +56,9 @@ const SingleCourse = () => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData.entries());
-    console.log(data);
     try {
       console.log('add promotion', data.amount);
+      console.log('Valid until, ', promotionExpiryDate);
     } catch (error) {
       console.log(error);
     }
@@ -201,12 +203,26 @@ const SingleCourse = () => {
                     ))}
                   {addPromotionOpen && (
                     <form onSubmit={onAddPromotion}>
+                      <label htmlFor="amount">Discount Amount</label>
                       <input
                         type="number"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
                         placeholder="Discount Amount"
                         name="amount"
+                        min={0}
+                        max={100}
+                        required
                       />
+                      <label htmlFor="validUntil">Valid Until</label>
+                      <DatePicker
+                        name="validUntil"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
+                        selected={promotionExpiryDate}
+                        onChange={(date: Date) => setPromotionExpiryDate(date)}
+                        required
+                        minDate={new Date()}
+                      />
+
                       <button className="w-full bg-primary text-white rounded-md py-2">
                         Save
                       </button>
