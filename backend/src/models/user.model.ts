@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import crypto from 'crypto';
 
 const userSchema = new Schema({
   name: {
@@ -31,6 +32,14 @@ const userSchema = new Schema({
   refreshToken: {
     type: String,
     default: null,
+  },
+  resetPasswordToken: {
+    type: String,
+    default: undefined,
+  },
+  resetPasswordExpire: {
+    type: Date,
+    default: undefined,
   },
   gender: {
     type: String,

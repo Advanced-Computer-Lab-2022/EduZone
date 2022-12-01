@@ -2,6 +2,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models';
 import { getUserById } from './usersService';
+import { userInfo } from 'os';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+
 export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
@@ -72,6 +76,96 @@ export const logout = async (id: string) => {
     throw new Error('User does not exist'); //TODO: change to custom error
   }
   user.refreshToken = '';
+  await user.save();
+
+  return true;
+};
+export const resetPassword = async (
+  resetPasswordToken: string,
+  password: string
+) => {
+  const user = await UserModel.findOne({
+    resetPasswordToken: resetPasswordToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    throw new Error('Invalid token');
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+};
+
+export const forgetPassword = async (email: string) => {
+  const user = await UserModel.findOne({
+    email: email,
+  });
+  if (!user) {
+    throw new Error('User does not exist'); //TODO: change to custom error
+  }
+  const resetToken = crypto.randomBytes(20).toString('hex');
+  user.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000);
+
+  await user.save({ validateBeforeSave: false });
+
+  // testAccount = await nodemailer.createTestAccount();
+
+  const url = `http://localhost:4000/reset-password/${user.resetPasswordToken}`;
+  const message = `
+  <h1>You have requested a password reset</h1>
+  <p>Please go to this link to reset your password</p>
+  <a href=${url} clicktracking=off>${url}</a>
+  `;
+  try {
+    await sendMail({
+      email: user.email,
+      subject: 'Password reset request',
+      message: message,
+    });
+  } catch (error) {
+    console.log(error);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return false;
+  }
+  return true;
+};
+const sendMail = async (options: any) => {
+  let transporter = nodemailer.createTransport({
+    host: 'smtp.mailtrap.io',
+    port: 587,
+    debug: true,
+    auth: {
+      user: 'b5ba0e717d7aad',
+      pass: 'dce157de2d04a5',
+    },
+  });
+  let message = {
+    from: 'Hakim',
+    to: options.email,
+    subject: options.subject,
+    text: options.message,
+  };
+  let info = await transporter.sendMail(message);
+  console.log('Message sent: %s', info.messageId);
+  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+};
+
+export const changePassword = async (id: String, password: string) => {
+  const user = await UserModel.findOne({ id: id });
+  if (!user) {
+    throw new Error('User does not exist'); //TODO: change to custom error
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
   await user.save();
 
   return true;
