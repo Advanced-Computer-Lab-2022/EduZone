@@ -43,7 +43,7 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
   };
   return (
     <div
-      className="bg-slate-100 border-zinc-200 border rounded-md absolute right-0 top-14  w-72 flex flex-col"
+      className="bg-slate-100  border-zinc-200 border rounded-md absolute right-0 top-14  w-72 flex flex-col"
       ref={ref}
     >
       {/*Profile Menu options */}
@@ -72,10 +72,11 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
       <Divider />
       <ProfileMenuItem>
         <IconText
-          text={user.email}
+          text={user.name}
           leading={<FaUserAlt className="w-6 text-gray-400" />}
           trailing={<FaChevronRight size={12} className="ml-auto" />}
           link={'internal'}
+          url={`/instructors/${user.id}/profile`}
         />
       </ProfileMenuItem>
       <ProfileMenuItem>
