@@ -240,9 +240,15 @@ const SingleCourse = () => {
                         minDate={new Date()}
                       />
 
-                      <button className="w-full bg-primary text-white rounded-md py-2">
+                      <button className="w-full bg-primary text-white rounded-md py-2 mb-2">
                         Save
                       </button>
+                      <div
+                        className="text-center w-full cursor-pointer bg-gray-400 text-white rounded-md py-2"
+                        onClick={() => setAddPromotionOpen(false)}
+                      >
+                        Cancel
+                      </div>
                     </form>
                   )}
                 </div>

@@ -1,7 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { CourseModel, UserModel } from '../models';
 import durationConverter from '../utils/duration_converter';
-
 export const getAllCourses = async (
   filters: any,
   page?: string,
@@ -161,12 +160,15 @@ const getVideoDuration = async (subtitles_ids: string[]) => {
     const ids = subtitles_ids.slice(i, i + 10);
     let url = 'https://www.googleapis.com/youtube/v3/videos?';
     for (let j = 0; j < 10; j++) {
+      if (ids[j] == undefined) break;
       url += `id=${ids[j]}&`;
     }
     url += `&part=contentDetails&key=${process.env.YOUTUBE_API_KEY}`;
 
-    const { data: duration_fetch } = await axios({ url, method: 'GET' });
-    (duration_fetch as any).items.map((item: any) => {
+    const res = await fetch(url).then((data) => data.json());
+    // { data: duration_fetch }
+    console.log(res);
+    res.items.map((item: any) => {
       console.log(item.contentDetails.duration);
       durations.push(
         Number(durationConverter(item.contentDetails.duration)).toFixed(2)
@@ -181,9 +183,15 @@ const getVideoDuration = async (subtitles_ids: string[]) => {
 
 export const addCourse = async (data: typeof CourseModel & { token: any }) => {
   const { token, ...courseData } = data;
+  console.log(
+    'data',
+    (courseData as any).subtitles.map((s: any) => s.youtube_url.split('v=')[1])
+  );
+
   const durations = await getVideoDuration(
     (courseData as any).subtitles.map((s: any) => s.youtube_url.split('v=')[1])
   );
+  console.log('Here');
 
   const modifiedCourseData = {
     ...courseData,

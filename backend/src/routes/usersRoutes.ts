@@ -1,5 +1,11 @@
 import express from 'express';
-import { addUser, getAllUsers, getUserById, getUserByName } from '../services';
+import {
+  addUser,
+  getAllUsers,
+  getUserById,
+  getUserByName,
+  updateUser,
+} from '../services';
 
 const router = express.Router();
 
@@ -54,6 +60,22 @@ router.get('/', async (req, res) => {
     res.status(200).json(await getAllUsers());
   } catch (error) {
     res.status(500).json({ message: (error as any).message });
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body as any;
+    if (!data) {
+      return res.status(400).json({
+        message: 'Bad Request Body',
+      });
+    }
+    const user = await updateUser(id, data);
+    res.status(202).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: (error as any).message });
   }
 });
 

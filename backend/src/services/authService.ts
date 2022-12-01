@@ -120,6 +120,7 @@ const hashData = async (data: string) => {
 };
 
 const getTokens = (user: any) => {
+  console.log(user);
   //generate Access token
   const accessPayload = {
     username: user.username,
@@ -128,6 +129,8 @@ const getTokens = (user: any) => {
     id: user._id,
     gender: user.gender,
     name: user.name,
+    img: user.img ?? null,
+    bio: user.bio ?? null,
   };
 
   const accessToken = jwt.sign(
