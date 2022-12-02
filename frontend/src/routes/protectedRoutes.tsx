@@ -6,6 +6,7 @@ import InstructorDashboard from '../pages/instructors/InstructorDashboard';
 import InstructorCourses from '../pages/instructors/courses/InstructorCourses';
 import CreateCourse from '../pages/courses/CreateCourse';
 import InstructorProfile from '../pages/instructors/profile/profile';
+import EditCourse from '../pages/courses/EditCourse';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -46,6 +47,11 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'instructors/:id/profile',
     element: <InstructorProfile />,
+    parent: false,
+  },
+  {
+    path: 'courses/:id/edit',
+    element: <EditCourse />,
     parent: false,
   },
 ];

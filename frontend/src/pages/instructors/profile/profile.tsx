@@ -35,8 +35,9 @@ const InstructorProfile = () => {
           refreshToken: undefined,
           password: undefined,
           lastLogin: undefined,
-          id: user._id,
+          id: res.data._id,
           _id: undefined,
+          __v: undefined,
         })
       );
     }

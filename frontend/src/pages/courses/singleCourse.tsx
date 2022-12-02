@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import React, { FormEventHandler, useEffect, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Avatar from '../../components/layout/navbar/common/ProfileMenu/Avatar';
 import Layout from '../../components/layout/Trainee/Layout';
 import { RootState } from '../../redux/store';
@@ -12,10 +12,11 @@ import { axios } from '../../utils';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
+import IconText from '../../components/common/IconText';
+import { MdEditNote } from 'react-icons/md';
 const SingleCourse = () => {
   const { id } = useParams();
-  const [course, setCourse] = useState(undefined as Course | undefined);
+  const [course, setCourse] = useState(undefined as any | undefined);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
@@ -78,7 +79,7 @@ const SingleCourse = () => {
     if (!course) getCourse();
     setWithPromotion(
       (course?.discount &&
-        new Date(course?.discount.validUntil) > new Date()) ||
+        new Date(course?.discount.validUntil) >= new Date()) ||
         false
     );
 
@@ -89,7 +90,17 @@ const SingleCourse = () => {
   return (
     <Layout>
       <div className="my-4 space-y-4  ">
-        <p className="text-3xl font-medium">{course?.title}</p>
+        <div className="flex justify-between items-center">
+          <p className="text-3xl font-medium">{course?.title}</p>
+          {/* {user.id === course?.instructor?._id && (
+            <Link
+              to={`/courses/${course?._id}/edit`}
+              className=" bg-primary text-white rounded-md"
+            >
+              <IconText text={'Edit Course'} leading={<MdEditNote size={20} />} />
+            </Link>
+          )} */}
+        </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2">
             <div
@@ -137,20 +148,23 @@ const SingleCourse = () => {
             <div className="mt-4">
               <p className="text-2xl font-medium my-2">Course Sections</p>
               <hr />
-              <div className="mt-2">
-                {course?.subtitles?.map((section: Subtitle, index) => (
-                  <div className="my-2" key={index}>
-                    <p className="text-lg font-medium">{section.title}</p>
-                    <p className="text-sm text-gray-500">
-                      {section.duration} Hrs
-                    </p>
+              <div className="">
+                {course?.subtitles?.map((section: Subtitle, index: number) => (
+                  <div className=" hover:bg-gray-200 p-2" key={index}>
+                    <div className="flex items-center justify-between">
+                      <p className="text-lg font-medium">{section.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {section.duration} Hrs
+                      </p>
+                    </div>
+                    <p>{section.description}</p>
                   </div>
                 ))}
               </div>
             </div>
             {/* Instructor */}
           </div>
-          <div className="  ">
+          <div className=" space-y-4 ">
             <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
               <img
                 src={course?.thumbnail}
@@ -168,7 +182,9 @@ const SingleCourse = () => {
                 {course &&
                   Number(
                     course?.price *
-                      (1 - (course?.discount?.amount ?? 0) / 100) *
+                      (withPromotion
+                        ? 1 - (course?.discount?.amount ?? 0) / 100
+                        : 1) *
                       conversion_rate
                   ).toFixed(2)}{' '}
                 {currency}
@@ -254,6 +270,29 @@ const SingleCourse = () => {
                 </div>
               )}
             </div>
+            {user.id === course?.instructor?._id && (
+              <div className="flex flex-col justify-between items-center bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+                {course?.finalExam && (
+                  <div className="flex items-center justify-between w-full">
+                    <p className="text-lg font-medium">Final Exam</p>
+                    <p className="text-sm text-gray-500">
+                      {course?.finalExam?.questions?.length} Questions
+                    </p>
+                  </div>
+                )}
+                <div className="w-full">
+                  {course?.finalExam ? (
+                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
+                      Edit Final Exam
+                    </button>
+                  ) : (
+                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
+                      Add Final Exam
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
