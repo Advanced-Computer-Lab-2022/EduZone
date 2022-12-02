@@ -236,3 +236,35 @@ export const updateCourseById = async (
 export const deleteCourseById = async (id: string) => {
   return await CourseModel.findByIdAndDelete(id);
 };
+
+/**
+ * Course exercies
+ */
+
+// Create final exercise
+export const createFinalExercise = async (courseId: string, finalExam: any) => {
+  const course = await CourseModel.findByIdAndUpdate(
+    courseId,
+    { finalExam },
+    {
+      new: true,
+    }
+  );
+  return course;
+};
+
+export const addSubtitleExercise = async (
+  courseId: string,
+  subtitleId: string,
+  data: any
+) => {
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new Error('Course not found');
+  const subtitle = course.subtitles.id(subtitleId);
+  if (subtitle) {
+    subtitle.exercise = data;
+    await course.save();
+    return course;
+  }
+  throw new Error('Subtitle not found');
+};
