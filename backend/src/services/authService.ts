@@ -6,6 +6,7 @@ import { userInfo } from 'os';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
+console.log(process.env.MAILGUN_API_KEY);
 export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
@@ -116,18 +117,19 @@ export const forgetPassword = async (email: string) => {
 
   // testAccount = await nodemailer.createTestAccount();
 
-  const url = `http://localhost:4000/reset-password/${user.resetPasswordToken}`;
+  const url = `http://localhost:4000/auth/reset-password/${user.resetPasswordToken}`;
   const message = `
   <h1>You have requested a password reset</h1>
   <p>Please go to this link to reset your password</p>
   <a href=${url} clicktracking=off>${url}</a>
   `;
   try {
-    await sendMail({
+    sendMail({
       email: user.email,
       subject: 'Password reset request',
-      message: message,
+      html: message,
     });
+    console.log(user.resetPasswordToken);
   } catch (error) {
     console.log(error);
     user.resetPasswordToken = undefined;
@@ -139,34 +141,37 @@ export const forgetPassword = async (email: string) => {
   return true;
 };
 const sendMail = async (options: any) => {
-  let transporter = nodemailer.createTransport({
-    host: 'smtp.mailtrap.io',
+  // generate test account
+  //const testAccount = await nodemailer.createTestAccount();
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.HOST,
     port: 587,
-    debug: true,
     auth: {
-      user: 'b5ba0e717d7aad',
-      pass: 'dce157de2d04a5',
+      user: process.env.USER,
+      pass: process.env.PASS,
     },
   });
-  let message = {
-    from: 'Hakim',
+  const message = {
+    from: 'HAKIM <hakimACL@gmail.com>',
     to: options.email,
     subject: options.subject,
-    text: options.message,
+    html: options.html,
   };
-  let info = await transporter.sendMail(message);
+  const info = await transporter.sendMail(message);
   console.log('Message sent: %s', info.messageId);
-  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 };
 
 export const changePassword = async (id: String, password: string) => {
-  const user = await UserModel.findOne({ id: id });
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await UserModel.findByIdAndUpdate(
+    id,
+    { password: hashedPassword },
+    { new: true }
+  );
   if (!user) {
     throw new Error('User does not exist'); //TODO: change to custom error
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
-  user.password = hashedPassword;
-  await user.save();
 
   return true;
 };

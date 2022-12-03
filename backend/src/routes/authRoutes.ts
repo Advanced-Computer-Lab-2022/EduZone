@@ -57,15 +57,11 @@ router.post('/logout', JWTAccessDecoder, async (req, res) => {
   }
 });
 
-router.put('/reset-password:resetToken', async (req, res) => {
+router.put('/reset-password/:resetToken', async (req, res) => {
   try {
     const resetToken = req.params.resetToken;
-    const resetPasswordToken = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
     const { password } = req.body;
-    const success = await resetPassword(resetPasswordToken, password);
+    const success = await resetPassword(resetToken, password);
     return res.status(200).json({ message: 'Password reset successful' });
   } catch (error) {
     return res.status(400).json({ message: (error as Error).message });
@@ -74,7 +70,6 @@ router.put('/reset-password:resetToken', async (req, res) => {
 
 router.post('/forget-password', async (req, res) => {
   try {
-    console.log(req.body);
     const { email } = req.body;
     const success = await forgetPassword(email);
     if (success)
@@ -84,7 +79,7 @@ router.post('/forget-password', async (req, res) => {
     return res.status(400).json({ message: (error as Error).message });
   }
 });
-router.post('/change-password', JWTAccessDecoder, async (req, res) => {
+router.put('/change-password', JWTAccessDecoder, async (req, res) => {
   try {
     const { id } = req.body.token;
     const { password } = req.body;
