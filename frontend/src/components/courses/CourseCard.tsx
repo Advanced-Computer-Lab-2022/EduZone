@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaUserAlt } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -9,8 +9,25 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
+
+  const [rating, setRating] = useState(undefined as number | undefined);
+
+  const calculateRating = () => {
+    let total = 0;
+    let sum = 0;
+    course?.enrolled?.map((s: any) => {
+      if (s.rating) {
+        sum += s.rating;
+        total++;
+      }
+    });
+
+    if (total === 0) setRating(undefined);
+    else setRating(sum / total);
+  };
+
   useEffect(() => {
-    return;
+    calculateRating();
   }, [currency]);
   const navigate = useNavigate();
   return (
@@ -48,8 +65,8 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
         </div>
         <div>
           Rating:{' '}
-          <span className="italic text-sm text-gray-500">
-            {course?.rating || ' No reviews yet'}
+          <span className="italic text-sm text-primary">
+            {rating || ' No reviews yet'}
           </span>
         </div>
         <div className="text-gray-700 text-sm mt-2 ">

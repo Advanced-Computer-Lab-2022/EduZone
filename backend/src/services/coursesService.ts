@@ -232,6 +232,7 @@ export const updateCourseById = async (
     'username',
     '_id',
     'email',
+    'img',
   ]);
 };
 
@@ -308,7 +309,13 @@ export const addSubtitleExercise = async (
 };
 
 export const buyCourse = async (courseId: string, studentId: string) => {
-  const course = await CourseModel.findById(courseId);
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+  ]);
   if (!course) throw new Error('Course not found');
   const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (isEnrolled) throw new Error('Already enrolled');
@@ -316,5 +323,25 @@ export const buyCourse = async (courseId: string, studentId: string) => {
   course.enrolled.push({ studentId });
   await course.save();
 
+  return course;
+};
+
+export const rateCourse = async (
+  courseId: string,
+  studentId: string,
+  rating: number
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+  ]);
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  enrolled.rating = rating;
+  await course.save();
   return course;
 };

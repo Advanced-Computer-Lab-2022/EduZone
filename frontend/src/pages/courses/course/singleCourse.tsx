@@ -15,11 +15,14 @@ import 'react-datepicker/dist/react-datepicker.css';
 import IconText from '../../../components/common/IconText';
 import { MdEditNote } from 'react-icons/md';
 import { getCookie } from 'cookies-next';
+import RatingBox from '../../../components/courses/RatingBox';
+
 const SingleCourse = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
+  const [rating, setRating] = useState(undefined as number | undefined);
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -35,6 +38,20 @@ const SingleCourse = () => {
       autoplay: 0,
       muted: 0,
     },
+  };
+
+  const calculateRating = () => {
+    let total = 0;
+    let sum = 0;
+    course?.enrolled?.map((s: any) => {
+      if (s.rating) {
+        sum += s.rating;
+        total++;
+      }
+    });
+
+    if (total === 0) setRating(undefined);
+    else setRating(sum / total);
   };
 
   const onBuyCourse = async () => {
@@ -70,6 +87,13 @@ const SingleCourse = () => {
       setPromotionExpiryDate(
         new Date(res.data?.discount?.validUntil || new Date())
       );
+
+      // setRating(
+      //   res.data.enrolled?.reduce(
+      //     (acc: any, curr: any) => (acc + curr.rating || 0) / 2,
+      //     0
+      //   )
+      // );
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -78,8 +102,52 @@ const SingleCourse = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
+  const rateCourse = async (rating: number) => {
+    try {
+      const res = await axios({
+        url: '/courses/' + id + '/rate',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          rating,
+        },
+      });
+      setCourse(res.data);
+      // setWithPromotion(
+      //   (res.data.discount &&
+      //     new Date(res.data.discount.validUntil) >= new Date()) ||
+      //     false
+      // );
+      // setPromotionExpiryDate(
+      //   new Date(res.data?.discount?.validUntil || new Date())
+      // );
+
+      // setRating(
+      //   res.data.enrolled?.reduce(
+      //     (acc: any, curr: any) => acc + curr.rating || 0,
+      //     0
+      //   )
+      // );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (!course) getCourse();
+    setWithPromotion(
+      (course?.discount &&
+        new Date(course?.discount.validUntil) >= new Date()) ||
+        false
+    );
+    setPromotionExpiryDate(
+      new Date(course?.discount?.validUntil || new Date())
+    );
+
+    calculateRating();
+    console.log(rating);
   }, [course]);
   return (
     <Layout>
@@ -88,7 +156,7 @@ const SingleCourse = () => {
           <div className=" justify-between items-center">
             <p className="text-4xl font-medium">{course?.title}</p>
             <p className="text-sm text-gray-500">
-              Rating: {course?.rating || 'No Rating yet'}
+              Rating: {rating || 'No Rating yet'}
             </p>
           </div>
           <div
@@ -145,6 +213,23 @@ const SingleCourse = () => {
           {/* Instructor */}
         </div>
         <div className=" space-y-4 w-full">
+          {course?.enrolled.find((s: any) => s.studentId === user.id) && (
+            <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+              <p className="text-xl text-center">
+                You are enrolled in this course
+              </p>
+              <div className="flex justify-between">
+                <p>Rate this course: </p>
+                <RatingBox
+                  rating={
+                    course?.enrolled.find((s: any) => s.studentId === user.id)
+                      .rating || -1
+                  }
+                  onClick={rateCourse}
+                />
+              </div>
+            </div>
+          )}
           <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
             {/* <img
                 src={course?.thumbnail}
@@ -162,7 +247,7 @@ const SingleCourse = () => {
             <div>
               <p className="text-lg font-medium">{course?.title}</p>
               <p className="text-sm text-gray-500">
-                Rating: {course?.rating || 'No Rating yet'}
+                Rating: {rating || 'No Rating yet'}
               </p>
             </div>
 
