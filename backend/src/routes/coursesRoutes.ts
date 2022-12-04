@@ -9,6 +9,7 @@ import {
   getAllCourses,
   getCourseById,
   getSubtitleByCourseAndId,
+  rateCourse,
   updateCourseById,
   updateSubtitleByCourseAndId,
 } from '../services';
@@ -185,6 +186,24 @@ router.patch('/:id/buy', JWTAccessDecoder, async (req, res) => {
     const { id } = req.params;
     const { id: userId } = req.body.token;
     const course = await buyCourse(id, userId);
+    if (!course) {
+      return res.status(404).json({
+        message: 'Course not found',
+      });
+    }
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.patch('/:id/rate', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: userId } = req.body.token;
+  const { rating } = req.body;
+  try {
+    const course = await rateCourse(id, userId, rating);
     if (!course) {
       return res.status(404).json({
         message: 'Course not found',

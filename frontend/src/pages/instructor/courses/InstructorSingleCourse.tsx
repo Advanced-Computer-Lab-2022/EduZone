@@ -49,9 +49,21 @@ const InstructorSingleCourse = () => {
       console.log(error);
     }
   };
-
+  const [rating, setRating] = useState(undefined as number | undefined);
   const { user } = useSelector((state: RootState) => state.auth);
+  const calculateRating = () => {
+    let total = 0;
+    let sum = 0;
+    course?.enrolled?.map((s: any) => {
+      if (s.rating) {
+        sum += s.rating;
+        total++;
+      }
+    });
 
+    if (total === 0) setRating(undefined);
+    else setRating(sum / total);
+  };
   const onAddPromotion: FormEventHandler = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -88,6 +100,7 @@ const InstructorSingleCourse = () => {
     setPromotionExpiryDate(
       new Date(course?.discount?.validUntil || new Date())
     );
+    calculateRating();
   }, [course]);
   return (
     <AdminLayout>
@@ -201,7 +214,7 @@ const InstructorSingleCourse = () => {
               <div>
                 <p className="text-lg font-medium">{course?.title}</p>
                 <p className="text-sm text-gray-500">
-                  Rating: {course?.rating || 'No Rating yet'}
+                  Rating: {rating || 'No Rating yet'}
                 </p>
               </div>
 
