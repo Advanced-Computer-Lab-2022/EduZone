@@ -1,4 +1,37 @@
 import mongoose, { Schema } from 'mongoose';
+
+const Answers = new Schema({
+  answer: {
+    type: String,
+    required: true,
+  },
+  isCorrect: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+});
+const ExerciseSchema = new Schema({
+  questions: {
+    type: [
+      {
+        question: {
+          type: String,
+          required: true,
+        },
+        answers: {
+          type: [Answers],
+          required: true,
+          validate: [arrayLimit, 'You need to have 4 answers'],
+        },
+      },
+    ],
+  },
+});
+function arrayLimit(val: any) {
+  return val.length == 4;
+}
+
 const SubtitleSchema = new Schema({
   title: {
     type: String,
@@ -10,7 +43,7 @@ const SubtitleSchema = new Schema({
   },
   youtube_url: {
     type: String,
-    required: true,
+    required: false,
   },
   order: {
     type: Number,
@@ -18,9 +51,14 @@ const SubtitleSchema = new Schema({
   },
   description: {
     type: String,
-    required: true,
+    required: false,
+  },
+  exercise: {
+    type: ExerciseSchema,
+    required: false,
   },
 });
+
 const courseSchema = new Schema({
   title: {
     type: String,
@@ -76,6 +114,10 @@ const courseSchema = new Schema({
       },
       validUntil: Date,
     },
+    required: false,
+  },
+  finalExam: {
+    type: ExerciseSchema,
     required: false,
   },
 });

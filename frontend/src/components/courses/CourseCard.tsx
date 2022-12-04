@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 import { CourseCardProps } from '../../types';
 import Truncate from '../common/Truncate';
-const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
@@ -16,7 +16,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   return (
     <div
       className="flex items-center w-full bg-gray-100 h-52 rounded-lg p-4 border gap-4 hover:border-primary cursor-pointer transition-all duration-300 ease-in-out"
-      onClick={() => navigate(`/courses/${course._id}`)}
+      onClick={() => navigate(`${base}/courses/${course._id}`)}
     >
       <img
         src={

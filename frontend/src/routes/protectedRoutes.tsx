@@ -2,10 +2,14 @@ import AdminDashboard from '../pages/admin/dashboard';
 import AdminUsers from '../pages/admin/users/AdminUsers';
 import AdminCreateUser from '../pages/admin/users/AdminCreateUsers';
 import { RouteType } from '../types';
-import InstructorDashboard from '../pages/instructors/InstructorDashboard';
-import InstructorCourses from '../pages/instructors/courses/InstructorCourses';
+import InstructorDashboard from '../pages/instructor/InstructorDashboard';
+import InstructorCourses from '../pages/instructor/courses/InstructorCourses';
 import CreateCourse from '../pages/courses/CreateCourse';
-import InstructorProfile from '../pages/instructors/profile/profile';
+import InstructorProfile from '../pages/instructor/profile/profile';
+import EditCourse from '../pages/instructor/courses/InstructorEditCourse';
+import InstructorSingleCourse from '../pages/instructor/courses/InstructorSingleCourse';
+import InstructorCourseExam from '../pages/instructor/courses/exam/InstructorCourseExam';
+import InstructorSubtitlePage from '../pages/instructor/courses/subtitles/InstructorSubtitlePage';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -29,23 +33,43 @@ const ProtectedRoutes: RouteType[] = [
     parent: false,
   },
   {
-    path: 'instructors/:id',
+    path: 'instructor/:id',
     element: <InstructorDashboard />,
     parent: false,
   },
   {
-    path: 'instructors/:id/courses',
+    path: 'instructor/:id/courses',
     element: <InstructorCourses />,
     parent: false,
   },
+  {
+    path: 'instructor/:instructorId/courses/:courseId',
+    element: <InstructorSingleCourse />,
+    parent: false,
+  },
+  {
+    path: 'instructor/:instructorId/courses/:courseId/exam',
+    element: <InstructorCourseExam />,
+  },
+
+  {
+    path: 'instructor/:instructorId/courses/:courseId/subtitles/:subtitleId',
+    element: <InstructorSubtitlePage />,
+  },
+
   {
     path: 'courses/create',
     element: <CreateCourse />,
     parent: false,
   },
   {
-    path: 'instructors/:id/profile',
+    path: 'instructor/:id/profile',
     element: <InstructorProfile />,
+    parent: false,
+  },
+  {
+    path: 'courses/:id/edit',
+    element: <EditCourse />,
     parent: false,
   },
 ];

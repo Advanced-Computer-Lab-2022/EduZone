@@ -17,4 +17,7 @@ export declare type Course = {
     validUntil: Date;
   };
   createdAt: Date;
+  finalExam?: {
+    questions: Question[];
+  };
 };

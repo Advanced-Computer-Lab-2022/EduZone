@@ -236,3 +236,71 @@ export const updateCourseById = async (
 export const deleteCourseById = async (id: string) => {
   return await CourseModel.findByIdAndDelete(id);
 };
+
+/**
+ * Course exercies
+ */
+
+// Create final exercise
+export const createFinalExercise = async (courseId: string, finalExam: any) => {
+  const course = await CourseModel.findByIdAndUpdate(
+    courseId,
+    { finalExam },
+    {
+      new: true,
+    }
+  );
+  return course;
+};
+
+export const getSubtitleByCourseAndId = async (
+  courseId: string,
+  subtitleId: string
+) => {
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new Error('Course not found');
+  const subtitle = course?.subtitles.find(
+    (s) => s._id?.toString() === subtitleId
+  );
+  return subtitle;
+};
+
+export const updateSubtitleByCourseAndId = async (
+  courseId: string,
+  subtitleId: string,
+  data: any
+) => {
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new Error('Course not found');
+  let subtitle = {};
+  let index = -1;
+  course?.subtitles.map((s, i) => {
+    if (s._id?.toString() === subtitleId) {
+      subtitle = s;
+      index = i;
+    }
+  });
+  if (index === -1) throw new Error('Subtitle not found');
+  course.subtitles[index] = {
+    ...subtitle,
+    ...data,
+  };
+  await course?.save();
+  return course?.subtitles[index];
+};
+
+export const addSubtitleExercise = async (
+  courseId: string,
+  subtitleId: string,
+  data: any
+) => {
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new Error('Course not found');
+  const subtitle = course.subtitles.id(subtitleId);
+  if (subtitle) {
+    subtitle.exercise = data;
+    await course.save();
+    return subtitle;
+  }
+  throw new Error('Subtitle not found');
+};
