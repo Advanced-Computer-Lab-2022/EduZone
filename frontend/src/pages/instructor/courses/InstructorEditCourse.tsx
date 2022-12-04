@@ -2,8 +2,8 @@ import axios, { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { RootState } from '../../redux/store';
-import { Course } from '../../types/entities/Course';
+import { RootState } from '../../../redux/store';
+import { Course } from '../../../types/entities/Course';
 
 const EditCourse = () => {
   const { id } = useParams<{ id: string }>();

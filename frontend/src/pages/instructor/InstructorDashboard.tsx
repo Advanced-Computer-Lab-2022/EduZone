@@ -15,7 +15,7 @@ const InstructorDashboard = () => {
       <div className="flex my-5">
         <div
           className="w-1/4 h-32 bg-zinc-300 text-red-800 rounded-md flex justify-center items-center cursor-pointer hover:border border-red-800"
-          onClick={() => navigate(`/instructors/${id}/courses`)}
+          onClick={() => navigate(`/instructor/${id}/courses`)}
         >
           <p className="text-2xl">Courses</p>
         </div>

@@ -43,7 +43,7 @@ const SubtitleSchema = new Schema({
   },
   youtube_url: {
     type: String,
-    required: true,
+    required: false,
   },
   order: {
     type: Number,
@@ -51,7 +51,7 @@ const SubtitleSchema = new Schema({
   },
   description: {
     type: String,
-    required: true,
+    required: false,
   },
   exercise: {
     type: ExerciseSchema,

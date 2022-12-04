@@ -75,7 +75,7 @@ const AdminCreateUser = () => {
         },
       });
       if (res.status === 201) {
-        navigate(`/instructors/${instructorId}/courses`);
+        navigate(`/instructor/${instructorId}/courses`);
       }
     } catch (err) {
       console.log(err);

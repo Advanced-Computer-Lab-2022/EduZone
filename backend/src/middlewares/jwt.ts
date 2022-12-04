@@ -8,6 +8,7 @@ export const JWTAccessDecoder: RequestHandler = async (req, res, next) => {
     req.body.token = decoded;
     next();
   } catch (error) {
+    console.log(error);
     return res.status(401).json({ message: 'Auth failed' });
   }
 };

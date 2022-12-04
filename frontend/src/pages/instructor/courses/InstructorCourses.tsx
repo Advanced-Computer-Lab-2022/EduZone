@@ -15,7 +15,7 @@ import SearchBar from '../../../components/layout/navbar/trainee/SearchBar';
 import { axios } from '../../../utils';
 
 const InstructorCourses = () => {
-  const { id } = useParams();
+  const { id: instructorId } = useParams();
   const [courses, setCourses] = useState([] as any[]);
   const [pagination, setPagination] = useState({} as any);
   const [searchParams] = useSearchParams();
@@ -45,7 +45,7 @@ const InstructorCourses = () => {
 
     try {
       const res: AxiosResponse<any, any> = await axios({
-        url: `/courses?instructor=${id}&query=${query || ''}`,
+        url: `/courses?instructor=${instructorId}&query=${query || ''}`,
         method: 'GET',
         params: params,
       });
@@ -71,7 +71,7 @@ const InstructorCourses = () => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
               const query = formData.get('query');
-              navigate(`/instructors/${id}/courses?query=${query}`);
+              navigate(`/instructor/${instructorId}/courses?query=${query}`);
             }}
           />
         </div>
@@ -87,7 +87,7 @@ const InstructorCourses = () => {
           </button>
         </div>
         <Link
-          to={`/courses/create?instructorId=${id}`}
+          to={`/courses/create?instructorId=${instructorId}`}
           className="bg-red-800 text-white flex text-center px-4 py-2 rounded-md w-fit"
         >
           <span>Create Course</span>
@@ -104,7 +104,11 @@ const InstructorCourses = () => {
             {courses &&
               courses.length > 0 &&
               courses?.map((course) => (
-                <CourseCard course={course} key={course._id.toString()} />
+                <CourseCard
+                  course={course}
+                  key={course._id.toString()}
+                  base={`/instructor/${instructorId}`}
+                />
               ))}
 
             {courses.length === 0 &&
@@ -119,7 +123,7 @@ const InstructorCourses = () => {
         }
         {filterOpen && (
           <div>
-            <FilterBox navigate_path={`instructors/${id}/courses`} />
+            <FilterBox navigate_path={`instructor/${instructorId}/courses`} />
           </div>
         )}
       </div>

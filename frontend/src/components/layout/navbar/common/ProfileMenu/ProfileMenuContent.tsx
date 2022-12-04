@@ -54,7 +54,7 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
             leading={<CgOrganisation className="w-6 text-gray-400" />}
             link={'internal'}
             trailing={<FaChevronRight size={12} className="ml-auto" />}
-            url={`/instructors/${user.id}`}
+            url={`/instructor/${user.id}`}
           />
         </ProfileMenuItem>
       ) : null}
@@ -76,7 +76,7 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
           leading={<FaUserAlt className="w-6 text-gray-400" />}
           trailing={<FaChevronRight size={12} className="ml-auto" />}
           link={'internal'}
-          url={`/instructors/${user.id}/profile`}
+          url={`/instructor/${user.id}/profile`}
         />
       </ProfileMenuItem>
       <ProfileMenuItem>

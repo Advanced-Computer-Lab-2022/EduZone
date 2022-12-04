@@ -3,22 +3,23 @@ import React, { FormEventHandler, useEffect, useState } from 'react';
 import { FaPlay } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import Avatar from '../../components/layout/navbar/common/ProfileMenu/Avatar';
-import Layout from '../../components/layout/Trainee/Layout';
-import { RootState } from '../../redux/store';
-import { Course } from '../../types/entities/Course';
-import { Subtitle } from '../../types/entities/Subtitle';
-import { axios } from '../../utils';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import IconText from '../../components/common/IconText';
 import { MdEditNote } from 'react-icons/md';
-const SingleCourse = () => {
-  const { id } = useParams();
+import AdminLayout from '../../../components/layout/Admin/AdminLayout';
+import Avatar from '../../../components/layout/navbar/common/ProfileMenu/Avatar';
+import Layout from '../../../components/layout/Trainee/Layout';
+import { RootState } from '../../../redux/store';
+import { Subtitle } from '../../../types/entities/Subtitle';
+import { axios } from '../../../utils';
+import IconText from '../../../components/common/IconText';
+const InstructorSingleCourse = () => {
+  const { courseId, instructorId } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
+  const navigate = useNavigate();
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -27,7 +28,8 @@ const SingleCourse = () => {
   };
 
   const opts: YouTubeProps['opts'] = {
-    height: '384',
+    height: '250',
+    width: '450',
     playerVars: {
       autoplay: 0,
       muted: 0,
@@ -39,7 +41,7 @@ const SingleCourse = () => {
   const getCourse = async () => {
     try {
       const res: AxiosResponse<any, any> = await axios({
-        url: '/courses/' + id,
+        url: '/courses/' + courseId,
         method: 'GET',
       });
       setCourse(res.data);
@@ -56,7 +58,7 @@ const SingleCourse = () => {
     const data = Object.fromEntries(formData.entries());
     try {
       const res: AxiosResponse<any, any> = await axios({
-        url: '/courses/' + id,
+        url: '/courses/' + courseId,
         method: 'PATCH',
         data: {
           discount: {
@@ -88,39 +90,24 @@ const SingleCourse = () => {
     );
   }, [course]);
   return (
-    <Layout>
-      <div className="my-4 space-y-4  ">
+    <AdminLayout>
+      <div className="my-4 space-y-4  max-w-[90%] mx-auto">
         <div className="flex justify-between items-center">
           <p className="text-3xl font-medium">{course?.title}</p>
-          {/* {user.id === course?.instructor?._id && (
+          {user.id === course?.instructor?._id && (
             <Link
               to={`/courses/${course?._id}/edit`}
               className=" bg-primary text-white rounded-md"
             >
-              <IconText text={'Edit Course'} leading={<MdEditNote size={20} />} />
+              <IconText
+                text={'Edit Course'}
+                leading={<MdEditNote size={20} />}
+              />
             </Link>
-          )} */}
+          )}
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2">
-            <div
-              className="w-full bg-gray-300 h-96 rounded-md flex justify-center items-center "
-              // after:absolute after:inset-0 after:bg-black after:bg-opacity-50 after:content-[''] after:z-10 relative overflow-hidden"
-              style={{
-                backgroundImage: `url(${course?.thumbnail})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            >
-              {
-                <YouTube
-                  videoId={course?.preview_video?.split('v=')[1]}
-                  opts={opts}
-                  onReady={onPlayerReady}
-                />
-              }
-            </div>
-
             <div className="mt-2 flex items-center py-2">
               <Avatar name={course?.instructor?.name || ''} />
               <div className="ml-2">
@@ -149,22 +136,62 @@ const SingleCourse = () => {
               <p className="text-2xl font-medium my-2">Course Sections</p>
               <hr />
               <div className="">
-                {course?.subtitles?.map((section: Subtitle, index: number) => (
-                  <div className=" hover:bg-gray-200 p-2" key={index}>
-                    <div className="flex items-center justify-between">
-                      <p className="text-lg font-medium">{section.title}</p>
+                {course?.subtitles?.map(
+                  (section: Subtitle & { _id: any }, index: number) => (
+                    <div
+                      className=" hover:bg-gray-200 p-2 cursor-pointer"
+                      key={index}
+                      onClick={() => navigate(`subtitles/${section._id}`)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-lg font-medium">{section.title}</p>
+                        <p className="text-sm text-gray-500">
+                          {section.duration} Hrs
+                        </p>
+                      </div>
                       <p className="text-sm text-gray-500">
-                        {section.duration} Hrs
+                        {section.description}
                       </p>
                     </div>
-                    <p>{section.description}</p>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
             {/* Instructor */}
           </div>
           <div className=" space-y-4 ">
+            <div>
+              <div className=" bg-gray-300 rounded-md flex justify-center items-center overflow-hidden">
+                {
+                  <YouTube
+                    videoId={course?.preview_video?.split('v=')[1]}
+                    opts={opts}
+                    onReady={onPlayerReady}
+                  />
+                }
+              </div>
+            </div>
+            {user.id === course?.instructor?._id && (
+              <div className="flex flex-col justify-between items-center bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+                {course?.finalExam && (
+                  <div className="flex items-center justify-between w-full">
+                    <p className="text-lg font-medium">Final Exam</p>
+                    <p className="text-sm text-gray-500">
+                      {course?.finalExam?.questions?.length} Questions
+                    </p>
+                  </div>
+                )}
+                <div className="w-full">
+                  <Link
+                    to={`/instructor/${instructorId}/courses/${courseId}/exam`}
+                  >
+                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
+                      {course?.finalExam ? 'Edit Final Exam' : 'Add Final Exam'}
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            )}
             <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
               <img
                 src={course?.thumbnail}
@@ -270,34 +297,11 @@ const SingleCourse = () => {
                 </div>
               )}
             </div>
-            {user.id === course?.instructor?._id && (
-              <div className="flex flex-col justify-between items-center bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
-                {course?.finalExam && (
-                  <div className="flex items-center justify-between w-full">
-                    <p className="text-lg font-medium">Final Exam</p>
-                    <p className="text-sm text-gray-500">
-                      {course?.finalExam?.questions?.length} Questions
-                    </p>
-                  </div>
-                )}
-                <div className="w-full">
-                  {course?.finalExam ? (
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
-                      Edit Final Exam
-                    </button>
-                  ) : (
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
-                      Add Final Exam
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 
-export default SingleCourse;
+export default InstructorSingleCourse;

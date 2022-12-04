@@ -7,7 +7,9 @@ import {
   deleteCourseById,
   getAllCourses,
   getCourseById,
+  getSubtitleByCourseAndId,
   updateCourseById,
+  updateSubtitleByCourseAndId,
 } from '../services';
 
 const router = express.Router();
@@ -92,7 +94,7 @@ router.delete('/:id', async (req, res) => {
 
 //GET all exercises
 
-router.post('/:id/exercise', JWTAccessDecoder, async (req, res) => {
+router.post('/:id/exam', JWTAccessDecoder, async (req, res) => {
   try {
     const { id } = req.params;
     const finalExam: any = req.body.finalExam;
@@ -126,19 +128,55 @@ router.post(
         });
       }
 
-      console.log(exercise);
-      const course = await addSubtitleExercise(id, subtitleId, exercise);
-      if (!course) {
+      const subtitle = await addSubtitleExercise(id, subtitleId, exercise);
+      if (!subtitle) {
         return res.status(404).json({
-          message: 'Course not found',
+          message: 'Subtitle not found',
         });
       }
-      return res.status(200).json(course);
+      return res.status(200).json(subtitle);
     } catch (e) {
       console.error(e);
       return res.status(500).json({ error: (e as any).message });
     }
   }
 );
+//PUT update subtitle
+router.put('/:id/subtitles/:subtitleId', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id, subtitleId } = req.params;
+    const { subtitle } = req.body;
+    if (!subtitle) {
+      return res.status(400).json({
+        message: 'Please fill all the fields',
+      });
+    }
+    const updatedSub = await updateSubtitleByCourseAndId(
+      id,
+      subtitleId,
+      subtitle
+    );
+    return res.status(202).json(updatedSub);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.get('/:id/subtitles/:subtitleId', async (req, res) => {
+  try {
+    const { id, subtitleId } = req.params;
+    const subtitle = await getSubtitleByCourseAndId(id, subtitleId);
+    if (!subtitle) {
+      return res.status(404).json({
+        message: 'Subtitle not found',
+      });
+    }
+    return res.status(200).json(subtitle);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
 
 export default router;
