@@ -7,7 +7,7 @@ const AdminLayout = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarWidth, setSideBarWidth] = useState(0);
   const [windowWidth, setWindowWidth] = useState(500);
 

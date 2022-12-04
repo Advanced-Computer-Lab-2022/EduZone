@@ -1,6 +1,6 @@
 import CreateCourse from '../pages/courses/CreateCourse';
 import Courses from '../pages/courses/courses';
-import SingleCourse from '../pages/courses/singleCourse';
+import SingleCourse from '../pages/courses/course/singleCourse';
 import Home from '../pages/home';
 import LoginPage from '../pages/login';
 import { RouteType } from '../types';

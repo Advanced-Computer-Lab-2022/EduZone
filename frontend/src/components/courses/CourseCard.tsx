@@ -1,22 +1,39 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaUserAlt } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 import { CourseCardProps } from '../../types';
 import Truncate from '../common/Truncate';
-const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
+
+  const [rating, setRating] = useState(undefined as number | undefined);
+
+  const calculateRating = () => {
+    let total = 0;
+    let sum = 0;
+    course?.enrolled?.map((s: any) => {
+      if (s.rating) {
+        sum += s.rating;
+        total++;
+      }
+    });
+
+    if (total === 0) setRating(undefined);
+    else setRating(sum / total);
+  };
+
   useEffect(() => {
-    return;
+    calculateRating();
   }, [currency]);
   const navigate = useNavigate();
   return (
     <div
       className="flex items-center w-full bg-gray-100 h-52 rounded-lg p-4 border gap-4 hover:border-primary cursor-pointer transition-all duration-300 ease-in-out"
-      onClick={() => navigate(`/courses/${course._id}`)}
+      onClick={() => navigate(`${base || ''}/courses/${course._id}`)}
     >
       <img
         src={
@@ -32,7 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
           <div className="text-xl font-medium ">
             {Number(
               course?.price *
-                (1 - (course?.discount ?? 0) / 100) *
+                (1 - (course?.discount?.amount ?? 0) / 100) *
                 conversion_rate
             ).toFixed(2)}{' '}
             {currency}
@@ -48,19 +65,21 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         </div>
         <div>
           Rating:{' '}
-          <span className="italic text-sm text-gray-500">
-            {course?.rating || ' No reviews yet'}
+          <span className="italic text-sm text-primary">
+            {rating || ' No reviews yet'}
           </span>
         </div>
         <div className="text-gray-700 text-sm mt-2 ">
           <Truncate text={course.summary || ''} length={40} more />
         </div>
         <div className="mt-2 text-sm text-gray-500 font-medium">
-          Duration :{' '}
+          Duration ≈{' '}
           {course.subtitles &&
-            course?.subtitles?.reduce(
-              (acc: any, curr: any) => acc + curr.duration,
-              0
+            Math.ceil(
+              course?.subtitles?.reduce(
+                (acc: any, curr: any) => acc + curr.duration,
+                0
+              )
             ) + ' hrs'}
         </div>
       </div>

@@ -18,3 +18,11 @@ export const getAllUsers = () => {
   const users = UserModel.find();
   return users;
 };
+
+export const updateUser = (id: string, data: Partial<typeof UserModel>) => {
+  const user = UserModel.findByIdAndUpdate(id, data, { new: true });
+  if (!user) {
+    throw new Error('User not found');
+  }
+  return user;
+};
