@@ -10,6 +10,7 @@ import EditCourse from '../pages/instructor/courses/InstructorEditCourse';
 import InstructorSingleCourse from '../pages/instructor/courses/InstructorSingleCourse';
 import InstructorCourseExam from '../pages/instructor/courses/exam/InstructorCourseExam';
 import InstructorSubtitlePage from '../pages/instructor/courses/subtitles/InstructorSubtitlePage';
+import LearningPage from '../pages/courses/course/LearningPage';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -71,6 +72,10 @@ const ProtectedRoutes: RouteType[] = [
     path: 'courses/:id/edit',
     element: <EditCourse />,
     parent: false,
+  },
+  {
+    path: 'courses/:id/learning',
+    element: <LearningPage />,
   },
 ];
 

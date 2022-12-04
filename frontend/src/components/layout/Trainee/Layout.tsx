@@ -10,7 +10,9 @@ const Layout = ({ children }: { children: JSX.Element | JSX.Element[] }) => {
     <div>
       <TraineeNavbar />
       <div className="bg-gray-100 min-h-screen pt-16">
-        <div className="mx-auto md:max-w-5xl xl:max-w-7xl px-6">{children}</div>
+        <div className="mx-auto md:max-w-[70%] xl:max-w-[80%] px-6">
+          {children}
+        </div>
       </div>
     </div>
   );

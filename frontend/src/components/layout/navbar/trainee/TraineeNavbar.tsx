@@ -15,7 +15,7 @@ const TraineeNavbar = () => {
   const navigate = useNavigate();
   return (
     <div className="h-14 bg-white flex items-center justify-center shadow-md fixed w-full z-30">
-      <div className="container xl:max-w-7xl md:max-w-5xl flex items-center justify-between mx-auto h-full px-6 ">
+      <div className="container md:max-w-[70%] xl:max-w-[80%] px-6 flex items-center justify-between mx-auto h-full px-6 ">
         <Link to="/" className="text-lg text-primary font-medium ">
           Placeholder
         </Link>
