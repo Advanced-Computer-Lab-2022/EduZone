@@ -16,6 +16,7 @@ export declare type Course = {
     amount: number;
     validUntil: Date;
   };
+  enrolled: { studentId: string; rating?: number }[];
   createdAt: Date;
   finalExam?: {
     questions: Question[];

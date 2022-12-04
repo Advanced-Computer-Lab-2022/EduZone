@@ -14,6 +14,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import IconText from '../../../components/common/IconText';
 import { MdEditNote } from 'react-icons/md';
+import { getCookie } from 'cookies-next';
 const SingleCourse = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -22,17 +23,35 @@ const SingleCourse = () => {
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
+  const navigate = useNavigate();
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     event.target.pauseVideo();
   };
 
   const opts: YouTubeProps['opts'] = {
-    height: '384',
+    width: (235 * 16) / 9,
+    height: '235',
     playerVars: {
       autoplay: 0,
       muted: 0,
     },
   };
+
+  const onBuyCourse = async () => {
+    try {
+      const res: AxiosResponse<any, any> = await axios({
+        url: '/courses/' + id + '/buy',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+      });
+      navigate('/courses/' + id + '/learning');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
@@ -43,6 +62,15 @@ const SingleCourse = () => {
         method: 'GET',
       });
       setCourse(res.data);
+      setWithPromotion(
+        (res.data.discount &&
+          new Date(res.data.discount.validUntil) >= new Date()) ||
+          false
+      );
+      setPromotionExpiryDate(
+        new Date(res.data?.discount?.validUntil || new Date())
+      );
+      console.log(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -50,249 +78,127 @@ const SingleCourse = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const onAddPromotion: FormEventHandler = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
-    try {
-      const res: AxiosResponse<any, any> = await axios({
-        url: '/courses/' + id,
-        method: 'PATCH',
-        data: {
-          discount: {
-            amount: data.amount,
-            validUntil: promotionExpiryDate,
-          },
-        },
-      });
-      setCourse({
-        ...res.data,
-        discount: { amount: data.amount, validUntil: promotionExpiryDate },
-      });
-      setAddPromotionOpen(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     if (!course) getCourse();
-    setWithPromotion(
-      (course?.discount &&
-        new Date(course?.discount.validUntil) >= new Date()) ||
-        false
-    );
-
-    setPromotionExpiryDate(
-      new Date(course?.discount?.validUntil || new Date())
-    );
   }, [course]);
   return (
     <Layout>
-      <div className="my-4 space-y-4  ">
-        <div className="flex justify-between items-center">
-          <p className="text-3xl font-medium">{course?.title}</p>
-          {/* {user.id === course?.instructor?._id && (
-            <Link
-              to={`/courses/${course?._id}/edit`}
-              className=" bg-primary text-white rounded-md"
-            >
-              <IconText text={'Edit Course'} leading={<MdEditNote size={20} />} />
-            </Link>
-          )} */}
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
-            <div
-              className="w-full bg-gray-300 h-96 rounded-md flex justify-center items-center "
-              // after:absolute after:inset-0 after:bg-black after:bg-opacity-50 after:content-[''] after:z-10 relative overflow-hidden"
-              style={{
-                backgroundImage: `url(${course?.thumbnail})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            >
-              {
-                <YouTube
-                  videoId={course?.preview_video?.split('v=')[1]}
-                  opts={opts}
-                  onReady={onPlayerReady}
-                />
-              }
-            </div>
-
-            <div className="mt-2 flex items-center py-2">
-              <Avatar name={course?.instructor?.name || ''} />
-              <div className="ml-2">
-                <p className="text-lg font-medium">
-                  {course?.instructor?.name}
-                </p>
-              </div>
-            </div>
-            <p className="text-gray-400 font-bold">
-              Duration ≈{' '}
-              {course?.subtitles &&
-                Math.ceil(
-                  course?.subtitles?.reduce(
-                    (acc: any, curr: any) => acc + curr.duration,
-                    0
-                  )
-                )}{' '}
-              hours
+      <div className="grid grid-cols-3 gap-6 my-4 ">
+        <div className="col-span-2">
+          <div className=" justify-between items-center">
+            <p className="text-4xl font-medium">{course?.title}</p>
+            <p className="text-sm text-gray-500">
+              Rating: {course?.rating || 'No Rating yet'}
             </p>
-            <div className="mt-4">
-              <p className="text-2xl font-medium my-2">Summary</p>
-              <hr />
-              <p className="mt-2">{course?.summary}</p>
-            </div>
-            <div className="mt-4">
-              <p className="text-2xl font-medium my-2">Course Sections</p>
-              <hr />
-              <div className="">
-                {course?.subtitles?.map((section: Subtitle, index: number) => (
-                  <div className=" hover:bg-gray-200 p-2" key={index}>
-                    <div className="flex items-center justify-between">
-                      <p className="text-lg font-medium">{section.title}</p>
-                      <p className="text-sm text-gray-500">
-                        {section.duration} Hrs
-                      </p>
-                    </div>
-                    <p>{section.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Instructor */}
           </div>
-          <div className=" space-y-4 ">
-            <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
-              <img
+          <div
+            className="flex items-center py-2 group cursor-pointer w-fit"
+            // onClick={()=>navigate(`/instructor/${course?.instructor._id}/profile`)}
+          >
+            <div className="group-hover:border-blue-500 border-2 border-white rounded-full">
+              <Avatar
+                name={course?.instructor?.name || ''}
+                img={course?.instructor?.img}
+              />
+            </div>
+            <div className="ml-2 flex flex-col">
+              <p className="text-lg font-medium group-hover:text-blue-500 text-gray-700">
+                {course?.instructor?.name}
+              </p>
+              <p className="text-sm font-medium group-hover:font-semibold -mt-1 text-gray-500">
+                Instructor
+              </p>
+            </div>
+          </div>
+          <p className="text-gray-600 font-medium">
+            Course Duration ≈{' '}
+            {course?.subtitles &&
+              Math.ceil(
+                course?.subtitles?.reduce(
+                  (acc: any, curr: any) => acc + curr.duration,
+                  0
+                )
+              )}{' '}
+            hours
+          </p>
+          <div className="mt-4">
+            <p className="text-xl font-medium">Summary</p>
+            <p className="m text-gray-500">{course?.summary}</p>
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-medium my-2">Course Sections</p>
+            <hr />
+            <div className="">
+              {course?.subtitles?.map((section: Subtitle, index: number) => (
+                <div className=" hover:bg-gray-200 p-2" key={index}>
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg font-medium">{section.title}</p>
+                    <p className="text-sm text-gray-500">
+                      {section.duration} Hrs
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-600">{section.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Instructor */}
+        </div>
+        <div className=" space-y-4 w-full">
+          <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+            {/* <img
                 src={course?.thumbnail}
                 alt=""
                 className="overflow-hidden rounded-md"
+              /> */}
+            <div className="w-full overflow-hidden bg-gray-100 rounded-md flex items-center">
+              <YouTube
+                videoId={course?.preview_video?.split('v=')[1]}
+                opts={opts}
+                onReady={onPlayerReady}
               />
-              <div>
-                <p className="text-lg font-medium">{course?.title}</p>
-                <p className="text-sm text-gray-500">
-                  Rating: {course?.rating || 'No Rating yet'}
-                </p>
-              </div>
+            </div>
 
-              <p className="text-3xl text-primary font-semibold">
-                {course &&
-                  Number(
-                    course?.price *
-                      (withPromotion
-                        ? 1 - (course?.discount?.amount ?? 0) / 100
-                        : 1) *
-                      conversion_rate
-                  ).toFixed(2)}{' '}
-                {currency}
+            <div>
+              <p className="text-lg font-medium">{course?.title}</p>
+              <p className="text-sm text-gray-500">
+                Rating: {course?.rating || 'No Rating yet'}
               </p>
+            </div>
 
-              {user.id !== course?.instructor?._id ? (
+            <p className="text-3xl text-primary font-semibold">
+              {course &&
+                Number(
+                  course?.price *
+                    (withPromotion
+                      ? 1 - (course?.discount?.amount ?? 0) / 100
+                      : 1) *
+                    conversion_rate
+                ).toFixed(2)}{' '}
+              {currency}
+            </p>
+
+            <div>
+              {course?.enrolled.find((s: any) => s.studentId === user.id) ? (
+                <Link to={`learn`}>
+                  <button className="w-full bg-primary text-white  py-2 rounded-md">
+                    Start Learning
+                  </button>
+                </Link>
+              ) : (
                 <div className=" w-full space-y-2">
-                  <button className="w-full bg-primary text-white rounded-md py-2">
+                  <button
+                    className="w-full bg-primary text-white rounded-md py-2"
+                    onClick={() => onBuyCourse()}
+                  >
                     Buy Now
                   </button>
                   <button className="w-full border border-primary text-primary rounded-md py-2 hover:text-white hover:bg-primary">
-                    Add to Cart
+                    Add to Wishlist
                   </button>
-                </div>
-              ) : (
-                <div className=" w-full space-y-2">
-                  <p>
-                    {withPromotion ? (
-                      <div>
-                        <p>
-                          Promotion:
-                          <span className="text-green-700"> Active </span> -
-                          <span className="font-medium">
-                            {' '}
-                            {course?.discount?.amount}% off{' '}
-                          </span>
-                        </p>
-                        <span className="text-gray-500">
-                          Valid until{' '}
-                          {new Date(
-                            course?.discount?.validUntil || ''
-                          ).toLocaleDateString()}
-                        </span>
-                      </div>
-                    ) : (
-                      <div>
-                        Promotion:
-                        <span className="text-red-700">Inactive</span>
-                      </div>
-                    )}
-                  </p>
-                  {!addPromotionOpen && (
-                    <button
-                      className="w-full bg-primary text-white rounded-md py-2"
-                      onClick={() => setAddPromotionOpen(true)}
-                    >
-                      {withPromotion ? 'Edit Promotion' : 'Add Promotion'}
-                    </button>
-                  )}
-                  {addPromotionOpen && (
-                    <form onSubmit={onAddPromotion}>
-                      <label htmlFor="amount">Discount Amount</label>
-                      <input
-                        type="number"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
-                        placeholder="Discount Amount"
-                        name="amount"
-                        min={0}
-                        max={100}
-                        required
-                      />
-                      <label htmlFor="validUntil">Valid Until</label>
-                      <DatePicker
-                        name="validUntil"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
-                        selected={promotionExpiryDate}
-                        onChange={(date: Date) => setPromotionExpiryDate(date)}
-                        required
-                        minDate={new Date()}
-                      />
-
-                      <button className="w-full bg-primary text-white rounded-md py-2 mb-2">
-                        Save
-                      </button>
-                      <div
-                        className="text-center w-full cursor-pointer bg-gray-400 text-white rounded-md py-2"
-                        onClick={() => setAddPromotionOpen(false)}
-                      >
-                        Cancel
-                      </div>
-                    </form>
-                  )}
                 </div>
               )}
             </div>
-            {user.id === course?.instructor?._id && (
-              <div className="flex flex-col justify-between items-center bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
-                {course?.finalExam && (
-                  <div className="flex items-center justify-between w-full">
-                    <p className="text-lg font-medium">Final Exam</p>
-                    <p className="text-sm text-gray-500">
-                      {course?.finalExam?.questions?.length} Questions
-                    </p>
-                  </div>
-                )}
-                <div className="w-full">
-                  {course?.finalExam ? (
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
-                      Edit Final Exam
-                    </button>
-                  ) : (
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
-                      Add Final Exam
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

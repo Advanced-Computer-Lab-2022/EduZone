@@ -16,7 +16,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
   return (
     <div
       className="flex items-center w-full bg-gray-100 h-52 rounded-lg p-4 border gap-4 hover:border-primary cursor-pointer transition-all duration-300 ease-in-out"
-      onClick={() => navigate(`${base}/courses/${course._id}`)}
+      onClick={() => navigate(`${base || ''}/courses/${course._id}`)}
     >
       <img
         src={

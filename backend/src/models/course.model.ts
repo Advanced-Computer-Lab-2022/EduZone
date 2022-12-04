@@ -120,6 +120,24 @@ const courseSchema = new Schema({
     type: ExerciseSchema,
     required: false,
   },
+  enrolled: {
+    type: [
+      {
+        studentId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
+        rating: {
+          type: Number,
+          min: 0,
+          max: 5,
+          required: false,
+        },
+      },
+    ],
+    required: false,
+  },
 });
 
 const CourseModel = mongoose.model('Course', courseSchema);
