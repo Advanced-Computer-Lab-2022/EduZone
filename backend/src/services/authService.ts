@@ -5,8 +5,6 @@ import { getUserById } from './usersService';
 import { userInfo } from 'os';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-
-console.log(process.env.MAILGUN_API_KEY);
 export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
@@ -115,13 +113,13 @@ export const forgetPassword = async (email: string) => {
 
   await user.save({ validateBeforeSave: false });
 
-  // testAccount = await nodemailer.createTestAccount();
-
-  const url = `http://localhost:4000/auth/reset-password/${user.resetPasswordToken}`;
+  const url = `http://localhost:3000/reset-password/${user.resetPasswordToken}`;
   const message = `
   <h1>You have requested a password reset</h1>
   <p>Please go to this link to reset your password</p>
-  <a href=${url} clicktracking=off>${url}</a>
+  <a href=${url} clicktracking=off style='background-color:#007ea7 ; padding: 8px 16px; color:white; text-decoration: none; border-radius:5px'>
+    Reset Password
+  </a>
   `;
   try {
     sendMail({
@@ -142,14 +140,12 @@ export const forgetPassword = async (email: string) => {
 };
 const sendMail = async (options: any) => {
   // generate test account
-  //const testAccount = await nodemailer.createTestAccount();
-
   const transporter = nodemailer.createTransport({
-    host: process.env.HOST,
+    host: process.env.MAILER_HOST,
     port: 587,
     auth: {
-      user: process.env.USER,
-      pass: process.env.PASS,
+      user: process.env.MAILER_USER,
+      pass: process.env.MAILER_PASS,
     },
   });
   const message = {
@@ -162,7 +158,7 @@ const sendMail = async (options: any) => {
   console.log('Message sent: %s', info.messageId);
 };
 
-export const changePassword = async (id: String, password: string) => {
+export const changePassword = async (id: string, password: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await UserModel.findByIdAndUpdate(
     id,

@@ -37,6 +37,16 @@ const UnProtectedRoutes: RouteType[] = [
     parent: false,
     element: <h1>Register</h1>,
   },
+  {
+    path: 'reset-password/:token',
+    parent: false,
+    element: <h1>Reset Password</h1>,
+  },
+  {
+    path: 'forget-password',
+    parent: false,
+    element: <h1>Forgot Password</h1>,
+  },
 ];
 
 export default UnProtectedRoutes;
