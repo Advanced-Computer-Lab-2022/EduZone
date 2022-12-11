@@ -21,6 +21,6 @@ export const JWTRefreshDecoder: RequestHandler = async (req, res, next) => {
     req.body.refreshToken = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Auth failed' });
+    return res.status(401).json({ message: 'Refreshing token failed' });
   }
 };

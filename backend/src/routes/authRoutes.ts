@@ -9,6 +9,15 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     //TODO: check DTO
     const tokens = await login(username, password);
+    // res.cookie('refreshToken', tokens.refreshToken, {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 7,
+    // });
+
+    // res.cookie('accessToken', tokens.accessToken, {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60 * 1, // 15 minutes
+    // });
     return res.status(200).json({ message: 'Login successful', ...tokens });
   } catch (error) {
     return res.status(400).json({ message: (error as any).message });
@@ -30,6 +39,16 @@ router.post('/register', async (req, res) => {
   try {
     //TODO: check DTO
     const tokens = await register(name, username, email, password, gender);
+    // res.cookie('refreshToken', tokens.refreshToken, {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 7,
+    // });
+
+    // res.cookie('accessToken', tokens.accessToken, {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60* 15, // 15 minutes
+    // });
+
     return res.status(200).json({ message: 'Register successful', ...tokens });
   } catch (error) {
     console.log(error);
@@ -56,6 +75,15 @@ router.get('/refresh', JWTRefreshDecoder, async (req, res) => {
       id,
       oldRefreshToken || ''
     );
+    // res.cookie('refreshToken', refreshToken, {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60 * 60 * 24 * 7,
+    // });
+
+    // res.cookie('accessToken', accessToken, {
+    //   httpOnly: true,
+    //   maxAge: 1000 * 60* 15, // 15 minutes
+    // });
     return res
       .status(200)
       .json({ message: 'Refresh successful', accessToken, refreshToken });

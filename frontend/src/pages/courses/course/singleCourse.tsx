@@ -265,7 +265,7 @@ const SingleCourse = () => {
 
             <div>
               {course?.enrolled.find((s: any) => s.studentId === user.id) ? (
-                <Link to={`learn`}>
+                <Link to={`learning`}>
                   <button className="w-full bg-primary text-white  py-2 rounded-md">
                     Start Learning
                   </button>

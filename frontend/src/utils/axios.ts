@@ -1,5 +1,6 @@
 import { AxiosInstance, default as ax } from 'axios';
 import { deleteCookie, getCookie, setCookie } from 'cookies-next';
+import jwt_decode from './decodeToken';
 
 const axios: AxiosInstance = ax.create({
   headers: {
@@ -67,7 +68,25 @@ axios.interceptors.response.use(
       return Promise.reject(error);
     }
     // if error unauthorized check if refreshToken exists refresh it
-    if (error.response?.status === 401 && refreshToken && !accessToken) {
+    console.log('Intercepting error with code: ', error.response.status);
+    console.log(
+      'Available tokens: ',
+      refreshToken ? 'refreshToken' : '',
+      accessToken ? 'accessToken' : ''
+    );
+
+    const decodedAccessToken = jwt_decode(accessToken as string) as any;
+    const decodedRefreshToken = jwt_decode(refreshToken as string) as any;
+    const timeNow = Math.floor(new Date().valueOf() / 1000);
+    console.log('Decoded Access Token: ', decodedAccessToken.exp);
+    console.log('Decoded Refresh Token: ', decodedRefreshToken.exp);
+    console.log(Math.floor(new Date().valueOf() / 1000));
+    if (
+      error.response?.status === 401 &&
+      refreshToken &&
+      decodedRefreshToken.exp > timeNow &&
+      decodedAccessToken.exp < timeNow
+    ) {
       console.log('Refreshing token');
       //refresh token through /GET /auth/refresh
       const tokens = await fetch(`http://localhost:4000/auth/refresh`, {
@@ -81,6 +100,8 @@ axios.interceptors.response.use(
           return Promise.reject(e);
         });
       //set new tokens in cookies
+      console.log('New Tokens: ', tokens);
+
       setCookie('access-token', (tokens as any).accessToken);
       setCookie('refresh-token', (tokens as any).refreshToken);
       //retry request

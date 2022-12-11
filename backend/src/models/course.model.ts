@@ -134,6 +134,10 @@ const courseSchema = new Schema({
           max: 5,
           required: false,
         },
+        review: {
+          type: String,
+          required: false,
+        },
       },
     ],
     required: false,

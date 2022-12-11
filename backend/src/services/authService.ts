@@ -135,7 +135,8 @@ const getTokens = (user: any) => {
 
   const accessToken = jwt.sign(
     accessPayload,
-    process.env.JWT_ACCESS_SECRET as string
+    process.env.JWT_ACCESS_SECRET as string,
+    {}
   );
 
   //generate Refresh token
