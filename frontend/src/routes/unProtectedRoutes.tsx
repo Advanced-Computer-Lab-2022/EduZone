@@ -4,6 +4,7 @@ import SingleCourse from '../pages/courses/singleCourse';
 import Home from '../pages/home';
 import LoginPage from '../pages/login';
 import { RouteType } from '../types';
+import ForgetPassword from '../pages/ForgetPassword';
 
 const UnProtectedRoutes: RouteType[] = [
   {
@@ -43,9 +44,9 @@ const UnProtectedRoutes: RouteType[] = [
     element: <h1>Reset Password</h1>,
   },
   {
-    path: 'forget-password',
+    path: '/forget-password',
     parent: false,
-    element: <h1>Forgot Password</h1>,
+    element: <ForgetPassword />,
   },
 ];
 
