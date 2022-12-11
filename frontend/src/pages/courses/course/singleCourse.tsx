@@ -16,6 +16,7 @@ import IconText from '../../../components/common/IconText';
 import { MdEditNote } from 'react-icons/md';
 import { getCookie } from 'cookies-next';
 import RatingBox from '../../../components/courses/RatingBox';
+import Modal from '../../../components/common/Modal';
 
 const SingleCourse = () => {
   const { id } = useParams();
@@ -25,6 +26,10 @@ const SingleCourse = () => {
   const [rating, setRating] = useState(undefined as number | undefined);
   const [openReview, setOpenReview] = useState(false);
   const [review, setReview] = useState('');
+  const [instructorRating, setInstructorRating] = useState(-1);
+  const [totalInstructorRating, setTotalInstructorRating] = useState(-1);
+  const [instructorReview, setInstructorReview] = useState('');
+  const [openInstructorProfile, setOpenInstructorProfile] = useState(false);
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -121,6 +126,41 @@ const SingleCourse = () => {
       console.log(error);
     }
   };
+  const rateInstructor = async (rating: number) => {
+    try {
+      const res = await axios({
+        url: '/users/' + course?.instructor?._id + '/rate',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          rating,
+        },
+      });
+      setCourse({ ...course, instructor: res.data });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const reviewInstructor = async (review: string) => {
+    try {
+      const res = await axios({
+        url: '/users/' + course?.instructor?._id + '/review',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          review,
+        },
+      });
+      setCourse({ ...course, instructor: res.data });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const reviewCourse = async (review: string) => {
     try {
@@ -153,12 +193,68 @@ const SingleCourse = () => {
     setReview(
       course?.enrolled?.find((s: any) => s.studentId === user.id).review || ''
     );
+    setInstructorRating(
+      course?.instructor?.feedback?.find((s: any) => s.student === user.id)
+        ?.rating || 0
+    );
+    setInstructorReview(
+      course?.instructor?.feedback?.find((s: any) => s.student === user.id)
+        ?.review || ''
+    );
 
     calculateRating();
     console.log(rating);
   }, [course]);
   return (
     <Layout>
+      <Modal
+        open={openInstructorProfile}
+        title={course?.instructor?.name}
+        close={() => setOpenInstructorProfile(false)}
+      >
+        <div className="flex flex-col  ">
+          <div className="flex gap-4 items-center">
+            <p>Rate instructor</p>
+            <RatingBox
+              fixed={false}
+              rating={instructorRating}
+              onClick={rateInstructor}
+            />
+          </div>
+          <div className="mt-4">
+            <p>Review instructor</p>
+            <textarea
+              className="w-full h-32 border border-gray-300 rounded-md p-2"
+              value={instructorReview}
+              onChange={(e) => setInstructorReview(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="bg-gray-300 text- px-4 py-2 rounded-md"
+                onClick={() => {
+                  setOpenInstructorProfile(false);
+                  setInstructorReview('');
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                onClick={async () => {
+                  if (instructorReview !== '')
+                    await reviewInstructor(instructorReview);
+                  setOpenInstructorProfile(false);
+                  setInstructorReview('');
+                }}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="grid grid-cols-3 gap-6 my-4 ">
         <div className="col-span-2">
           <div className=" justify-between items-center">
@@ -169,7 +265,7 @@ const SingleCourse = () => {
           </div>
           <div
             className="flex items-center py-2 group cursor-pointer w-fit"
-            // onClick={()=>navigate(`/instructor/${course?.instructor._id}/profile`)}
+            onClick={() => setOpenInstructorProfile(true)}
           >
             <div className="group-hover:border-blue-500 border-2 border-white rounded-full">
               <Avatar
@@ -186,18 +282,30 @@ const SingleCourse = () => {
               </p>
             </div>
           </div>
-          <p className="text-gray-600 font-medium">
-            Course Duration ≈{' '}
-            {course?.subtitles &&
-              Math.ceil(
-                course?.subtitles?.reduce(
-                  (acc: any, curr: any) => acc + curr.duration,
-                  0
-                )
-              )}{' '}
-            hours
-          </p>
+          {/* <div>
+            <p className="text-sm text-primary" onClick={() => ''}>
+              Rate the instructor
+            </p>
+            <div className="">
+              <RatingBox
+                fixed={false}
+                rating={instructorRating}
+                onClick={() => ''}
+              />
+            </div>
+          </div> */}
           <div className="mt-4">
+            <p className="text-gray-600 font-medium">
+              Course Duration ≈{' '}
+              {course?.subtitles &&
+                Math.ceil(
+                  course?.subtitles?.reduce(
+                    (acc: any, curr: any) => acc + curr.duration,
+                    0
+                  )
+                )}{' '}
+              hours
+            </p>
             <p className="text-xl font-medium">Summary</p>
             <p className="m text-gray-500">{course?.summary}</p>
           </div>

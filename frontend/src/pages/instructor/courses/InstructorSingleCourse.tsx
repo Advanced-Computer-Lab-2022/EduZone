@@ -14,11 +14,13 @@ import { RootState } from '../../../redux/store';
 import { Subtitle } from '../../../types/entities/Subtitle';
 import { axios } from '../../../utils';
 import IconText from '../../../components/common/IconText';
+import RatingBox from '../../../components/courses/RatingBox';
 const InstructorSingleCourse = () => {
   const { courseId, instructorId } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
+  const [openViewReviews, setOpenViewReviews] = useState(false);
   const navigate = useNavigate();
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
@@ -206,18 +208,12 @@ const InstructorSingleCourse = () => {
               </div>
             )}
             <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
-              <img
+              {/* <img
                 src={course?.thumbnail}
                 alt=""
                 className="overflow-hidden rounded-md"
-              />
-              <div>
-                <p className="text-lg font-medium">{course?.title}</p>
-                <p className="text-sm text-gray-500">
-                  Rating: {rating || 'No Rating yet'}
-                </p>
-              </div>
-
+              /> */}
+              <p className="text-xl font-medium">{course?.title}</p>
               <p className="text-3xl text-primary font-semibold">
                 {course &&
                   Number(
@@ -229,7 +225,6 @@ const InstructorSingleCourse = () => {
                   ).toFixed(2)}{' '}
                 {currency}
               </p>
-
               {user.id !== course?.instructor?._id ? (
                 <div className=" w-full space-y-2">
                   <button className="w-full bg-primary text-white rounded-md py-2">
@@ -309,6 +304,65 @@ const InstructorSingleCourse = () => {
                   )}
                 </div>
               )}
+            </div>
+            <div>
+              <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+                <p className="text-xl font-medium">Course Reviews</p>
+                <div className="text text-gray-500 flex justify-between">
+                  <span> Rating: </span>
+                  <span>
+                    {rating ? (
+                      <div className="flex items-center gap-2">
+                        <RatingBox
+                          fixed={true}
+                          rating={rating}
+                          onClick={() => ''}
+                        />
+                        <span className="">{rating}</span>
+                      </div>
+                    ) : (
+                      'No Reviews'
+                    )}
+                  </span>
+                </div>
+                <div className="text text-gray-500 flex flex-col justify-between ">
+                  <div className="flex justify-between">
+                    <p>
+                      Total Reviews:{' '}
+                      <span className="font-medium">
+                        {
+                          course?.enrolled?.filter(
+                            (s: any) => s.review !== undefined
+                          ).length
+                        }
+                      </span>
+                    </p>
+                    <span
+                      className="text-primary text-sm hover:underline cursor-pointer"
+                      onClick={() => {
+                        setOpenViewReviews((s) => !s);
+                      }}
+                    >
+                      {openViewReviews ? 'Close' : 'View All'}
+                    </span>
+                  </div>
+                  <div>
+                    {openViewReviews && (
+                      <div className="w-full pl-4">
+                        {course?.enrolled?.map((s: any) => {
+                          if (s.review) {
+                            return (
+                              <li className="text-sm text-gray-500">
+                                {s.review}
+                              </li>
+                            );
+                          }
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

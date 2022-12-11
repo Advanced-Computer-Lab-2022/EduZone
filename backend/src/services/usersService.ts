@@ -26,3 +26,53 @@ export const updateUser = (id: string, data: Partial<typeof UserModel>) => {
   }
   return user;
 };
+
+export const reviewInstructor = async (
+  instructorId: string,
+  studentId: string,
+  review: string
+) => {
+  const instructor = await UserModel.findById(instructorId).populate([
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!instructor) throw new Error('instructor not found');
+  const oldFeedback = instructor.feedback.find((s) => s.student === studentId);
+  if (oldFeedback) {
+    oldFeedback.review = review;
+    await instructor.save();
+    return instructor;
+  }
+  instructor.feedback.push({ student: studentId, review });
+  await instructor.save();
+  return instructor;
+};
+
+export const rateInstructor = async (
+  instructorId: string,
+  studentId: string,
+  rating: number
+) => {
+  const instructor = await UserModel.findById(instructorId).populate([
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!instructor) throw new Error('instructor not found');
+  const oldFeedback = instructor.feedback.find((s) => s.student === studentId);
+  if (oldFeedback) {
+    oldFeedback.rating = rating;
+    await instructor.save();
+    return instructor;
+  }
+  instructor.feedback.push({ student: studentId, rating });
+  await instructor.save();
+  return instructor;
+};

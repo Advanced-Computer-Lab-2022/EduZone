@@ -41,6 +41,29 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
+  img: {
+    type: String,
+    default: null,
+  },
+  feedback: {
+    type: [
+      {
+        student: {
+          type: String,
+          ref: 'User',
+        },
+        rating: {
+          type: Number,
+          min: 0,
+          max: 5,
+        },
+        review: {
+          type: String,
+        },
+      },
+    ],
+    required: false,
+  },
 });
 
 const UserModel = mongoose.model('User', userSchema);
