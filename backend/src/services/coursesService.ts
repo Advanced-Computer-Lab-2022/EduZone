@@ -345,3 +345,23 @@ export const rateCourse = async (
   await course.save();
   return course;
 };
+export const reviewCourse = async (
+  courseId: string,
+  studentId: string,
+  review: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+  ]);
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  enrolled.review = review;
+  console.log('Enrolled', enrolled);
+  await course.save();
+  return course;
+};

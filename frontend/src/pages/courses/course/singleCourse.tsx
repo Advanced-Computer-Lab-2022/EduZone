@@ -23,6 +23,8 @@ const SingleCourse = () => {
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
   const [rating, setRating] = useState(undefined as number | undefined);
+  const [openReview, setOpenReview] = useState(false);
+  const [review, setReview] = useState('');
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -115,21 +117,24 @@ const SingleCourse = () => {
         },
       });
       setCourse(res.data);
-      // setWithPromotion(
-      //   (res.data.discount &&
-      //     new Date(res.data.discount.validUntil) >= new Date()) ||
-      //     false
-      // );
-      // setPromotionExpiryDate(
-      //   new Date(res.data?.discount?.validUntil || new Date())
-      // );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      // setRating(
-      //   res.data.enrolled?.reduce(
-      //     (acc: any, curr: any) => acc + curr.rating || 0,
-      //     0
-      //   )
-      // );
+  const reviewCourse = async (review: string) => {
+    try {
+      const res = await axios({
+        url: '/courses/' + id + '/review',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          review,
+        },
+      });
+      setCourse(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -144,6 +149,9 @@ const SingleCourse = () => {
     );
     setPromotionExpiryDate(
       new Date(course?.discount?.validUntil || new Date())
+    );
+    setReview(
+      course?.enrolled?.find((s: any) => s.studentId === user.id).review || ''
     );
 
     calculateRating();
@@ -218,15 +226,9 @@ const SingleCourse = () => {
               <p className="text-xl text-center">
                 You are enrolled in this course
               </p>
-              <div className="flex justify-between">
-                <p>Rate this course: </p>
-                <RatingBox
-                  rating={
-                    course?.enrolled.find((s: any) => s.studentId === user.id)
-                      .rating || -1
-                  }
-                  onClick={rateCourse}
-                />
+
+              <div>
+                <p className="text-lg font-medium">Course Progress</p>
               </div>
             </div>
           )}
@@ -285,6 +287,77 @@ const SingleCourse = () => {
               )}
             </div>
           </div>
+          {course?.enrolled.find((s: any) => s.studentId === user.id) && (
+            <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+              <p className="text-xl text-center">Give us your feedback!</p>
+              <div className="flex justify-between">
+                <p>Rate this course: </p>
+                <RatingBox
+                  rating={
+                    course?.enrolled.find((s: any) => s.studentId === user.id)
+                      .rating || -1
+                  }
+                  onClick={rateCourse}
+                />
+              </div>
+              <div>
+                <div>
+                  {review === '' ? (
+                    <p
+                      className="text-sm text-right -mt-3 text-primary hover:underline cursor-pointer"
+                      onClick={() => setOpenReview((s) => !s)}
+                    >
+                      {openReview ? 'Cancel' : 'Write a review'}
+                    </p>
+                  ) : (
+                    <div>
+                      <span className="font-medium">Your review: </span>
+                      {!openReview && (
+                        <span className="text-sm text-gray-500 hover:underline cursor-pointer">
+                          {review}
+                        </span>
+                      )}
+                      <p
+                        className="text-sm text-right  text-primary hover:underline cursor-pointer"
+                        onClick={() => setOpenReview((s) => !s)}
+                      >
+                        {openReview ? 'Cancel' : 'Edit your review'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {openReview && (
+                  <form
+                    className="text-gray-800"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(
+                        e.target as HTMLFormElement
+                      );
+                      const review = formData.get('review');
+                      if (review) {
+                        reviewCourse(review as string);
+                      }
+                      setOpenReview(false);
+                    }}
+                  >
+                    <textarea
+                      className="w-full border border-gray-300 rounded-md p-4"
+                      name="review"
+                      id=""
+                      cols={30}
+                      rows={3}
+                      placeholder="Write your review here"
+                      defaultValue={review}
+                    ></textarea>
+                    <button className="w-full bg-primary text-white rounded-md py-2 mt-2">
+                      Submit
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
