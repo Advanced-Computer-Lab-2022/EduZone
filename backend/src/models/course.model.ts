@@ -141,6 +141,11 @@ const courseSchema = new Schema({
     ],
     required: false,
   },
+  isPublished: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 const CourseModel = mongoose.model('Course', courseSchema);

@@ -265,7 +265,10 @@ const SingleCourse = () => {
           </div>
           <div
             className="flex items-center py-2 group cursor-pointer w-fit"
-            onClick={() => setOpenInstructorProfile(true)}
+            onClick={() =>
+              course?.enrolled.find((s: any) => s.studentId === user.id) &&
+              setOpenInstructorProfile(true)
+            }
           >
             <div className="group-hover:border-blue-500 border-2 border-white rounded-full">
               <Avatar

@@ -6,7 +6,17 @@ export const addUser = (data: typeof UserModel) => {
 };
 
 export const getUserById = (id: string) => {
-  const user = UserModel.findById(id);
+  const user = UserModel.findById(id)
+    .lean()
+    .populate({
+      path: 'feedback',
+      populate: {
+        path: 'student',
+        model: 'User',
+        select: 'name username _id img',
+      },
+    });
+
   return user;
 };
 

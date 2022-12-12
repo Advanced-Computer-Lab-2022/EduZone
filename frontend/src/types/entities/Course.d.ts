@@ -21,4 +21,5 @@ export declare type Course = {
   finalExam?: {
     questions: Question[];
   };
+  isPublished?: boolean;
 };

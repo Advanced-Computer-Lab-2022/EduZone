@@ -15,6 +15,7 @@ import { Subtitle } from '../../../types/entities/Subtitle';
 import { axios } from '../../../utils';
 import IconText from '../../../components/common/IconText';
 import RatingBox from '../../../components/courses/RatingBox';
+import InstructorLayout from '../../../components/layout/Instructor/InstructorLayout';
 const InstructorSingleCourse = () => {
   const { courseId, instructorId } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -105,7 +106,7 @@ const InstructorSingleCourse = () => {
     calculateRating();
   }, [course]);
   return (
-    <AdminLayout>
+    <InstructorLayout>
       <div className="my-4 space-y-4  max-w-[90%] mx-auto">
         <div className="flex justify-between items-center">
           <p className="text-3xl font-medium">{course?.title}</p>
@@ -367,7 +368,7 @@ const InstructorSingleCourse = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </InstructorLayout>
   );
 };
 

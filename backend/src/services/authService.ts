@@ -87,7 +87,7 @@ export const refreshTokens = async (userId: string, refreshToken: string) => {
   );
   if (!refreshTokenMatches) throw new Error('Access Denied');
   const tokens = await getTokens(user);
-  await updateRefreshToken(user.id, tokens.refreshToken);
+  await updateRefreshToken(userId, tokens.refreshToken);
   return tokens;
 };
 
