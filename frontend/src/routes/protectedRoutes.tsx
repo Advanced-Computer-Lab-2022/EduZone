@@ -11,6 +11,7 @@ import InstructorSingleCourse from '../pages/instructor/courses/InstructorSingle
 import InstructorCourseExam from '../pages/instructor/courses/exam/InstructorCourseExam';
 import InstructorSubtitlePage from '../pages/instructor/courses/subtitles/InstructorSubtitlePage';
 import LearningPage from '../pages/courses/course/LearningPage';
+import TraineeCourses from '../pages/trainee/TraineeCourses';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -76,6 +77,10 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'courses/:id/learning',
     element: <LearningPage />,
+  },
+  {
+    path: 'trainee/:id/courses',
+    element: <TraineeCourses />,
   },
 ];
 

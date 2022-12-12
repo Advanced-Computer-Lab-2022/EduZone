@@ -9,6 +9,7 @@ import {
   getAllCourses,
   getCourseById,
   getSubtitleByCourseAndId,
+  getTraineeCourses,
   publishCourse,
   rateCourse,
   reviewCourse,
@@ -47,6 +48,17 @@ router.post('/', JWTAccessDecoder, async (req, res) => {
     return res
       .status(500)
       .json({ message: (error as any).message, stack: error });
+  }
+});
+
+router.get('/trainee', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id } = req.body.token;
+    const courses = await getTraineeCourses(id);
+    return res.status(200).json(courses);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 

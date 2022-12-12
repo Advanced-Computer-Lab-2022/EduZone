@@ -392,3 +392,17 @@ export const publishCourse = async (courseId: string) => {
   await course.save();
   return course;
 };
+
+export const getTraineeCourses = async (studentId: string) => {
+  const courses = await CourseModel.find({
+    'enrolled.studentId': studentId,
+  }).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  return courses;
+};
