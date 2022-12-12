@@ -34,7 +34,7 @@ const LoginPage = () => {
           password,
         },
       });
-
+      const { accessToken, refreshToken } = res.data;
       if (res.status === 200) {
         setCookie('access-token', res.data?.accessToken);
         setCookie('refresh-token', res.data?.refreshToken);

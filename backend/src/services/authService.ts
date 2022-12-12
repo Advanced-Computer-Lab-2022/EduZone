@@ -87,7 +87,7 @@ export const refreshTokens = async (userId: string, refreshToken: string) => {
   );
   if (!refreshTokenMatches) throw new Error('Access Denied');
   const tokens = await getTokens(user);
-  await updateRefreshToken(user.id, tokens.refreshToken);
+  await updateRefreshToken(userId, tokens.refreshToken);
   return tokens;
 };
 
@@ -135,7 +135,8 @@ const getTokens = (user: any) => {
 
   const accessToken = jwt.sign(
     accessPayload,
-    process.env.JWT_ACCESS_SECRET as string
+    process.env.JWT_ACCESS_SECRET as string,
+    {}
   );
 
   //generate Refresh token

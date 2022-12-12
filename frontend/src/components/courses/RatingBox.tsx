@@ -3,7 +3,8 @@ import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 const RatingBox: React.FC<{
   rating: number;
   onClick: (index: number) => void;
-}> = ({ rating, onClick }) => {
+  fixed?: boolean;
+}> = ({ rating, onClick, fixed = false }) => {
   const [hoverOnStar, setHoverOnStar] = useState(-1);
   return (
     <div className="flex text-yellow-600 cursor-pointer">
@@ -12,10 +13,10 @@ const RatingBox: React.FC<{
           <div
             id={index.toString()}
             onMouseEnter={() => {
-              setHoverOnStar(index);
+              if (!fixed) setHoverOnStar(index);
             }}
             onMouseLeave={() => {
-              setHoverOnStar(-1);
+              if (!fixed) setHoverOnStar(-1);
             }}
           >
             {hoverOnStar >= index ? (

@@ -1,9 +1,12 @@
 import express from 'express';
+import { JWTAccessDecoder } from '../middlewares/jwt';
 import {
   addUser,
   getAllUsers,
   getUserById,
   getUserByName,
+  rateInstructor,
+  reviewInstructor,
   updateUser,
 } from '../services';
 
@@ -76,6 +79,42 @@ router.put('/:id', async (req, res) => {
     res.status(202).json(user);
   } catch (error) {
     return res.status(500).json({ message: (error as any).message });
+  }
+});
+
+router.patch('/:id/rate', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: userId } = req.body.token;
+  const { rating } = req.body;
+  try {
+    const instructor: any = await rateInstructor(id, userId, Number(rating));
+    if (!instructor) {
+      return res.status(404).json({
+        message: 'instructor not found',
+      });
+    }
+    return res.status(200).json(instructor);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.patch('/:id/review', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: userId } = req.body.token;
+  const { review } = req.body;
+  try {
+    const instructor: any = await reviewInstructor(id, userId, review);
+    if (!instructor) {
+      return res.status(404).json({
+        message: 'instructor not found',
+      });
+    }
+    return res.status(200).json(instructor);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 

@@ -69,7 +69,6 @@ const courseSchema = new Schema({
     type: Number,
     require: true,
   },
-  //TODO change to refrence a user with role instructor
   instructor: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -134,9 +133,18 @@ const courseSchema = new Schema({
           max: 5,
           required: false,
         },
+        review: {
+          type: String,
+          required: false,
+        },
       },
     ],
     required: false,
+  },
+  isPublished: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 

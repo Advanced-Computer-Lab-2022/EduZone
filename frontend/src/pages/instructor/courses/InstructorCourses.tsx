@@ -10,6 +10,7 @@ import {
 import CourseCard from '../../../components/courses/CourseCard';
 import FilterBox from '../../../components/courses/FilterBox';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
+import InstructorLayout from '../../../components/layout/Instructor/InstructorLayout';
 import SearchBar from '../../../components/layout/navbar/trainee/SearchBar';
 // import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
 import { axios } from '../../../utils';
@@ -63,7 +64,7 @@ const InstructorCourses = () => {
 
   const navigate = useNavigate();
   return (
-    <AdminLayout>
+    <InstructorLayout>
       <div className="w-full flex mb-4">
         <div className="grow">
           <SearchBar
@@ -88,7 +89,7 @@ const InstructorCourses = () => {
         </div>
         <Link
           to={`/courses/create?instructorId=${instructorId}`}
-          className="bg-red-800 text-white flex text-center px-4 py-2 rounded-md w-fit"
+          className="bg-primary text-white flex text-center px-4 py-2 rounded-md w-fit"
         >
           <span>Create Course</span>
         </Link>
@@ -127,7 +128,7 @@ const InstructorCourses = () => {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </InstructorLayout>
   );
 };
 

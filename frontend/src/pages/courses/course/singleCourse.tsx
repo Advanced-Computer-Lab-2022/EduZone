@@ -16,6 +16,7 @@ import IconText from '../../../components/common/IconText';
 import { MdEditNote } from 'react-icons/md';
 import { getCookie } from 'cookies-next';
 import RatingBox from '../../../components/courses/RatingBox';
+import Modal from '../../../components/common/Modal';
 
 const SingleCourse = () => {
   const { id } = useParams();
@@ -23,6 +24,12 @@ const SingleCourse = () => {
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
   const [rating, setRating] = useState(undefined as number | undefined);
+  const [openReview, setOpenReview] = useState(false);
+  const [review, setReview] = useState('');
+  const [instructorRating, setInstructorRating] = useState(-1);
+  const [totalInstructorRating, setTotalInstructorRating] = useState(-1);
+  const [instructorReview, setInstructorReview] = useState('');
+  const [openInstructorProfile, setOpenInstructorProfile] = useState(false);
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -115,21 +122,59 @@ const SingleCourse = () => {
         },
       });
       setCourse(res.data);
-      // setWithPromotion(
-      //   (res.data.discount &&
-      //     new Date(res.data.discount.validUntil) >= new Date()) ||
-      //     false
-      // );
-      // setPromotionExpiryDate(
-      //   new Date(res.data?.discount?.validUntil || new Date())
-      // );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const rateInstructor = async (rating: number) => {
+    try {
+      const res = await axios({
+        url: '/users/' + course?.instructor?._id + '/rate',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          rating,
+        },
+      });
+      setCourse({ ...course, instructor: res.data });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-      // setRating(
-      //   res.data.enrolled?.reduce(
-      //     (acc: any, curr: any) => acc + curr.rating || 0,
-      //     0
-      //   )
-      // );
+  const reviewInstructor = async (review: string) => {
+    try {
+      const res = await axios({
+        url: '/users/' + course?.instructor?._id + '/review',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          review,
+        },
+      });
+      setCourse({ ...course, instructor: res.data });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const reviewCourse = async (review: string) => {
+    try {
+      const res = await axios({
+        url: '/courses/' + id + '/review',
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+        data: {
+          review,
+        },
+      });
+      setCourse(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -145,12 +190,71 @@ const SingleCourse = () => {
     setPromotionExpiryDate(
       new Date(course?.discount?.validUntil || new Date())
     );
+    setReview(
+      course?.enrolled?.find((s: any) => s.studentId === user.id).review || ''
+    );
+    setInstructorRating(
+      course?.instructor?.feedback?.find((s: any) => s.student === user.id)
+        ?.rating || 0
+    );
+    setInstructorReview(
+      course?.instructor?.feedback?.find((s: any) => s.student === user.id)
+        ?.review || ''
+    );
 
     calculateRating();
     console.log(rating);
   }, [course]);
   return (
     <Layout>
+      <Modal
+        open={openInstructorProfile}
+        title={course?.instructor?.name}
+        close={() => setOpenInstructorProfile(false)}
+      >
+        <div className="flex flex-col  ">
+          <div className="flex gap-4 items-center">
+            <p>Rate instructor</p>
+            <RatingBox
+              fixed={false}
+              rating={instructorRating}
+              onClick={rateInstructor}
+            />
+          </div>
+          <div className="mt-4">
+            <p>Review instructor</p>
+            <textarea
+              className="w-full h-32 border border-gray-300 rounded-md p-2"
+              value={instructorReview}
+              onChange={(e) => setInstructorReview(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="bg-gray-300 text- px-4 py-2 rounded-md"
+                onClick={() => {
+                  setOpenInstructorProfile(false);
+                  setInstructorReview('');
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                onClick={async () => {
+                  if (instructorReview !== '')
+                    await reviewInstructor(instructorReview);
+                  setOpenInstructorProfile(false);
+                  setInstructorReview('');
+                }}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="grid grid-cols-3 gap-6 my-4 ">
         <div className="col-span-2">
           <div className=" justify-between items-center">
@@ -161,7 +265,10 @@ const SingleCourse = () => {
           </div>
           <div
             className="flex items-center py-2 group cursor-pointer w-fit"
-            // onClick={()=>navigate(`/instructor/${course?.instructor._id}/profile`)}
+            onClick={() =>
+              course?.enrolled.find((s: any) => s.studentId === user.id) &&
+              setOpenInstructorProfile(true)
+            }
           >
             <div className="group-hover:border-blue-500 border-2 border-white rounded-full">
               <Avatar
@@ -178,18 +285,30 @@ const SingleCourse = () => {
               </p>
             </div>
           </div>
-          <p className="text-gray-600 font-medium">
-            Course Duration ≈{' '}
-            {course?.subtitles &&
-              Math.ceil(
-                course?.subtitles?.reduce(
-                  (acc: any, curr: any) => acc + curr.duration,
-                  0
-                )
-              )}{' '}
-            hours
-          </p>
+          {/* <div>
+            <p className="text-sm text-primary" onClick={() => ''}>
+              Rate the instructor
+            </p>
+            <div className="">
+              <RatingBox
+                fixed={false}
+                rating={instructorRating}
+                onClick={() => ''}
+              />
+            </div>
+          </div> */}
           <div className="mt-4">
+            <p className="text-gray-600 font-medium">
+              Course Duration ≈{' '}
+              {course?.subtitles &&
+                Math.ceil(
+                  course?.subtitles?.reduce(
+                    (acc: any, curr: any) => acc + curr.duration,
+                    0
+                  )
+                )}{' '}
+              hours
+            </p>
             <p className="text-xl font-medium">Summary</p>
             <p className="m text-gray-500">{course?.summary}</p>
           </div>
@@ -218,15 +337,9 @@ const SingleCourse = () => {
               <p className="text-xl text-center">
                 You are enrolled in this course
               </p>
-              <div className="flex justify-between">
-                <p>Rate this course: </p>
-                <RatingBox
-                  rating={
-                    course?.enrolled.find((s: any) => s.studentId === user.id)
-                      .rating || -1
-                  }
-                  onClick={rateCourse}
-                />
+
+              <div>
+                <p className="text-lg font-medium">Course Progress</p>
               </div>
             </div>
           )}
@@ -265,7 +378,7 @@ const SingleCourse = () => {
 
             <div>
               {course?.enrolled.find((s: any) => s.studentId === user.id) ? (
-                <Link to={`learn`}>
+                <Link to={`learning`}>
                   <button className="w-full bg-primary text-white  py-2 rounded-md">
                     Start Learning
                   </button>
@@ -285,6 +398,77 @@ const SingleCourse = () => {
               )}
             </div>
           </div>
+          {course?.enrolled.find((s: any) => s.studentId === user.id) && (
+            <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+              <p className="text-xl text-center">Give us your feedback!</p>
+              <div className="flex justify-between">
+                <p>Rate this course: </p>
+                <RatingBox
+                  rating={
+                    course?.enrolled.find((s: any) => s.studentId === user.id)
+                      .rating || -1
+                  }
+                  onClick={rateCourse}
+                />
+              </div>
+              <div>
+                <div>
+                  {review === '' ? (
+                    <p
+                      className="text-sm text-right -mt-3 text-primary hover:underline cursor-pointer"
+                      onClick={() => setOpenReview((s) => !s)}
+                    >
+                      {openReview ? 'Cancel' : 'Write a review'}
+                    </p>
+                  ) : (
+                    <div>
+                      <span className="font-medium">Your review: </span>
+                      {!openReview && (
+                        <span className="text-sm text-gray-500 hover:underline cursor-pointer">
+                          {review}
+                        </span>
+                      )}
+                      <p
+                        className="text-sm text-right  text-primary hover:underline cursor-pointer"
+                        onClick={() => setOpenReview((s) => !s)}
+                      >
+                        {openReview ? 'Cancel' : 'Edit your review'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {openReview && (
+                  <form
+                    className="text-gray-800"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(
+                        e.target as HTMLFormElement
+                      );
+                      const review = formData.get('review');
+                      if (review) {
+                        reviewCourse(review as string);
+                      }
+                      setOpenReview(false);
+                    }}
+                  >
+                    <textarea
+                      className="w-full border border-gray-300 rounded-md p-4"
+                      name="review"
+                      id=""
+                      cols={30}
+                      rows={3}
+                      placeholder="Write your review here"
+                      defaultValue={review}
+                    ></textarea>
+                    <button className="w-full bg-primary text-white rounded-md py-2 mt-2">
+                      Submit
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

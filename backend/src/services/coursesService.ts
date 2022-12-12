@@ -50,7 +50,14 @@ export const getAllCourses = async (
     : filter_query;
 
   const courses = CourseModel.find(full_query)
-    .populate('instructor', ['name', 'username', '_id', 'email', 'img'])
+    .populate('instructor', [
+      'name',
+      'username',
+      '_id',
+      'email',
+      'img',
+      'feedback',
+    ])
     .sort({ createdAt: -1 });
 
   if (page && limit) {
@@ -218,6 +225,7 @@ export const getCourseById = async (id: string) => {
     '_id',
     'email',
     'img',
+    'feedback',
   ]);
   return course;
 };
@@ -233,6 +241,7 @@ export const updateCourseById = async (
     '_id',
     'email',
     'img',
+    'feedback',
   ]);
 };
 
@@ -315,6 +324,7 @@ export const buyCourse = async (courseId: string, studentId: string) => {
     '_id',
     'email',
     'img',
+    'feedback',
   ]);
   if (!course) throw new Error('Course not found');
   const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
@@ -337,11 +347,48 @@ export const rateCourse = async (
     '_id',
     'email',
     'img',
+    'feedback',
   ]);
   if (!course) throw new Error('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (!enrolled) throw new Error('Not enrolled');
   enrolled.rating = rating;
+  await course.save();
+  return course;
+};
+export const reviewCourse = async (
+  courseId: string,
+  studentId: string,
+  review: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  enrolled.review = review;
+  console.log('Enrolled', enrolled);
+  await course.save();
+  return course;
+};
+
+export const publishCourse = async (courseId: string) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new Error('Course not found');
+  course.isPublished = true;
   await course.save();
   return course;
 };
