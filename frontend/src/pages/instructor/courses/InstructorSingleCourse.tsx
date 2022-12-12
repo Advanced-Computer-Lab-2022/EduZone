@@ -6,7 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { MdEditNote } from 'react-icons/md';
+import { FaGlobe } from 'react-icons/fa';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
 import Avatar from '../../../components/layout/navbar/common/ProfileMenu/Avatar';
 import Layout from '../../../components/layout/Trainee/Layout';
@@ -16,6 +16,7 @@ import { axios } from '../../../utils';
 import IconText from '../../../components/common/IconText';
 import RatingBox from '../../../components/courses/RatingBox';
 import InstructorLayout from '../../../components/layout/Instructor/InstructorLayout';
+import { getCookie } from 'cookies-next';
 const InstructorSingleCourse = () => {
   const { courseId, instructorId } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -92,6 +93,22 @@ const InstructorSingleCourse = () => {
     }
   };
 
+  const publishCourse = async () => {
+    try {
+      const res: AxiosResponse<any, any> = await axios({
+        url: '/courses/' + courseId + '/publish',
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+      });
+      setCourse(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (!course) getCourse();
     setWithPromotion(
@@ -109,17 +126,21 @@ const InstructorSingleCourse = () => {
     <InstructorLayout>
       <div className="my-4 space-y-4  max-w-[90%] mx-auto">
         <div className="flex justify-between items-center">
-          <p className="text-3xl font-medium">{course?.title}</p>
-          {user.id === course?.instructor?._id && (
-            <Link
-              to={`/courses/${course?._id}/edit`}
-              className=" bg-primary text-white rounded-md"
-            >
+          <div>
+            <p className="text-3xl font-medium">{course?.title}</p>
+            <p className="text-sm text-gray-600 font-medium">
+              {course?.isPublished ? 'Published' : 'Not Published'} º{' '}
+              {course?.enrolled?.length} students enrolled
+            </p>
+          </div>
+          {user.id === course?.instructor?._id && !course.isPublished && (
+            <button className=" bg-secondary text-white rounded-md">
               <IconText
-                text={'Edit Course'}
-                leading={<MdEditNote size={20} />}
+                text={'Publish'}
+                leading={<FaGlobe size={20} />}
+                onClick={() => publishCourse()}
               />
-            </Link>
+            </button>
           )}
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -201,7 +222,7 @@ const InstructorSingleCourse = () => {
                   <Link
                     to={`/instructor/${instructorId}/courses/${courseId}/exam`}
                   >
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
+                    <button className="bg-secondary text-white w-full py-2 rounded-md">
                       {course?.finalExam ? 'Edit Final Exam' : 'Add Final Exam'}
                     </button>
                   </Link>

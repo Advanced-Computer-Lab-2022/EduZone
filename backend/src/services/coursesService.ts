@@ -377,3 +377,18 @@ export const reviewCourse = async (
   await course.save();
   return course;
 };
+
+export const publishCourse = async (courseId: string) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new Error('Course not found');
+  course.isPublished = true;
+  await course.save();
+  return course;
+};
