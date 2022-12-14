@@ -1,8 +1,17 @@
 import Express from 'express';
 import { JWTAccessDecoder, JWTRefreshDecoder } from '../middlewares/jwt';
+import crypto from 'crypto';
 
 const router = Express.Router();
-import { login, logout, refreshTokens, register } from '../services';
+import {
+  login,
+  logout,
+  refreshTokens,
+  register,
+  forgetPassword,
+  resetPassword,
+  changePassword,
+} from '../services';
 
 router.post('/login', async (req, res) => {
   try {
@@ -63,6 +72,39 @@ router.post('/logout', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json({ message: 'Logout successful' });
   } catch (error) {
     console.log(error);
+    return res.status(400).json({ message: (error as Error).message });
+  }
+});
+
+router.put('/reset-password/:resetToken', async (req, res) => {
+  try {
+    const resetToken = req.params.resetToken;
+    const { password } = req.body;
+    const success = await resetPassword(resetToken, password);
+    return res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    return res.status(400).json({ message: (error as Error).message });
+  }
+});
+
+router.post('/forget-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const success = await forgetPassword(email);
+    if (success)
+      return res.status(200).json({ message: 'mail sent successfully' });
+    else return res.status(400).json({ message: 'mail not sent' });
+  } catch (error) {
+    return res.status(400).json({ message: (error as Error).message });
+  }
+});
+router.put('/change-password', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id } = req.body.token;
+    const { password } = req.body;
+    const success = await changePassword(id, password);
+    return res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
     return res.status(400).json({ message: (error as Error).message });
   }
 });

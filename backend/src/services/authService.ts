@@ -2,6 +2,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models';
 import { getUserById } from './usersService';
+import { userInfo } from 'os';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
@@ -73,6 +76,98 @@ export const logout = async (id: string) => {
   }
   user.refreshToken = '';
   await user.save();
+
+  return true;
+};
+export const resetPassword = async (
+  resetPasswordToken: string,
+  password: string
+) => {
+  const user = await UserModel.findOne({
+    resetPasswordToken: resetPasswordToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    throw new Error('Invalid token');
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+};
+
+export const forgetPassword = async (email: string) => {
+  const user = await UserModel.findOne({
+    email: email,
+  });
+  if (!user) {
+    throw new Error('User does not exist'); //TODO: change to custom error
+  }
+  const resetToken = crypto.randomBytes(20).toString('hex');
+  user.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000);
+
+  await user.save({ validateBeforeSave: false });
+
+  const url = `http://localhost:3000/reset-password/${user.resetPasswordToken}`;
+  const message = `
+  <h1>You have requested a password reset</h1>
+  <p>Please go to this link to reset your password</p>
+  <a href=${url} clicktracking=off style='background-color:#007ea7 ; padding: 8px 16px; color:white; text-decoration: none; border-radius:5px'>
+    Reset Password
+  </a>
+  `;
+  try {
+    sendMail({
+      email: user.email,
+      subject: 'Password reset request',
+      html: message,
+    });
+    console.log(user.resetPasswordToken);
+  } catch (error) {
+    console.log(error);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return false;
+  }
+  return true;
+};
+const sendMail = async (options: any) => {
+  // generate test account
+  const transporter = nodemailer.createTransport({
+    host: process.env.MAILER_HOST,
+    port: 587,
+    auth: {
+      user: process.env.MAILER_USER,
+      pass: process.env.MAILER_PASS,
+    },
+  });
+  const message = {
+    from: 'HAKIM <hakimACL@gmail.com>',
+    to: options.email,
+    subject: options.subject,
+    html: options.html,
+  };
+  const info = await transporter.sendMail(message);
+  console.log('Message sent: %s', info.messageId);
+};
+
+export const changePassword = async (id: string, password: string) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await UserModel.findByIdAndUpdate(
+    id,
+    { password: hashedPassword },
+    { new: true }
+  );
+  if (!user) {
+    throw new Error('User does not exist'); //TODO: change to custom error
+  }
 
   return true;
 };
