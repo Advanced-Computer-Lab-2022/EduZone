@@ -13,6 +13,7 @@ import {
   publishCourse,
   rateCourse,
   reviewCourse,
+  traineeSubmitSubtitleExercise,
   updateCourseById,
   updateSubtitleByCourseAndId,
 } from '../services';
@@ -263,5 +264,43 @@ router.patch('/:id/publish', JWTAccessDecoder, async (req, res) => {
     return res.status(500).json({ error: (e as any).message });
   }
 });
+
+/**
+courseId: string,
+  subtitleId: string,
+  studentId: string,
+  exerciseId: string,
+  data: any
+ */
+
+// SUBMIT EXERCISE Answers
+router.post(
+  '/:id/subtitles/:subtitleId/exercise/:exerciseId',
+  JWTAccessDecoder,
+  async (req, res) => {
+    try {
+      const { id, subtitleId, exerciseId } = req.params;
+      const { id: studentId } = req.body.token;
+      const { answers } = req.body;
+      if (!answers) {
+        return res.status(400).json({
+          message: 'Please fill all the fields',
+        });
+      }
+      const score = await traineeSubmitSubtitleExercise(
+        id,
+        subtitleId,
+        studentId,
+        exerciseId,
+        answers
+      );
+
+      return res.status(200).json({ score });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ error: (e as any).message });
+    }
+  }
+);
 
 export default router;

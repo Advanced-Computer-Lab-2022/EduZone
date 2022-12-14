@@ -30,6 +30,7 @@ app.use((req, res) => {
   });
 });
 
+console.log('Starting server...');
 mongoose.connect(process.env.MONGO_URI as string, (err) => {
   if (err) throw err;
   console.log('Connected to MongoDB');
