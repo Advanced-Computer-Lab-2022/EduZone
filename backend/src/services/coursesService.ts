@@ -173,7 +173,7 @@ const getVideoDuration = async (subtitles_ids: string[]) => {
     }
     url += `&part=contentDetails&key=${process.env.YOUTUBE_API_KEY}`;
 
-    const res = await fetch(url).then((data) => data.json());
+    const res = await fetch(url).then((data: any) => data.json());
     // { data: duration_fetch }
     console.log(res);
     res.items.map((item: any) => {
@@ -330,7 +330,7 @@ export const buyCourse = async (courseId: string, studentId: string) => {
   const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (isEnrolled) throw new Error('Already enrolled');
 
-  course.enrolled.push({ studentId });
+  course.enrolled.push({ studentId, exercises: [] });
   await course.save();
 
   return course;
@@ -391,4 +391,83 @@ export const publishCourse = async (courseId: string) => {
   course.isPublished = true;
   await course.save();
   return course;
+};
+
+export const getTraineeCourses = async (studentId: string) => {
+  const courses = await CourseModel.find({
+    'enrolled.studentId': studentId,
+  }).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  return courses;
+};
+
+export const traineeSubmitSubtitleExercise = async (
+  courseId: string,
+  subtitleId: string,
+  studentId: string,
+  exerciseId: string,
+  answers: any
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+
+  if (!course) throw new Error('Course not found');
+  const subtitle = course.subtitles.id(subtitleId);
+  if (!subtitle) throw new Error('Subtitle not found');
+  if (!subtitle.exercise)
+    throw new Error('Subtitle does not contain an exercise');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  const exercise = enrolled.exercises.find((e) => e?.exerciseId === exerciseId);
+  if (exercise) throw new Error('Already submitted');
+  if (subtitle.exercise === undefined)
+    throw new Error('Subtitle contains no exercise');
+
+  const questionsCount = subtitle.exercise?.questions.length;
+  if (
+    questionsCount > answers.filter((a: any) => a.answerId !== undefined).length
+  )
+    throw new Error('You need to answer all questions');
+
+  // console.log('Answers', answers);
+  // console.log('Questions', subtitle.exercise?.questions);
+  let correctAnswers = 0;
+  answers.map((submittedAnswer: any) => {
+    const question = subtitle.exercise?.questions.find(
+      (q: any) => q._id.toString() === submittedAnswer.questionId
+    );
+    if (!question) throw Error('Question error');
+    if (
+      question?.answers?.find(
+        (a: any) => a?._id.toString() === submittedAnswer?.answerId
+      )?.isCorrect
+    )
+      correctAnswers++;
+  });
+
+  const score = (100 * correctAnswers) / questionsCount;
+
+  enrolled.exercises.push({
+    exerciseId,
+    score: (100 * correctAnswers) / questionsCount,
+    answers: answers.map((a: any) => a.answerId),
+    submittedAt: new Date(),
+    viewedCorrectAnswers: false,
+  });
+
+  await course.save();
+
+  return score;
 };

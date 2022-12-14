@@ -15,6 +15,12 @@ const ExerciseSchema = new Schema({
   questions: {
     type: [
       {
+        // questionId: {
+        //   type: String,
+        //   required: false,
+        //   unique: true,
+        //   default: mongoose.Types.ObjectId,
+        // },
         question: {
           type: String,
           required: true,
@@ -136,6 +142,41 @@ const courseSchema = new Schema({
         review: {
           type: String,
           required: false,
+        },
+        exercises: {
+          required: false,
+          type: [
+            {
+              exerciseId: {
+                type: String,
+                required: false,
+              },
+              answers: {
+                type: [
+                  {
+                    // answerId
+                    type: String,
+                    required: false,
+                  },
+                ],
+                required: false,
+              },
+              score: {
+                type: Number,
+                required: false,
+              },
+              submittedAt: {
+                type: Date,
+                required: false,
+                default: Date.now,
+              },
+              viewedCorrectAnswers: {
+                type: Boolean,
+                required: false,
+                default: false,
+              },
+            },
+          ],
         },
       },
     ],

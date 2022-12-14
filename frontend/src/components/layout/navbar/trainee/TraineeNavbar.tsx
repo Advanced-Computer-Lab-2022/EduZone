@@ -15,7 +15,7 @@ const TraineeNavbar = () => {
   const navigate = useNavigate();
   return (
     <div className="h-14 bg-white flex items-center justify-center shadow-md fixed w-full z-30">
-      <div className="container md:max-w-[70%] xl:max-w-[80%] px-6 flex items-center justify-between mx-auto h-full px-6 ">
+      <div className="container md:max-w-[70%] xl:max-w-[80%] px-6 flex items-center justify-between mx-auto h-full ">
         <Link to="/" className="text-lg text-primary font-medium ">
           Placeholder
         </Link>
@@ -28,6 +28,13 @@ const TraineeNavbar = () => {
               navigate(`/courses?query=${query}`);
             }}
           />
+        </div>
+        <div>
+          <Link to={`/trainee/${user.id}/courses`}>
+            <button className="text-sm text-gray-500 font-medium hover:text-primary">
+              My Courses
+            </button>
+          </Link>
         </div>
         {isAuthenticated ? (
           // <button
