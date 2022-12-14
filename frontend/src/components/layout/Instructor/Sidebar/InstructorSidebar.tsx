@@ -43,7 +43,7 @@ const InstructorSidebar: React.FC<SidebarProps> = ({
               className="flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-white/30"
               to={item.link}
             >
-              <div className="text-white">{item.icon}</div>
+              <div className="text-white text-center ml-1">{item.icon}</div>
               {isOpen && <div className="text-white">{item.name}</div>}
             </Link>
           ))}

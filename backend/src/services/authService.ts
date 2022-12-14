@@ -21,12 +21,13 @@ export const login = async (username: string, password: string) => {
 
   const encryptedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
+  const prevLastLogin = user.lastLogin;
   // save refresh token to db
   user.refreshToken = encryptedRefreshToken;
   user.lastLogin = new Date();
   await user.save();
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken, lastLogin: prevLastLogin };
 };
 
 export const register = async (

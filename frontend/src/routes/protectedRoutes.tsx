@@ -12,6 +12,8 @@ import InstructorCourseExam from '../pages/instructor/courses/exam/InstructorCou
 import InstructorSubtitlePage from '../pages/instructor/courses/subtitles/InstructorSubtitlePage';
 import LearningPage from '../pages/courses/course/LearningPage';
 import TraineeCourses from '../pages/trainee/TraineeCourses';
+import InstructorPolicy from '../pages/instructor/InstructorPolicy';
+import TraineePolicy from '../pages/trainee/TraineePolicy';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -34,6 +36,15 @@ const ProtectedRoutes: RouteType[] = [
     element: <AdminCreateUser />,
     parent: false,
   },
+  {
+    path: 'instructor-policy',
+    element: <InstructorPolicy />,
+  },
+  {
+    path: 'trainee-policy',
+    element: <TraineePolicy />,
+  },
+
   {
     path: 'instructor/:id',
     element: <InstructorDashboard />,

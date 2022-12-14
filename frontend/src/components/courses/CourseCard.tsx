@@ -41,7 +41,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
           'https://via.placeholder.com/150/DEDEDE/808080?text=Thumbnail'
         }
         alt=""
-        className="h-full rounded-lg aspect-square"
+        className="h-full rounded-lg aspect-square object-cover "
       />
       <div className="px-4 w-full">
         <div className="flex justify-between w-full ">

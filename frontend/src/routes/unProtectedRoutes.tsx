@@ -5,6 +5,7 @@ import Home from '../pages/home';
 import LoginPage from '../pages/login';
 import { RouteType } from '../types';
 import ForgetPassword from '../pages/ForgetPassword';
+import ResetPassword from '../pages/ResetPassword';
 
 const UnProtectedRoutes: RouteType[] = [
   {
@@ -41,7 +42,7 @@ const UnProtectedRoutes: RouteType[] = [
   {
     path: 'reset-password/:token',
     parent: false,
-    element: <h1>Reset Password</h1>,
+    element: <ResetPassword />,
   },
   {
     path: '/forget-password',

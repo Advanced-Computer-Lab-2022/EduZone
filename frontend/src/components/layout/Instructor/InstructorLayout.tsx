@@ -1,4 +1,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
+import {
+  MdOndemandVideo,
+  MdPerson,
+  MdRemoveRedEye,
+  MdSpaceDashboard,
+} from 'react-icons/md';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import InstructorNavbar from './Navbar/InstructorNavbar';
@@ -18,18 +24,23 @@ const InstructorLayout = ({
   const sidebarItems = [
     {
       name: 'Dashboard',
-      icon: <div></div>,
+      icon: <MdSpaceDashboard size={25} />,
       link: `/instructor/${user.id}`,
     },
     {
       name: 'Courses',
-      icon: <div></div>,
+      icon: <MdOndemandVideo size={25} />,
       link: `/instructor/${user.id}/courses`,
     },
     {
       name: 'Profile',
-      icon: <div></div>,
+      icon: <MdPerson size={25} />,
       link: `/instructor/${user.id}/profile`,
+    },
+    {
+      name: 'Preview Courses',
+      icon: <MdRemoveRedEye size={25} />,
+      link: `/`,
     },
   ];
 

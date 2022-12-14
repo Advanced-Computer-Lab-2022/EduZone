@@ -34,14 +34,24 @@ const LoginPage = () => {
           password,
         },
       });
-      const { accessToken, refreshToken } = res.data;
+      // const { accessToken, refreshToken, lastLogin } = res.data;
       if (res.status === 200) {
         setCookie('access-token', res.data?.accessToken);
         setCookie('refresh-token', res.data?.refreshToken);
         const user = decodeToken(res.data?.accessToken);
         dispatch(login(user));
         setLoading(false);
-        navigate('/');
+        if (res.data?.lastLogin === null) {
+          navigate(
+            user?.role === 'instructor'
+              ? '/instructor-policy'
+              : '/trainee-policy'
+          );
+        } else {
+          navigate(
+            user?.role === 'instructor' ? `/instructor/${user.id}` : '/'
+          );
+        }
       } else {
         console.log(res);
       }
