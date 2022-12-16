@@ -1,11 +1,16 @@
 import { AxiosResponse } from 'axios';
 import { getCookie } from 'cookies-next';
 import React, { FormEventHandler, useEffect, useState } from 'react';
-import { Question } from '../../types/entities/Question';
-import { axios } from '../../utils';
+import { Question } from '../../../types/entities/Question';
+import { axios } from '../../../utils';
+import GradeView from './GradeView';
 
 const ExerciseView: React.FC<{
-  exercise: { questions: Question[]; _id: string };
+  exercise: {
+    questions: Question[];
+    _id: string;
+    type: 'finalExam' | 'exercise';
+  };
   subtitleId: string;
   courseId: string;
   onRefresh: () => void;
@@ -16,7 +21,8 @@ const ExerciseView: React.FC<{
   );
 
   const onSelectAnswer = (questionId: string, answerId: string) => {
-    const newAnswers = answers.map((answer) => {
+    console.log('Select answer: ', questionId, answerId);
+    const newAnswers = answers?.map((answer) => {
       if (answer.questionId === questionId) answer.answerId = answerId;
       return answer;
     });
@@ -24,22 +30,28 @@ const ExerciseView: React.FC<{
   };
 
   const onSubmit = async () => {
+    // console.log('Submit answers: ', answers);
+    // return;
+    const url =
+      exercise.type === 'finalExam'
+        ? `/courses/${courseId}/exam/submit`
+        : `/courses/${courseId}/subtitles/${subtitleId}/exercise/${exercise._id}`;
     const res: AxiosResponse<any, any> = await axios({
-      url: `/courses/${courseId}/subtitles/${subtitleId}/exercise/${exercise._id}`,
+      url,
       method: 'POST',
       data: { answers },
       headers: {
         Authorization: 'Bearer ' + getCookie('access-token'),
       },
     });
-    console.log(res);
+    // console.log(res);
     // alert(res.data?.score);
     onRefresh();
   };
 
   useEffect(() => {
     if (answers.length === 0 && exercise) {
-      exercise.questions.map((q) => {
+      exercise.questions?.map((q) => {
         setAnswers((prev) => [...prev, { questionId: q._id }]);
       });
     }
@@ -48,14 +60,14 @@ const ExerciseView: React.FC<{
   return (
     <div>
       {exercise &&
-        exercise?.questions.map((q, index) => (
+        exercise?.questions?.map((q, index) => (
           <div key={index} className="mb-6">
             <div className="text-lg font-semibold flex gap-3 mb-1">
               <p className="">{index + 1}. </p>
               <p>{q.question}</p>
             </div>
             <div className="space-y-2 mt-3">
-              {q.answers.map((answer, i2) => (
+              {q?.answers?.map((answer, i2) => (
                 <div key={i2} className="mx-8 space-x-2">
                   <input
                     type="radio"

@@ -13,6 +13,7 @@ import {
   publishCourse,
   rateCourse,
   reviewCourse,
+  traineeSubmitFinalExam,
   traineeSubmitSubtitleExercise,
   updateCourseById,
   updateSubtitleByCourseAndId,
@@ -127,6 +128,22 @@ router.post('/:id/exam', JWTAccessDecoder, async (req, res) => {
       });
     }
     return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+  }
+});
+router.post('/:id/exam/submit', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { id: studentId } = req.body.token;
+    const { answers } = req.body;
+    if (!answers) {
+      return res.status(400).json({
+        message: 'Please fill all the fields',
+      });
+    }
+    const score = await traineeSubmitFinalExam(id, studentId, answers);
+    return res.status(200).json({ score });
   } catch (e) {
     console.error(e);
   }

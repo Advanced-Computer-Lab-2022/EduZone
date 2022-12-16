@@ -9,7 +9,8 @@ import { RootState } from '../../../redux/store';
 import { axios } from '../../../utils';
 import { BsArrowRightShort, BsArrowLeftShort } from 'react-icons/bs';
 import { Subtitle } from '../../../types/entities/Subtitle';
-import ExerciseView from '../../../components/courses/ExerciseView';
+import ExerciseView from '../../../components/courses/Exercises/ExerciseView';
+import GradeView from '../../../components/courses/Exercises/GradeView';
 const LearningPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -62,6 +63,15 @@ const LearningPage = () => {
           ]);
         }
       });
+      if (res.data?.finalExam) {
+        setCourseItems((prev) => [
+          ...prev,
+          {
+            type: 'finalExam',
+            data: res.data.finalExam,
+          },
+        ]);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -94,32 +104,32 @@ const LearningPage = () => {
     //         courseItems[currentCourseItem - 1]?.data?._id.toString()
     //     )?.score
     // );
-    if (
-      (score === -1 &&
-        courseItems[currentCourseItem - 1]?.type === 'exercise' &&
-        enrolled) ||
-      refresh
-    ) {
-      setScore(
-        enrolled?.exercises.find(
-          (e: any) =>
-            e.exerciseId ===
-            courseItems[currentCourseItem - 1]?.data?._id.toString()
-        )?.score ?? -1
-      );
+    if ((score === -1 && enrolled) || refresh) {
+      if (courseItems[currentCourseItem - 1]?.type === 'exercise') {
+        setScore(
+          enrolled?.exercises.find(
+            (e: any) =>
+              e.exerciseId ===
+              courseItems[currentCourseItem - 1]?.data?._id.toString()
+          )?.score ?? -1
+        );
+      } else if (courseItems[currentCourseItem - 1]?.type === 'finalExam') {
+        setScore(enrolled?.finalExam?.score ?? -1);
+        console.log(enrolled?.finalExam?.score);
+      }
     }
     setRefresh(false);
   }, [course, enrolled, currentCourseItem]);
 
-  console.log(enrolled);
-  console.log(courseItems[currentCourseItem - 1]?.data?._id);
-  console.log(
-    enrolled?.exercises.find(
-      (e: any) =>
-        e.exerciseId ===
-        courseItems[currentCourseItem - 1]?.data?._id.toString()
-    )?.score
-  );
+  // console.log(enrolled);
+  // console.log(courseItems[currentCourseItem - 1]?.data?._id);
+  // console.log(
+  //   enrolled?.exercises.find(
+  //     (e: any) =>
+  //       e.exerciseId ===
+  //       courseItems[currentCourseItem - 1]?.data?._id.toString()
+  //   )?.score
+  // );
   return (
     <Layout>
       <div className="grid grid-cols-3">
@@ -155,57 +165,18 @@ const LearningPage = () => {
               />
             ) : (
               <div className="flex flex-col items-center justify-center w-full h-full bg-white rounded-md  p-6">
-                {enrolled?.exercises.find(
+                {(enrolled?.exercises.find(
                   (e: any) =>
                     e.exerciseId ===
                     courseItems[currentCourseItem - 1]?.data?._id.toString()
-                ) && (
-                  <div
-                    className={`flex items-center justify-between  border rounded-md  p-4 ${
-                      score >= 75
-                        ? 'border-green-600 text-green-700 bg-green-500/20'
-                        : score >= 50
-                        ? 'border-yellow-600 text-yellow-700 bg-yellow-500/20'
-                        : 'border-red-600 text-red-700 bg-red-500/20'
-                    }  w-full mb-4`}
-                  >
-                    <p>
-                      You have submitted your answer successfully
-                      <p className="text-sm">
-                        You can review your answers below.{' '}
-                        {score < 50 && (
-                          <span className="underline hover:font-semibold cursor-pointer">
-                            Retake the exercise
-                          </span>
-                        )}
-                      </p>
-                    </p>
-                    <div className="flex flex-col">
-                      <p>Your Score:</p>
-                      <p className={'text-xl font-semibold'}>
-                        <span className="font-bold">{score}% - </span>
-                        {score >= 50 ? 'PASSED' : 'FAILED'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {score > -1 ? (
-                  <div className="flex w-full justify-end gap-2 text-sm mb-3">
-                    {score < 100 && (
-                      <button className="hover:underline text-gray-600 pr-2 border-r-2 border-gray-400">
-                        View Correct Answers
-                      </button>
-                    )}
-                    {score < 50 && (
-                      <button className="hover:underline text-gray-600">
-                        {' '}
-                        Retake the exercise
-                      </button>
-                    )}
-                  </div>
-                ) : null}
+                ) ||
+                  enrolled?.finalExam) && <GradeView score={score} />}
+
                 <ExerciseView
-                  exercise={courseItems[currentCourseItem - 1]?.data}
+                  exercise={{
+                    ...courseItems[currentCourseItem - 1]?.data,
+                    type: courseItems[currentCourseItem - 1]?.type,
+                  }}
                   subtitleId={courseItems[currentCourseItem - 2]?.data?._id}
                   courseId={course?._id}
                   onRefresh={() => {
@@ -224,22 +195,24 @@ const LearningPage = () => {
                 <IconText
                   text={'Previous'}
                   leading={<BsArrowLeftShort size={25} />}
-                  onClick={() =>
-                    currentCourseItem > 1
+                  onClick={() => {
+                    setScore(-1);
+                    return currentCourseItem > 1
                       ? setCurrentCourseItem(currentCourseItem - 1)
-                      : null
-                  }
+                      : null;
+                  }}
                 />
               </button>
               <button className="cursor-pointer hover:text-primary">
                 <IconText
                   text={'Next'}
                   trailing={<BsArrowRightShort size={25} />}
-                  onClick={() =>
-                    currentCourseItem < courseItems.length
+                  onClick={() => {
+                    setScore(-1);
+                    return currentCourseItem < courseItems.length
                       ? setCurrentCourseItem(currentCourseItem + 1)
-                      : null
-                  }
+                      : null;
+                  }}
                 />
               </button>
             </div>
@@ -252,7 +225,10 @@ const LearningPage = () => {
                     ? 'bg-gray-200'
                     : 'hover:bg-gray-200'
                 }`}
-                onClick={() => setCurrentCourseItem(index + 1)}
+                onClick={() => {
+                  setCurrentCourseItem(index + 1);
+                  setScore(-1);
+                }}
               >
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
@@ -260,7 +236,9 @@ const LearningPage = () => {
                     <p className="text-sm font-semibold">
                       {item.type === 'subtitle'
                         ? item.data.title
-                        : `Exercise: ${courseItems[index - 1].data.title}`}
+                        : item.type === 'exercise'
+                        ? `Exercise: ${courseItems[index - 1].data.title}`
+                        : 'Final Exam'}
                     </p>
                     <p className="text-xs text-gray-500">
                       {item.type === 'subtitle' ? item.data.duration : `5 mins`}
@@ -270,9 +248,9 @@ const LearningPage = () => {
               </div>
             ))}
 
-            <div
+            {/* <div
               className={`flex items-center justify-between p-2 my-1 border border-gray-300 rounded-md cursor-pointer `}
-              // onClick={() => setSubtitleNumber(index + 1)}
+              onClick={() => setCurrentCourseItem(courseItems.length)}
             >
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
@@ -281,7 +259,7 @@ const LearningPage = () => {
                   <p className="text-xs text-gray-500">15 mins</p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

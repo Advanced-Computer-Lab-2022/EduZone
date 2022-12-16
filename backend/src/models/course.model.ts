@@ -178,6 +178,37 @@ const courseSchema = new Schema({
             },
           ],
         },
+        finalExam: {
+          type: {
+            submitted: {
+              type: Boolean,
+              required: false,
+            },
+            answers: {
+              type: [
+                {
+                  // answerId
+                  type: String,
+                  required: false,
+                },
+              ],
+              required: false,
+            },
+            score: {
+              type: Number,
+              required: false,
+            },
+            submittedAt: {
+              type: Date,
+              required: false,
+            },
+            viewedCorrectAnswers: {
+              type: Boolean,
+              required: false,
+            },
+          },
+          required: false,
+        },
       },
     ],
     required: false,

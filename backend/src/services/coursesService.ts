@@ -330,7 +330,15 @@ export const buyCourse = async (courseId: string, studentId: string) => {
   const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (isEnrolled) throw new Error('Already enrolled');
 
-  course.enrolled.push({ studentId, exercises: [] });
+  course.enrolled.push({
+    studentId,
+    exercises: [],
+    finalExam: {
+      submitted: false,
+      score: -1,
+      answers: [],
+    },
+  });
   await course.save();
 
   return course;
@@ -470,4 +478,72 @@ export const traineeSubmitSubtitleExercise = async (
   await course.save();
 
   return score;
+};
+
+export const traineeSubmitFinalExam = async (
+  courseId: string,
+  studentId: string,
+  answers: any
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new Error('Course not found');
+  let enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  if (enrolled.finalExam?.submitted)
+    throw new Error('Final exam already submitted');
+  const questionsCount = course.finalExam?.questions?.length ?? 0;
+
+  console.log('Question Count', questionsCount);
+  console.log('Answers', answers);
+
+  // if (!enrolled.finalExam) {
+
+  // }
+
+  if (
+    questionsCount > answers.filter((a: any) => a.answerId !== undefined).length
+  )
+    throw new Error('You need to answer all questions');
+
+  let correctAnswers = 0;
+  answers.map((submittedAnswer: any) => {
+    const question = course.finalExam?.questions.find(
+      (q: any) => q._id.toString() === submittedAnswer.questionId
+    );
+    if (!question) throw Error('Question error');
+    if (
+      question?.answers?.find(
+        (a: any) => a?._id.toString() === submittedAnswer?.answerId
+      )?.isCorrect
+    )
+      correctAnswers++;
+  });
+
+  const score = (100 * correctAnswers) / questionsCount;
+
+  // if (!enrolled.finalExam) {
+  const finalExam = {
+    submitted: true,
+    score,
+    answers: answers.map((a: any) => a.answerId),
+    submittedAt: new Date(),
+  };
+  enrolled.finalExam = { ...finalExam, ...enrolled.finalExam };
+  await course.save();
+  return score;
+  // }
+
+  // enrolled!.finalExam.submitted = true;
+  // enrolled.finalExam.score = score;
+  // enrolled.finalExam.answers = answers.map((a: any) => a.answerId);
+  // enrolled.finalExam.submittedAt = new Date();
+  // await course.save();
+  // return score;
 };
