@@ -1,7 +1,8 @@
 import { getCookie } from 'cookies-next';
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
+import { showMessage } from '../../redux/features/ui.reducer';
 import { RootState } from '../../redux/store';
 import { axios } from '../../utils';
 
@@ -9,6 +10,7 @@ const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
+  const dispatch = useDispatch();
   const { token } = useParams();
   const navigate = useNavigate();
   const onResetPassword = async () => {
@@ -31,8 +33,12 @@ const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
       headers,
     });
     if (res.status === 202) {
-      alert('Password reset successfully');
-
+      dispatch(
+        showMessage({
+          text: 'Password Changed Successfully',
+          type: 'success',
+        })
+      );
       if (isReset) navigate('/login');
       else navigate(-1);
     }

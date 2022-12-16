@@ -5,11 +5,13 @@ import SingleCourse from './pages/courses/course/singleCourse';
 import Home from './pages/home';
 import { RootState } from './redux/store';
 import { ProtectedRoutes, UnProtectedRoutes } from './routes';
+import Alert from './components/common/Alert';
 
 function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   return (
     <div className="App">
+      <Alert />
       <Routes>
         {UnProtectedRoutes.map((route) => {
           if (!route.parent)
