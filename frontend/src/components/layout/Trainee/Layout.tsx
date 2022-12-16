@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Router, useLocation, useNavigate } from 'react-router-dom';
 //import useBreadcrumbs from 'use-react-router-breadcrumbs';
 import { IoMdHome, IoIosArrowBack } from 'react-icons/io';
-import TraineeNavbar from '../navbar/trainee/TraineeNavbar';
+import TraineeNavbar from '../common/navbar/trainee/TraineeNavbar';
 const Layout = ({ children }: { children: JSX.Element | JSX.Element[] }) => {
   const location = useLocation();
 

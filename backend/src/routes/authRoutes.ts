@@ -81,7 +81,7 @@ router.put('/reset-password/:resetToken', async (req, res) => {
     const resetToken = req.params.resetToken;
     const { password } = req.body;
     const success = await resetPassword(resetToken, password);
-    return res.status(200).json({ message: 'Password reset successful' });
+    return res.status(202).json({ message: 'Password reset successful' });
   } catch (error) {
     return res.status(400).json({ message: (error as Error).message });
   }
@@ -103,7 +103,7 @@ router.put('/change-password', JWTAccessDecoder, async (req, res) => {
     const { id } = req.body.token;
     const { password } = req.body;
     const success = await changePassword(id, password);
-    return res.status(200).json({ message: 'Password changed successfully' });
+    return res.status(202).json({ message: 'Password changed successfully' });
   } catch (error) {
     return res.status(400).json({ message: (error as Error).message });
   }

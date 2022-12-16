@@ -11,7 +11,7 @@ import CourseCard from '../../../components/courses/CourseCard';
 import FilterBox from '../../../components/courses/FilterBox';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
 import InstructorLayout from '../../../components/layout/Instructor/InstructorLayout';
-import SearchBar from '../../../components/layout/navbar/trainee/SearchBar';
+import SearchBar from '../../../components/layout/common/navbar/trainee/SearchBar';
 // import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
 import { axios } from '../../../utils';
 

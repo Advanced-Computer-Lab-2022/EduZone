@@ -76,7 +76,11 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
           leading={<FaUserAlt className="w-6 text-gray-400" />}
           trailing={<FaChevronRight size={12} className="ml-auto" />}
           link={'internal'}
-          url={`/instructor/${user.id}/profile`}
+          url={
+            user.role === 'instructor'
+              ? `/instructor/${user.id}/profile`
+              : `/trainee/${user.id}/profile`
+          }
         />
       </ProfileMenuItem>
       <ProfileMenuItem>

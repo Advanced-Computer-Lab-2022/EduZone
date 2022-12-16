@@ -8,7 +8,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaGlobe } from 'react-icons/fa';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
-import Avatar from '../../../components/layout/navbar/common/ProfileMenu/Avatar';
+import Avatar from '../../../components/layout/common/navbar/ProfileMenu/Avatar';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { Subtitle } from '../../../types/entities/Subtitle';

@@ -1,0 +1,74 @@
+import { getCookie } from 'cookies-next';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { RootState } from '../../redux/store';
+import { axios } from '../../utils';
+
+const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const onResetPassword = async () => {
+    if (password !== password2) {
+      alert('Passwords do not match');
+      return;
+    }
+    const url = isReset
+      ? `/auth/reset-password/${token}`
+      : `/auth/change-password`;
+    const headers = isReset
+      ? {}
+      : { Authorization: `Bearer ${getCookie('access-token')}` };
+    const res = await axios({
+      url,
+      method: 'PUT',
+      data: {
+        password,
+      },
+      headers,
+    });
+    if (res.status === 202) {
+      alert('Password reset successfully');
+
+      if (isReset) navigate('/login');
+      else navigate(-1);
+    }
+  };
+  return (
+    <div className="flex flex-col items-center justify-center mt-[20%]">
+      <div className="flex flex-col gap-4 w-1/3 items-center">
+        <div className="flex flex-col">
+          <label htmlFor="">Password</label>
+          <input
+            type="password"
+            className="px-4 border-2 border-gray-300 rounded-md p-2 w-96"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="">Confirm Password</label>
+          <input
+            type="password"
+            className="px-4 border-2 border-gray-300 rounded-md p-2 w-96"
+            placeholder="Confirm Password"
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+          />
+        </div>
+        <button
+          className="bg-primary text-white px-4 py-2 rounded-md w-96"
+          onClick={onResetPassword}
+        >
+          Reset Password
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ChangePassword;

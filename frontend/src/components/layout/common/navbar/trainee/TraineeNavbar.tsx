@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { logout } from '../../../../redux/features/auth.reducer';
-import { RootState } from '../../../../redux/store';
-import Avatar from '../common/ProfileMenu/Avatar';
-import ProfileMenu from '../common/ProfileMenu/ProfileMenu';
+import { logout } from '../../../../../redux/features/auth.reducer';
+import { RootState } from '../../../../../redux/store';
+import Avatar from '../ProfileMenu/Avatar';
+import ProfileMenu from '../ProfileMenu/ProfileMenu';
 import CurrencyConverter from './CurrencyConverter';
 import SearchBar from './SearchBar';
 

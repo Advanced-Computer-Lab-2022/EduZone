@@ -14,6 +14,9 @@ import LearningPage from '../pages/courses/course/LearningPage';
 import TraineeCourses from '../pages/trainee/TraineeCourses';
 import InstructorPolicy from '../pages/instructor/InstructorPolicy';
 import TraineePolicy from '../pages/trainee/TraineePolicy';
+import TraineeProfile from '../pages/trainee/TraineeProfile';
+import TraineeChangePassword from '../pages/trainee/TraineeChangePassword';
+import InstructorChangePassword from '../pages/instructor/profile/InstructorChangePassword';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -81,6 +84,11 @@ const ProtectedRoutes: RouteType[] = [
     parent: false,
   },
   {
+    path: 'instructor/:id/profile/change-password',
+    element: <InstructorChangePassword />,
+    parent: false,
+  },
+  {
     path: 'courses/:id/edit',
     element: <EditCourse />,
     parent: false,
@@ -92,6 +100,14 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'trainee/:id/courses',
     element: <TraineeCourses />,
+  },
+  {
+    path: 'trainee/:id/profile',
+    element: <TraineeProfile />,
+  },
+  {
+    path: 'trainee/:id/profile/change-password',
+    element: <TraineeChangePassword />,
   },
 ];
 
