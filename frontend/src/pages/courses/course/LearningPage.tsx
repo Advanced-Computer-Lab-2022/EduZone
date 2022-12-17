@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import IconText from '../../../components/common/IconText';
 import Layout from '../../../components/layout/Trainee/Layout';
@@ -143,7 +143,11 @@ const LearningPage = () => {
                       courseItems[currentCourseItem - 2]?.data.title
                     }`}
               </span>
-              <p className="text-gray-600 font-medium -mt-1">{course?.title}</p>
+              <Link to={'/courses/' + course?._id}>
+                <p className="text-gray-600 font-medium -mt-1 hover:text-primary">
+                  {course?.title}
+                </p>
+              </Link>
             </div>
             <div className="flex items-center space-x-2">
               <button className="px-4 py-2 text-white bg-green-600 rounded-md">

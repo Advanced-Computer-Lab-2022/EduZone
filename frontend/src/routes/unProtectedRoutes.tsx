@@ -8,6 +8,7 @@ import ForgetPassword from '../pages/ForgetPassword';
 import ResetPassword from '../pages/ResetPassword';
 import SignUp from '../pages/signUp';
 
+
 const UnProtectedRoutes: RouteType[] = [
   {
     path: '/',
@@ -39,6 +40,7 @@ const UnProtectedRoutes: RouteType[] = [
     path: '/register',
     parent: false,
     element: <SignUp />,
+
   },
   {
     path: 'reset-password/:token',
