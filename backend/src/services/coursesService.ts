@@ -355,7 +355,10 @@ export const buyCourse = async (
       score: -1,
       answers: [],
     },
-    paymentId,
+    payment: {
+      id: paymentId,
+      amount: course.price as number,
+    },
   });
   await course.save();
 
@@ -553,7 +556,7 @@ export const traineeSubmitFinalExam = async (
     answers: answers.map((a: any) => a.answerId),
     submittedAt: new Date(),
   };
-  enrolled.finalExam = { ...finalExam, ...enrolled.finalExam };
+  enrolled.finalExam = finalExam;
   await course.save();
   return score;
 

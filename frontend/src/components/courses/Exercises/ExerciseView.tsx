@@ -30,7 +30,8 @@ const ExerciseView: React.FC<{
   };
 
   const onSubmit = async () => {
-    // console.log('Submit answers: ', answers);
+    console.log('Submit answers: ', answers);
+    console.log('Submit exercise: ', exercise.type);
     // return;
     const url =
       exercise.type === 'finalExam'
