@@ -125,6 +125,17 @@ const courseSchema = new Schema({
     type: ExerciseSchema,
     required: false,
   },
+  views: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: false,
+      },
+    ],
+    required: false,
+  },
+
   enrolled: {
     type: [
       {

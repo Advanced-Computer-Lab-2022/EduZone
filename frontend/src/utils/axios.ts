@@ -48,6 +48,12 @@ axios.interceptors.response.use(
   async function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
+    if (
+      error.config.url.includes('auth/login') ||
+      error.config.url.includes('auth/register')
+    ) {
+      return Promise.reject(error);
+    }
     const refreshToken = getCookie('refresh-token');
     const accessToken = getCookie('access-token');
     if (!refreshToken) {

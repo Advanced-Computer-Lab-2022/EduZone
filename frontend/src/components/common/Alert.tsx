@@ -11,7 +11,7 @@ const Alert = () => {
     if (message)
       setTimeout(() => {
         dispatch(hideMessage());
-      }, 3000);
+      }, 5000);
   });
   if (!message) return null;
   return (
