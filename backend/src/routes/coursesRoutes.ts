@@ -216,8 +216,9 @@ router.get('/:id/subtitles/:subtitleId', async (req, res) => {
 router.patch('/:id/buy', JWTAccessDecoder, async (req, res) => {
   try {
     const { id } = req.params;
-    const { id: userId } = req.body.token;
-    const course = await buyCourse(id, userId);
+    const { id: userId, email } = req.body.token;
+    const { paymentId } = req.body;
+    const course = await buyCourse(id, userId, email, paymentId);
     if (!course) {
       return res.status(404).json({
         message: 'Course not found',

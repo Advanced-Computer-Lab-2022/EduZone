@@ -174,7 +174,8 @@ const LearningPage = () => {
                     e.exerciseId ===
                     courseItems[currentCourseItem - 1]?.data?._id.toString()
                 ) ||
-                  enrolled?.finalExam) && <GradeView score={score} />}
+                  enrolled?.finalExam) &&
+                  score > -1 && <GradeView score={score} />}
 
                 <ExerciseView
                   exercise={{
