@@ -1,8 +1,8 @@
 import React, { FormEventHandler, useState } from 'react';
-import InputField from '../components/common/InputField';
+import RefInputField from '../components/common/RefInputField';
 import Hero from './../assets/illustrations/login-hero-with-corner.svg';
 import { MdEmail } from 'react-icons/md';
-import { FaKey } from 'react-icons/fa';
+import { FaKey, FaUserAlt } from 'react-icons/fa';
 import { BiUserCircle } from 'react-icons/bi';
 import { Link, useNavigate } from 'react-router-dom';
 import { axios, decodeToken } from '../utils';
@@ -11,103 +11,143 @@ import { AxiosResponse } from 'axios';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/features/auth.reducer';
 import CircularLoadingIndicator from '../components/common/CircularLoadingIndicator';
-
+import { GiMale, GiFemale } from 'react-icons/gi';
+import { BsShieldLockFill } from 'react-icons/bs';
+import { RiFileUserFill } from 'react-icons/ri';
+import { showMessage } from '../redux/features/ui.reducer';
 const SignUp = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const onSubmit: FormEventHandler = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-    const firstName = formData.get('firstName');
-    const lastName = formData.get('lastName');
-    const username = formData.get('username');
-    const email = formData.get('email');
-    const password = formData.get('password');
-    const confirmPassword = formData.get('confirmPassword');
-    const gender = formData.get('gender');
-    const role = formData.get('role');
+  const firstRef = React.useRef<HTMLInputElement>(null);
+  const lastRef = React.useRef<HTMLInputElement>(null);
+  const usernameRef = React.useRef<HTMLInputElement>(null);
+  const emailRef = React.useRef<HTMLInputElement>(null);
+  const passwordRef = React.useRef<HTMLInputElement>(null);
+  const confirmPasswordRef = React.useRef<HTMLInputElement>(null);
+  const [gender, setGender] = useState('');
 
-    const name = firstName + ' ' + lastName;
-    console.log(name);
+  const onRegister = async () => {
+    setLoading(true);
+
+    const password = passwordRef.current?.value;
+    const confirmPassword = confirmPasswordRef.current?.value;
+
     if (password !== confirmPassword) {
-      alert('Password does not match');
+      dispatch(
+        showMessage({
+          text: 'Password does not match',
+          type: 'error',
+        })
+      );
       return;
     }
+    const firstName = firstRef.current?.value;
+    const lastName = lastRef.current?.value;
+    const username = usernameRef.current?.value;
+    const email = emailRef.current?.value;
+    const name = firstName + ' ' + lastName;
+
+    const userData = {
+      username,
+      password,
+      name,
+      gender,
+      email,
+    };
+    // console.log(userData);
+    // return;
 
     try {
-      console.log('here');
+      console.log('HERE');
       const res: AxiosResponse<any> = await axios({
         url: `/auth/register`,
         method: 'POST',
-        data: {
-          username: username,
-          password: password,
-          name: name,
-          gender: gender,
-          email: email,
-          role: role,
-        },
+        data: userData,
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      // return
       console.log(res);
       if (res.status === 200) {
+        setCookie('access-token', res.data?.accessToken);
+        setCookie('refresh-token', res.data?.refreshToken);
+        const user = decodeToken(res.data?.accessToken);
+        dispatch(login(user));
         setLoading(false);
-        navigate('/');
-      }
-      if (res.status === 400) {
-        alert('User already exists');
-        return;
+        // if (res.data?.lastLogin === null) {
+        navigate(
+          user?.role === 'instructor' ? '/instructor-policy' : '/trainee-policy'
+        );
+        // } else {
+        //   navigate(
+        //     user?.role === 'instructor' ? `/instructor/${user.id}` : '/'
+        //   );
+        // }
       }
     } catch (err) {
       console.log(err);
     }
   };
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center h-full from-secondary-dark to-primary bg-gradient-to-br flex">
-      <div className="hidden md:block w-1/2 h-2/4">
-        <img src={Hero} alt="login hero" />
+    // <div className="flex flex-col md:flex-row items-center justify-center h-full from-secondary-dark to-primary bg-gradient-to-br">
+    <div className="h-screen from-secondary-dark to-primary bg-gradient-to-br flex">
+      <div className="relative h-full  w-2/5">
+        <img
+          src={Hero}
+          alt="Bottom Corner"
+          className="absolute bottom-0 -left-0 w-full"
+        />
       </div>
-      <div className="w-3/5 h-full flex justify-center items-center space-y-4">
-        <form
-          className="bg-white w-1/2 h-full rounded-lg shadow-lg p-10 py-20 flex flex-col justify-center"
-          onSubmit={onSubmit}
-          method="POST"
-        >
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Sign Up</h1>
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="firstName" className="text-gray-600">
-              First Name
-            </label>
-            <InputField
-              type="text"
-              name="firstName"
-              placeholder="First Name"
-              required
-            />
+      <div className="w-4/5 h-full flex justify-center items-center ">
+        <div className="bg-white w-1/2 rounded-lg shadow-lg p-10 py-20 flex flex-col justify-center space-y-2">
+          <div className="mb-4">
+            <h1 className="text-3xl text-primary font-medium">
+              Create your account
+            </h1>
+            <p className="text-gray-600 text-sm">Please fill your data below</p>
           </div>
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="lastName" className="text-gray-600">
-              Last Name
-            </label>
-            <InputField
-              type="text"
-              name="lastName"
-              placeholder="Last Name"
-              required
-            />
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col w-full">
+              <label htmlFor="firstName" className="text-gray-600">
+                First Name
+              </label>
+              <RefInputField
+                icon={
+                  <FaUserAlt
+                    size={20}
+                    className=" text-gray-500 absolute ml-1"
+                  />
+                }
+                type="text"
+                name="firstName"
+                placeholder="First Name"
+                required
+                ref={firstRef}
+              />
+            </div>
+            <div className="flex flex-col  w-full">
+              <label htmlFor="lastName" className="text-gray-600">
+                Last Name
+              </label>
+              <RefInputField
+                type="text"
+                name="lastName"
+                placeholder="Last Name"
+                required
+                ref={lastRef}
+              />
+            </div>
           </div>
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col ">
             <label htmlFor="username" className="text-gray-600">
               Username
             </label>
-            <InputField
+            <RefInputField
               icon={
-                <BiUserCircle
-                  size={25}
+                <RiFileUserFill
+                  size={20}
                   className=" text-gray-500 absolute ml-1"
                 />
               }
@@ -115,97 +155,115 @@ const SignUp = () => {
               name="username"
               placeholder="Username"
               required
+              ref={usernameRef}
             />
           </div>
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col ">
             <label htmlFor="email" className="text-gray-600">
               Email
             </label>
-            <InputField
+            <RefInputField
               icon={
-                <MdEmail size={25} className=" text-gray-500 absolute ml-1" />
+                <MdEmail size={20} className=" text-gray-500 absolute ml-1" />
               }
               type="email"
               name="email"
               placeholder="Email"
               required
+              ref={emailRef}
             />
           </div>
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col ">
             <label htmlFor="password" className="text-gray-600">
               Password
             </label>
-            <InputField
+            <RefInputField
               icon={
-                <FaKey size={25} className=" text-gray-500 absolute ml-1" />
+                <FaKey size={20} className=" text-gray-500 absolute ml-1" />
               }
               type="password"
               name="password"
               placeholder="Password"
               required
+              ref={passwordRef}
             />
           </div>
-          <div className="flex flex-col space-y-2">
+          <div className="flex flex-col ">
             <label htmlFor="confirmPassword" className="text-gray-600">
               Confirm Password
             </label>
-            <InputField
+            <RefInputField
+              icon={
+                <BsShieldLockFill
+                  size={20}
+                  className=" text-gray-500 absolute ml-1"
+                />
+              }
               type="password"
               name="confirmPassword"
               placeholder="Confirm Password"
               required
+              ref={confirmPasswordRef}
             />
           </div>
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="gender" className="text-gray-600">
-              Choose a Gender
-            </label>
-            <select
-              name="gender"
-              id="gender"
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            >
-              <option value="" disabled selected>
-                Select your gender
-              </option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+
+          <label htmlFor="gender" className="text-gray-600">
+            Choose your Gender
+          </label>
+          <div className="flex w-full gap-4">
+            <div className="w-full">
+              <input
+                type="radio"
+                name={'gender'}
+                id={'male'}
+                value={'male'}
+                className="hidden peer"
+                required
+                onChange={(e) => setGender('male')}
+              />
+              <label
+                htmlFor={'male'}
+                className="inline-flex justify-between items-center px-5 w-full text-gray-500  rounded-sm border border-gray-200 cursor-pointer py-3  peer-checked:border-primary peer-checked:text-primary hover:text-gray-600 hover:bg-gray-100 bg-gray-50 "
+              >
+                <div className="w-full flex items-center gap-4">
+                  <GiMale size={18} /> <span>Male</span>
+                </div>
+              </label>
+            </div>
+            <div className="w-full">
+              <input
+                type="radio"
+                name={'gender'}
+                id={'female'}
+                className="hidden peer"
+                required
+                value={'female'}
+                onChange={(e) => setGender('female')}
+                // onChange={(e) =>
+                //   onSelectAnswer(q?._id?.toString() ?? '', answer._id ?? '')
+                // }
+              />
+              <label
+                htmlFor={'female'}
+                className="inline-flex justify-between items-center px-5 py-3 w-full text-gray-500 rounded-sm border border-gray-200 cursor-pointer  peer-checked:border-primary peer-checked:text-primary hover:text-gray-600 hover:bg-gray-100 bg-gray-50 "
+              >
+                <div className="w-full flex items-center gap-4">
+                  <GiFemale size={18} /> <span>Female</span>
+                </div>
+              </label>
+            </div>
           </div>
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="role" className="text-gray-600">
-              Applying as a :
-            </label>
-            <select
-              name="role"
-              id="role"
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            >
-              <option value="" disabled selected>
-                Select your option
-              </option>
-              <option value="trainee">Trainee</option>
-              <option value="instructor">Instructor</option>
-              <option value="corp_trainee">Corporate Trainee</option>
-            </select>
-          </div>
-          <div className="flex flex-col space-y-6">
-            <label htmlFor="terms" className="text-gray-600 space">
-              <input type="checkbox" name="terms" id="terms" required />
-              {'  '}I agree to the terms and conditions
-            </label>
-          </div>
-          <div className="flex flex-col space-y-6">
+
+          <div className="flex flex-col space-y-6 pt-4">
             <button
-              type="submit"
-              value={'Submit'}
+              onClick={() => onRegister()}
               className="bg-primary text-white w-full py-3 rounded-sm flex items-center justify-center"
             >
               <CircularLoadingIndicator loading={loading} />
               Submit
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

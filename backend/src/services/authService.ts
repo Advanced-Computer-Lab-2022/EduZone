@@ -64,6 +64,8 @@ export const register = async (
   // store refresh token in db
   newUser.refreshToken = encryptedRefreshToken;
 
+  // const prevLastLogin = newUser.lastLogin;
+  newUser.lastLogin = new Date();
   await newUser.save();
 
   return { accessToken, refreshToken };
