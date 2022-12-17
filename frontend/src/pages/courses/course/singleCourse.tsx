@@ -17,6 +17,7 @@ import { MdEditNote } from 'react-icons/md';
 import { getCookie } from 'cookies-next';
 import RatingBox from '../../../components/courses/RatingBox';
 import Modal from '../../../components/common/Modal';
+import StripeCheckout, { Token } from 'react-stripe-checkout';
 
 const SingleCourse = () => {
   const { id } = useParams();
@@ -30,6 +31,9 @@ const SingleCourse = () => {
   const [totalInstructorRating, setTotalInstructorRating] = useState(-1);
   const [instructorReview, setInstructorReview] = useState('');
   const [openInstructorProfile, setOpenInstructorProfile] = useState(false);
+  const [paymentToken, setPaymentToken] = useState(
+    undefined as Token | undefined
+  );
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -61,16 +65,22 @@ const SingleCourse = () => {
     else setRating(sum / total);
   };
 
-  const onBuyCourse = async () => {
+  const onBuyCourse = async (token: Token) => {
     try {
       const res: AxiosResponse<any, any> = await axios({
         url: '/courses/' + id + '/buy',
+        data: {
+          paymentId: token.id,
+        },
         method: 'PATCH',
         headers: {
           Authorization: 'Bearer ' + getCookie('access-token'),
         },
       });
-      navigate('/courses/' + id + '/learning');
+      console.log(res.data);
+      if (res.status === 200) {
+        navigate('/courses/' + id + '/learning');
+      }
     } catch (error) {
       console.log(error);
     }
@@ -191,7 +201,7 @@ const SingleCourse = () => {
       new Date(course?.discount?.validUntil || new Date())
     );
     setReview(
-      course?.enrolled?.find((s: any) => s.studentId === user.id).review || ''
+      course?.enrolled?.find((s: any) => s.studentId === user.id)?.review || ''
     );
     setInstructorRating(
       course?.instructor?.feedback?.find((s: any) => s.student === user.id)
@@ -205,6 +215,11 @@ const SingleCourse = () => {
     calculateRating();
     console.log(rating);
   }, [course]);
+
+  const handleToken = (token: Token) => {
+    console.log(token);
+    setPaymentToken(token);
+  };
   return (
     <Layout>
       <Modal
@@ -385,12 +400,20 @@ const SingleCourse = () => {
                 </Link>
               ) : (
                 <div className=" w-full space-y-2">
-                  <button
-                    className="w-full bg-primary text-white rounded-md py-2"
-                    onClick={() => onBuyCourse()}
+                  <StripeCheckout
+                    stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+                    token={onBuyCourse}
+                    name=""
+                    panelLabel={`Pay`}
+                    currency="USD"
+                    amount={course?.price * 100}
+                    ComponentClass="div"
                   >
-                    Buy Now
-                  </button>
+                    <button className="w-full bg-primary text-white rounded-md py-2">
+                      Buy Now
+                    </button>
+                  </StripeCheckout>
+
                   <button className="w-full border border-primary text-primary rounded-md py-2 hover:text-white hover:bg-primary">
                     Add to Wishlist
                   </button>

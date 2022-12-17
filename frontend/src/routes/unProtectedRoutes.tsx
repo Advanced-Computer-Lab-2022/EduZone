@@ -7,7 +7,7 @@ import { RouteType } from '../types';
 import ForgetPassword from '../pages/ForgetPassword';
 import ResetPassword from '../pages/ResetPassword';
 import SignUp from '../pages/signUp';
-
+import CoursePayment from '../components/courses/CoursePayment';
 
 const UnProtectedRoutes: RouteType[] = [
   {
@@ -40,7 +40,6 @@ const UnProtectedRoutes: RouteType[] = [
     path: '/register',
     parent: false,
     element: <SignUp />,
-
   },
   {
     path: 'reset-password/:token',
@@ -51,6 +50,11 @@ const UnProtectedRoutes: RouteType[] = [
     path: '/forget-password',
     parent: false,
     element: <ForgetPassword />,
+  },
+  {
+    path: '/courses/:id/buy',
+    parent: false,
+    element: <CoursePayment />,
   },
 ];
 

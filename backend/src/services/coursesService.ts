@@ -2,6 +2,9 @@ import axios, { AxiosResponse } from 'axios';
 import { CourseModel, UserModel } from '../models';
 import { ObjectId } from 'mongodb';
 import durationConverter from '../utils/duration_converter';
+import Stripe from 'stripe';
+// const stripe = require('stripe')();
+
 export const getAllCourses = async (
   filters: any,
   page?: string,
@@ -317,7 +320,12 @@ export const addSubtitleExercise = async (
   throw new Error('Subtitle not found');
 };
 
-export const buyCourse = async (courseId: string, studentId: string) => {
+export const buyCourse = async (
+  courseId: string,
+  studentId: string,
+  studentEmail: string,
+  paymentId: string
+) => {
   const course = await CourseModel.findById(courseId).populate('instructor', [
     'name',
     'username',
@@ -330,6 +338,15 @@ export const buyCourse = async (courseId: string, studentId: string) => {
   const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (isEnrolled) throw new Error('Already enrolled');
 
+  const success = await payForCourse(
+    course.title,
+    studentId,
+    studentEmail,
+    course.price as number,
+    paymentId
+  );
+
+  if (!success) throw new Error('Payment failed');
   course.enrolled.push({
     studentId,
     exercises: [],
@@ -338,6 +355,7 @@ export const buyCourse = async (courseId: string, studentId: string) => {
       score: -1,
       answers: [],
     },
+    paymentId,
   });
   await course.save();
 
@@ -494,7 +512,7 @@ export const traineeSubmitFinalExam = async (
     'feedback',
   ]);
   if (!course) throw new Error('Course not found');
-  let enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (!enrolled) throw new Error('Not enrolled');
   if (enrolled.finalExam?.submitted)
     throw new Error('Final exam already submitted');
@@ -538,6 +556,7 @@ export const traineeSubmitFinalExam = async (
   enrolled.finalExam = { ...finalExam, ...enrolled.finalExam };
   await course.save();
   return score;
+
   // }
 
   // enrolled!.finalExam.submitted = true;
@@ -546,4 +565,57 @@ export const traineeSubmitFinalExam = async (
   // enrolled.finalExam.submittedAt = new Date();
   // await course.save();
   // return score;
+};
+
+export const payForCourse = async (
+  courseTitle: string,
+  studentId: string,
+  email: string,
+  amount: number,
+  paymentId: string
+) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2022-11-15',
+  });
+  if (!courseTitle || !studentId || !email || !amount) {
+    throw new Error('Invalid parameters');
+  }
+
+  const { id: customerId }: any = await stripe.customers
+    .create({
+      email: email,
+      source: paymentId,
+    })
+    .catch((e: Error) => {
+      console.log(e);
+      return null;
+    });
+
+  if (!customerId) {
+    return false;
+  }
+
+  const invoiceId = `${email}-${Math.random().toString()}-${Date.now().toString()}`;
+
+  const charge = await stripe.charges
+    .create(
+      {
+        amount: amount * 100,
+        currency: 'USD',
+        customer: customerId,
+        receipt_email: email,
+        description: `Course Payment: ${courseTitle}`,
+      },
+      { idempotencyKey: invoiceId }
+    )
+    .catch((e: Error) => {
+      console.log(e);
+      return null;
+    });
+
+  if (!charge) {
+    return false;
+  }
+
+  return true;
 };

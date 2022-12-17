@@ -139,6 +139,11 @@ const courseSchema = new Schema({
   enrolled: {
     type: [
       {
+        paymentId: {
+          type: String,
+          required: true,
+          unique: true,
+        },
         studentId: {
           type: String,
           required: true,
