@@ -8,6 +8,7 @@ import {
   deleteCourseById,
   getAllCourses,
   getCourseById,
+  getMostPopularCourses,
   getSubtitleByCourseAndId,
   getTraineeCourses,
   publishCourse,
@@ -57,6 +58,17 @@ router.get('/trainee', JWTAccessDecoder, async (req, res) => {
   try {
     const { id } = req.body.token;
     const courses = await getTraineeCourses(id);
+    return res.status(200).json(courses);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.get('/popular', async (req, res) => {
+  try {
+    const { limit } = req.query;
+    const courses: any = await getMostPopularCourses(Number(limit ?? 5));
     return res.status(200).json(courses);
   } catch (e) {
     console.error(e);
