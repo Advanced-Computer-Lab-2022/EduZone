@@ -495,6 +495,14 @@ export const traineeSubmitSubtitleExercise = async (
     submittedAt: new Date(),
     viewedCorrectAnswers: false,
   });
+  console.log('Here 1');
+  if (!enrolled.completed)
+    enrolled.completed = {
+      finalExam: false,
+      exercises: [],
+      subtitles: [],
+    };
+  enrolled.completed.exercises = [...enrolled.completed.exercises, exerciseId];
 
   await course.save();
 
@@ -557,6 +565,15 @@ export const traineeSubmitFinalExam = async (
     submittedAt: new Date(),
   };
   enrolled.finalExam = finalExam;
+
+  if (!enrolled.completed)
+    enrolled.completed = {
+      finalExam: false,
+      exercises: [],
+      subtitles: [],
+    };
+  enrolled.completed.finalExam = true;
+
   await course.save();
   return score;
 
@@ -630,4 +647,76 @@ export const getMostPopularCourses = async (limit?: number) => {
     .limit(limit ?? 5)
     .populate('instructor', ['name', 'img']);
   return courses;
+};
+
+export const completeCourseItem = async (
+  courseId: string,
+  studentId: string,
+  item: 'finalExam' | 'exercise' | 'subtitle',
+  itemId?: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled.completed)
+    enrolled.completed = {
+      finalExam: false,
+      exercises: [],
+      subtitles: [],
+    };
+  if (item === 'finalExam') {
+    enrolled.completed.finalExam = true;
+  } else {
+    if (!itemId) throw Error('ItemId should be provided');
+    if (item === 'exercise') {
+      if (!enrolled.completed.exercises.includes(itemId))
+        enrolled.completed.exercises = [
+          ...enrolled.completed.exercises,
+          itemId,
+        ];
+    } else {
+      if (!enrolled.completed.subtitles.includes(itemId))
+        enrolled.completed.subtitles = [
+          ...enrolled.completed.subtitles,
+          itemId,
+        ];
+    }
+  }
+
+  await course.save();
+  return course;
+};
+
+export const finishCourse = async (courseId: string, studentId: string) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled.completed)
+    throw new Error('You need to complete all course items');
+  if (enrolled.completed.subtitles.length !== course.subtitles.length)
+    throw new Error('You need to complete all subtitles');
+  if (
+    enrolled.completed.exercises.length !==
+    course.subtitles.reduce((acc, s) => acc + (s.exercise ? 1 : 0), 0)
+  )
+    throw new Error('You need to complete all exercises');
+
+  if (!enrolled.completed.finalExam)
+    throw new Error('You need to complete final exam');
+  if (enrolled.finalExam?.score! < 50)
+    throw new Error('You need to pass the final exam');
+
+  enrolled.finished = true;
+  await course.save();
+  return course;
 };

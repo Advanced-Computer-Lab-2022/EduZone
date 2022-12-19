@@ -4,8 +4,10 @@ import {
   addCourse,
   addSubtitleExercise,
   buyCourse,
+  completeCourseItem,
   createFinalExercise,
   deleteCourseById,
+  finishCourse,
   getAllCourses,
   getCourseById,
   getMostPopularCourses,
@@ -76,6 +78,18 @@ router.get('/popular', async (req, res) => {
   }
 });
 
+router.patch('/:id/finish', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id: studentId } = req.body.token;
+    const { id: courseId } = req.params;
+    const course = await finishCourse(courseId, studentId);
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
 //get Course By ID Route
 router.get('/:id', async (req, res) => {
   try {
@@ -118,11 +132,23 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-/**
- * Exercises routes
- */
-
-//GET all exercises
+router.patch('/:id/complete', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id: studentId } = req.body.token;
+    const { item, itemId } = req.query;
+    const { id: courseId } = req.params;
+    const course = await completeCourseItem(
+      courseId,
+      studentId,
+      (item as 'exercise' | 'subtitle' | 'finalExam') ?? '',
+      (itemId as string) ?? ''
+    );
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
 
 router.post('/:id/exam', JWTAccessDecoder, async (req, res) => {
   try {

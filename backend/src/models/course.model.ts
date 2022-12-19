@@ -177,6 +177,29 @@ const courseSchema = new Schema({
           type: String,
           required: false,
         },
+        finished: {
+          type: Boolean,
+          required: false,
+        },
+        completed: {
+          type: {
+            exercises: {
+              type: [String],
+              unique: true,
+              required: false,
+            },
+            finalExam: {
+              type: Boolean,
+              required: false,
+              unique: true,
+            },
+            subtitles: {
+              type: [String],
+              required: false,
+            },
+          },
+          required: false,
+        },
         exercises: {
           required: false,
           type: [

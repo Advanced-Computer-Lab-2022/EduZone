@@ -7,10 +7,18 @@ import IconText from '../../../components/common/IconText';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { axios } from '../../../utils';
-import { BsArrowRightShort, BsArrowLeftShort } from 'react-icons/bs';
+import {
+  BsArrowRightShort,
+  BsArrowLeftShort,
+  BsFileEarmarkText,
+  BsPencilSquare,
+  BsPlayFill,
+} from 'react-icons/bs';
 import { Subtitle } from '../../../types/entities/Subtitle';
 import ExerciseView from '../../../components/courses/Exercises/ExerciseView';
 import GradeView from '../../../components/courses/Exercises/GradeView';
+import { getCookie } from 'cookies-next';
+import CourseItemsNav from '../../../components/courses/CourseItemsNav';
 const LearningPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -32,6 +40,37 @@ const LearningPage = () => {
       autoplay: 0,
       muted: 0,
     },
+  };
+
+  const completeItem = async (
+    item: 'exercise' | 'subtitle' | 'finalExam',
+    itemId: string
+  ) => {
+    const res = await axios({
+      url: '/courses/' + id + '/complete?item=' + item + '&itemId=' + itemId,
+      method: 'PATCH',
+      data: {},
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setRefresh(true);
+  };
+
+  const finishCourse = async () => {
+    const res = await axios({
+      url: '/courses/' + id + '/complete',
+      method: 'PATCH',
+      data: {},
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setRefresh(true);
   };
 
   const getCourse = async () => {
@@ -83,6 +122,7 @@ const LearningPage = () => {
   const [currentCourseItem, setCurrentCourseItem] = useState(1);
   const [score, setScore] = useState(-1);
   const [refresh, setRefresh] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (!course && !refresh) {
@@ -95,6 +135,19 @@ const LearningPage = () => {
       setEnrolled(
         course?.enrolled?.find((e: any) => e?.studentId === user?.id)
       );
+
+    setProgress(
+      ((course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.completed
+        ?.exercises?.length +
+        course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.completed
+          ?.subtitles?.length +
+        (course?.enrolled?.find((e: any) => e?.studentId === user?.id)
+          ?.completed?.finalExam
+          ? 1
+          : 0)) /
+        courseItems.length) *
+        100
+    );
     // setScore(
     //   course?.enrolled
     //     ?.find((e: any) => e?.studentId === user?.id)
@@ -104,6 +157,7 @@ const LearningPage = () => {
     //         courseItems[currentCourseItem - 1]?.data?._id.toString()
     //     )?.score
     // );
+
     if ((score === -1 && enrolled) || refresh) {
       if (courseItems[currentCourseItem - 1]?.type === 'exercise') {
         setScore(
@@ -130,6 +184,20 @@ const LearningPage = () => {
   //       courseItems[currentCourseItem - 1]?.data?._id.toString()
   //   )?.score
   // );
+  const nextItem = () => {
+    setScore(-1);
+    if (currentCourseItem < courseItems.length)
+      setCurrentCourseItem(currentCourseItem + 1);
+  };
+  const prevItem = () => {
+    setScore(-1);
+    if (currentCourseItem > 1) setCurrentCourseItem(currentCourseItem - 1);
+  };
+
+  const onClickItem = (index: number) => {
+    setCurrentCourseItem(index + 1);
+    setScore(-1);
+  };
   return (
     <Layout>
       <div className="grid grid-cols-3">
@@ -149,11 +217,24 @@ const LearningPage = () => {
                 </p>
               </Link>
             </div>
-            <div className="flex items-center space-x-2">
-              <button className="px-4 py-2 text-white bg-green-600 rounded-md">
-                Complete
-              </button>
-            </div>
+            {courseItems[currentCourseItem - 1]?.type === 'subtitle' &&
+              !enrolled?.completed?.subtitles?.includes(
+                courseItems[currentCourseItem - 1]?.data._id
+              ) && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="px-4 py-2 text-white bg-green-600 rounded-md"
+                    onClick={() => {
+                      completeItem(
+                        courseItems[currentCourseItem - 1]?.type,
+                        courseItems[currentCourseItem - 1]?.data._id
+                      );
+                    }}
+                  >
+                    Mark as Completed
+                  </button>
+                </div>
+              )}
           </div>
 
           <div className="overflow-hidden w-full rounded-md">
@@ -193,80 +274,16 @@ const LearningPage = () => {
             )}
           </div>
         </div>
-        <div>
-          <div className="flex flex-col mt-4">
-            <div className="flex justify-between -mx-4 ">
-              <button className="cursor-pointer hover:text-primary">
-                <IconText
-                  text={'Previous'}
-                  leading={<BsArrowLeftShort size={25} />}
-                  onClick={() => {
-                    setScore(-1);
-                    return currentCourseItem > 1
-                      ? setCurrentCourseItem(currentCourseItem - 1)
-                      : null;
-                  }}
-                />
-              </button>
-              <button className="cursor-pointer hover:text-primary">
-                <IconText
-                  text={'Next'}
-                  trailing={<BsArrowRightShort size={25} />}
-                  onClick={() => {
-                    setScore(-1);
-                    return currentCourseItem < courseItems.length
-                      ? setCurrentCourseItem(currentCourseItem + 1)
-                      : null;
-                  }}
-                />
-              </button>
-            </div>
-
-            {courseItems?.map((item, index: number) => (
-              <div
-                key={index}
-                className={`flex items-center justify-between p-2 my-1 border border-gray-300 rounded-md cursor-pointer  ${
-                  currentCourseItem === index + 1
-                    ? 'bg-gray-200'
-                    : 'hover:bg-gray-200'
-                }`}
-                onClick={() => {
-                  setCurrentCourseItem(index + 1);
-                  setScore(-1);
-                }}
-              >
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                  <div className="ml-2">
-                    <p className="text-sm font-semibold">
-                      {item.type === 'subtitle'
-                        ? item.data.title
-                        : item.type === 'exercise'
-                        ? `Exercise: ${courseItems[index - 1].data.title}`
-                        : 'Final Exam'}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item.type === 'subtitle' ? item.data.duration : `5 mins`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* <div
-              className={`flex items-center justify-between p-2 my-1 border border-gray-300 rounded-md cursor-pointer `}
-              onClick={() => setCurrentCourseItem(courseItems.length)}
-            >
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                <div className="ml-2">
-                  <p className="text-sm font-semibold">Final Exam</p>
-                  <p className="text-xs text-gray-500">15 mins</p>
-                </div>
-              </div>
-            </div> */}
-          </div>
-        </div>
+        {/* HERE */}
+        <CourseItemsNav
+          nextItem={nextItem}
+          prevItem={prevItem}
+          courseItems={courseItems}
+          currentCourseItem={currentCourseItem}
+          onClickItem={onClickItem}
+          enrolled={enrolled}
+          progress={progress}
+        />
       </div>
     </Layout>
   );

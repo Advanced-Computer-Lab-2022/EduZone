@@ -23,4 +23,9 @@ export declare type Course = {
     questions: Question[];
   };
   isPublished?: boolean;
+  completed?: {
+    exercises: string[];
+    finalExam: boolean;
+    subtitles: boolean;
+  };
 };
