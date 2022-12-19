@@ -83,6 +83,8 @@ const SingleCourse = () => {
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
+  const [discount, setDiscount] = useState({} as any);
+
   const getCourse = async () => {
     try {
       const res: AxiosResponse<any, any> = await axios({
@@ -98,6 +100,13 @@ const SingleCourse = () => {
       setPromotionExpiryDate(
         new Date(res.data?.discount?.validUntil || new Date())
       );
+      setDiscount({
+        ...res.data?.discount,
+        valid:
+          res.data?.discount &&
+          res.data?.discount?.validFrom < new Date() &&
+          res.data?.discount?.validUntil > new Date(),
+      });
 
       // setRating(
       //   res.data.enrolled?.reduce(
@@ -205,6 +214,14 @@ const SingleCourse = () => {
       course?.instructor?.feedback?.find((s: any) => s.student === user.id)
         ?.review || ''
     );
+
+    setDiscount({
+      ...course?.discount,
+      valid:
+        course?.discount &&
+        course?.discount?.validFrom < new Date() &&
+        course?.discount?.validUntil > new Date(),
+    });
 
     calculateRating();
     console.log(rating);
@@ -374,14 +391,13 @@ const SingleCourse = () => {
             </div>
 
             <p className="text-3xl text-primary font-semibold">
-              {course &&
-                Number(
-                  course?.price *
-                    (withPromotion
-                      ? 1 - (course?.discount?.amount ?? 0) / 100
-                      : 1) *
-                    conversion_rate
-                ).toFixed(2)}{' '}
+              {course && discount.valid
+                ? Number(
+                    course?.price *
+                      (1 - (course?.discount?.amount ?? 0) / 100) *
+                      conversion_rate
+                  ).toFixed(2)
+                : Number(course?.price * conversion_rate).toFixed(2)}{' '}
               {currency}
             </p>
 

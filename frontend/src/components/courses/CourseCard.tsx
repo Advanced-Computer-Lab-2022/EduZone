@@ -25,6 +25,13 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
     if (total === 0) setRating(undefined);
     else setRating(sum / total);
   };
+  const [discount, setDiscount] = useState({
+    ...course.discount,
+    valid:
+      course?.discount &&
+      course?.discount?.validFrom < new Date() &&
+      course?.discount?.validUntil > new Date(),
+  });
 
   useEffect(() => {
     calculateRating();
@@ -47,11 +54,13 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, base }) => {
         <div className="flex justify-between w-full ">
           <div className="text-2xl font-bold ">{course.title}</div>
           <div className="text-xl font-medium ">
-            {Number(
-              course?.price *
-                (1 - (course?.discount?.amount ?? 0) / 100) *
-                conversion_rate
-            ).toFixed(2)}{' '}
+            {discount.valid
+              ? Number(
+                  course?.price *
+                    (1 - (course?.discount?.amount ?? 0) / 100) *
+                    conversion_rate
+                ).toFixed(2)
+              : Number(course?.price * conversion_rate).toFixed(2)}{' '}
             {currency}
           </div>
         </div>

@@ -69,7 +69,7 @@ const InstructorLayout = ({
             sidebarWidth={sidebarWidth}
           />
           <div
-            className="p-5 bg-zinc-100 min-h-screen pt-20 w-full"
+            className="p-5 px-16 bg-zinc-100 min-h-screen pt-20 w-full"
             // style={{
             //   width: windowWidth - sidebarWidth,
             // }}
