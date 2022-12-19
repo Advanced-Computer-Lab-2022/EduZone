@@ -61,7 +61,7 @@ export const getAllCourses = async (
       'img',
       'feedback',
     ])
-    .sort({ createdAt: -1 });
+    .sort({ enrolled: -1 });
 
   if (page && limit) {
     const currentPage = parseInt(page);

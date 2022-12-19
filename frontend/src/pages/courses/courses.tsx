@@ -11,6 +11,7 @@ import { RootState } from '../../redux/store';
 import { FaUserAlt } from 'react-icons/fa';
 import CourseCard from '../../components/courses/CourseCard';
 import FilterBox from '../../components/courses/FilterBox';
+import CourseCardBlock from '../../components/courses/CourseCardBlock';
 const Courses = () => {
   const [courses, setCourses] = useState([] as any[]);
   const [pagination, setPagination] = useState({} as any);
@@ -93,13 +94,16 @@ const Courses = () => {
           {
             <div
               className={`${
-                filterOpen ? 'col-span-3' : 'col-span-4'
-              } flex flex-col space-y-4 `}
+                filterOpen ? 'col-span-3 grid-cols-3' : 'col-span-4 grid-cols-4'
+              } grid  gap-4 `}
             >
               {courses &&
                 courses.length > 0 &&
                 courses?.map((course) => (
-                  <CourseCard course={course} key={course._id.toString()} />
+                  <CourseCardBlock
+                    course={course}
+                    key={course._id.toString()}
+                  />
                 ))}
 
               {courses.length === 0 &&
