@@ -117,7 +117,14 @@ const courseSchema = new Schema({
         min: 0,
         max: 100,
       },
-      validUntil: Date,
+      validUntil: {
+        type: Date,
+        required: true,
+      },
+      validFrom: {
+        type: Date,
+        required: false,
+      },
     },
     required: false,
   },

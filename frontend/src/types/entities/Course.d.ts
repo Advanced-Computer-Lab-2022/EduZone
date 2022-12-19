@@ -15,6 +15,7 @@ export declare type Course = {
   discount?: {
     amount: number;
     validUntil: Date;
+    validFrom: Date;
   };
   enrolled: { studentId: string; rating?: number }[];
   createdAt: Date;

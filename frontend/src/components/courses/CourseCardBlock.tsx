@@ -1,23 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
+import { CourseCardProps } from '../../types';
 import { Course } from '../../types/entities/Course';
 import { calculateCourseRating } from '../../utils';
 import Truncate from '../common/Truncate';
 import DisplayRating from './DisplayRating';
 
-const CourseCardBlock: React.FC<{ course: Course }> = ({ course }) => {
+const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
   const { total, rating } = calculateCourseRating(course);
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
   const navigate = useNavigate();
+  const [discount, setDiscount] = useState({
+    ...course.discount,
+    valid:
+      course?.discount &&
+      course?.discount?.validFrom < new Date() &&
+      course?.discount?.validUntil > new Date(),
+  });
+
   return (
     <div
       key={course._id.toString()}
       className="w-full bg-white shadow-sm hover:shadow-md  rounded-lg duration-150 flex flex-col cursor-pointer"
-      onClick={() => navigate(`/courses/${course._id}`)}
+      onClick={() => navigate(`${base || ''}/courses/${course._id}`)}
     >
       <img
         src={
@@ -58,11 +67,13 @@ const CourseCardBlock: React.FC<{ course: Course }> = ({ course }) => {
         </p>
         <div className=" mt-auto w-full flex items-center pt-2 font-sans justify-between">
           <p className="text-xl font-semibold text-primary">
-            {Number(
-              course?.price *
-                (1 - (course?.discount?.amount ?? 0) / 100) *
-                conversion_rate
-            ).toFixed(2)}{' '}
+            {discount.valid
+              ? Number(
+                  course?.price *
+                    (1 - (course?.discount?.amount ?? 0) / 100) *
+                    conversion_rate
+                ).toFixed(2)
+              : Number(course?.price * conversion_rate).toFixed(2)}{' '}
             <span className="text-xs ">{currency}</span>
           </p>
           <Link to={`/courses/${course?._id}`}>

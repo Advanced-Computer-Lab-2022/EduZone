@@ -14,6 +14,7 @@ import InstructorLayout from '../../../components/layout/Instructor/InstructorLa
 import SearchBar from '../../../components/layout/common/navbar/trainee/SearchBar';
 // import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
 import { axios } from '../../../utils';
+import CourseCardBlock from '../../../components/courses/CourseCardBlock';
 
 const InstructorCourses = () => {
   const { id: instructorId } = useParams();
@@ -99,18 +100,20 @@ const InstructorCourses = () => {
         {
           <div
             className={`${
-              filterOpen ? 'col-span-3' : 'col-span-4'
-            } flex flex-col space-y-4 `}
+              filterOpen ? 'col-span-3 grid-cols-4' : 'col-span-4 grid-cols-5'
+            } grid gap-4`}
           >
             {courses &&
               courses.length > 0 &&
-              courses?.map((course) => (
-                <CourseCard
-                  course={course}
-                  key={course._id.toString()}
-                  base={`/instructor/${instructorId}`}
-                />
-              ))}
+              courses?.map((course) => {
+                return (
+                  <CourseCardBlock
+                    course={course}
+                    key={course._id.toString()}
+                    base={`/instructor/${instructorId}`}
+                  />
+                );
+              })}
 
             {courses.length === 0 &&
               (!loading ? (

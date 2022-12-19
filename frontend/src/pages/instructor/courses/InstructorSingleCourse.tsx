@@ -27,6 +27,9 @@ const InstructorSingleCourse = () => {
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
+  const [promotionStartDate, setPromotionStartDate] = useState(
+    null as Date | null
+  );
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
     event.target.pauseVideo();
   };
@@ -80,12 +83,17 @@ const InstructorSingleCourse = () => {
           discount: {
             amount: data.amount,
             validUntil: promotionExpiryDate,
+            validFrom: promotionStartDate,
           },
         },
       });
       setCourse({
         ...res.data,
-        discount: { amount: data.amount, validUntil: promotionExpiryDate },
+        discount: {
+          amount: data.amount,
+          validUntil: promotionExpiryDate,
+          validFrom: promotionStartDate,
+        },
       });
       setAddPromotionOpen(false);
     } catch (error) {
@@ -108,7 +116,7 @@ const InstructorSingleCourse = () => {
       console.log(error);
     }
   };
-
+  const [discount, setDiscount] = useState({} as any);
   useEffect(() => {
     if (!course) getCourse();
     setWithPromotion(
@@ -120,6 +128,14 @@ const InstructorSingleCourse = () => {
     setPromotionExpiryDate(
       new Date(course?.discount?.validUntil || new Date())
     );
+    setPromotionStartDate(new Date(course?.discount?.validFrom || new Date()));
+    setDiscount({
+      ...course?.discount,
+      valid:
+        course?.discount &&
+        course?.discount?.validFrom < new Date() &&
+        course?.discount?.validUntil > new Date(),
+    });
     calculateRating();
   }, [course]);
   return (
@@ -237,14 +253,13 @@ const InstructorSingleCourse = () => {
               /> */}
               <p className="text-xl font-medium">{course?.title}</p>
               <p className="text-3xl text-primary font-semibold">
-                {course &&
-                  Number(
-                    course?.price *
-                      (withPromotion
-                        ? 1 - (course?.discount?.amount ?? 0) / 100
-                        : 1) *
-                      conversion_rate
-                  ).toFixed(2)}{' '}
+                {course && discount.valid
+                  ? Number(
+                      course?.price *
+                        (1 - (course?.discount?.amount ?? 0) / 100) *
+                        conversion_rate
+                    ).toFixed(2)
+                  : Number(course?.price * conversion_rate).toFixed(2)}{' '}
                 {currency}
               </p>
               {user.id !== course?.instructor?._id ? (
@@ -270,6 +285,13 @@ const InstructorSingleCourse = () => {
                           </span>
                         </p>
                         <span className="text-gray-500">
+                          Valid from{'  '}
+                          {new Date(
+                            course?.discount?.validFrom || ''
+                          ).toLocaleDateString()}
+                        </span>
+                        {'  -  '}
+                        <span className="text-gray-500">
                           Valid until{' '}
                           {new Date(
                             course?.discount?.validUntil || ''
@@ -279,7 +301,7 @@ const InstructorSingleCourse = () => {
                     ) : (
                       <div>
                         Promotion:
-                        <span className="text-red-700">Inactive</span>
+                        <span className="text-red-700"> Inactive</span>
                       </div>
                     )}
                   </p>
@@ -303,15 +325,35 @@ const InstructorSingleCourse = () => {
                         max={100}
                         required
                       />
-                      <label htmlFor="validUntil">Valid Until</label>
-                      <DatePicker
-                        name="validUntil"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
-                        selected={promotionExpiryDate}
-                        onChange={(date: Date) => setPromotionExpiryDate(date)}
-                        required
-                        minDate={new Date()}
-                      />
+                      <div className="flex gap-2">
+                        <div>
+                          <label htmlFor="validFrom">Valid From</label>
+                          <DatePicker
+                            name="validFrom"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
+                            selected={promotionStartDate}
+                            onChange={(date: Date) =>
+                              setPromotionStartDate(date)
+                            }
+                            required
+                            minDate={new Date()}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="validUntil">Valid Until</label>
+                          <DatePicker
+                            name="validUntil"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
+                            selected={promotionExpiryDate}
+                            onChange={(date: Date) =>
+                              setPromotionExpiryDate(date)
+                            }
+                            required
+                            minDate={promotionStartDate ?? new Date()}
+                          />
+                        </div>
+                      </div>
 
                       <button className="w-full bg-primary text-white rounded-md py-2 mb-2">
                         Save
