@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 import { Course } from '../../types/entities/Course';
 import { calculateCourseRating } from '../../utils';
@@ -12,10 +12,12 @@ const CourseCardBlock: React.FC<{ course: Course }> = ({ course }) => {
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
+  const navigate = useNavigate();
   return (
     <div
       key={course._id.toString()}
-      className="w-full bg-white shadow-md  rounded-lg  duration-150 flex flex-col"
+      className="w-full bg-white shadow-sm hover:shadow-md  rounded-lg duration-150 flex flex-col cursor-pointer"
+      onClick={() => navigate(`/courses/${course._id}`)}
     >
       <img
         src={
