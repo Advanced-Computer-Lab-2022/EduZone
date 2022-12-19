@@ -8,7 +8,7 @@ import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { Course } from '../../../types/entities/Course';
 import { Subtitle } from '../../../types/entities/Subtitle';
-import { axios } from '../../../utils';
+import { axios, calculateCourseRating } from '../../../utils';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -18,6 +18,7 @@ import { getCookie } from 'cookies-next';
 import RatingBox from '../../../components/courses/RatingBox';
 import Modal from '../../../components/common/Modal';
 import StripeCheckout, { Token } from 'react-stripe-checkout';
+import calculateRatingFunc from '../../../utils/rating';
 
 const SingleCourse = () => {
   const { id } = useParams();
@@ -52,17 +53,10 @@ const SingleCourse = () => {
   };
 
   const calculateRating = () => {
-    let total = 0;
-    let sum = 0;
-    course?.enrolled?.map((s: any) => {
-      if (s.rating) {
-        sum += s.rating;
-        total++;
-      }
-    });
+    const { total, rating } = calculateCourseRating(course);
 
     if (total === 0) setRating(undefined);
-    else setRating(sum / total);
+    else setRating(rating);
   };
 
   const onBuyCourse = async (token: Token) => {

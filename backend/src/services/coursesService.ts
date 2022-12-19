@@ -622,3 +622,12 @@ export const payForCourse = async (
 
   return true;
 };
+
+export const getMostPopularCourses = async (limit?: number) => {
+  // get top 5 courses with most enrolled students
+  const courses = await CourseModel.find()
+    .sort({ enrolled: -1 })
+    .limit(limit ?? 5)
+    .populate('instructor', ['name', 'img']);
+  return courses;
+};

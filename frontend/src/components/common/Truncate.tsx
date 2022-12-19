@@ -8,18 +8,28 @@ const Truncate: React.FC<TruncateProps> = ({
   onClickMore,
 }) => {
   const [truncatedText, setTruncatedText] = useState('' as string);
+  const [isTruncated, setIsTruncated] = useState(true);
   useEffect(() => {
+    if (length > text.split(' ').length) setIsTruncated(false);
     if (text) {
       const array = text.split(' ').slice(0, length);
+      console.log(array);
       setTruncatedText(array.join(' ') + '... ');
     }
   }, [text]);
 
   return (
     <div>
-      {text.length > length ? truncatedText : text}
-      {text && more && (
-        <span className="underline cursor-pointer">Read More</span>
+      {isTruncated ? truncatedText : text}
+      {text && text.split(' ').length > length && more && (
+        <span
+          className="underline cursor-pointer ml-1   text-primary text-sm"
+          onClick={() => {
+            setIsTruncated(!isTruncated);
+          }}
+        >
+          {isTruncated ? 'Read More' : 'Show less'}
+        </span>
       )}
     </div>
   );

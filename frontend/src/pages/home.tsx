@@ -1,9 +1,15 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import Truncate from '../components/common/Truncate';
 import CategoryCards from '../components/courses/CategoryCards';
+import DisplayRating from '../components/courses/DisplayRating';
+import PopularCourses from '../components/courses/PopularCourses';
 import Layout from '../components/layout/Trainee/Layout';
 import { logout } from '../redux/features/auth.reducer';
+import { RootState } from '../redux/store';
+import { Course } from '../types/entities/Course';
+import { axios, calculateCourseRating } from '../utils';
 
 const Home = () => {
   return (
@@ -17,16 +23,7 @@ const Home = () => {
           </Link>
         </div>
         <CategoryCards />
-        <div>
-          <p className="text-2xl font-medium text-gray-600 my-2">Placeholder</p>
-          <div className="grid grid-cols-5 gap-4">
-            <div className="w-full bg-gray-300 h-52 rounded-lg animate-pulse duration-150"></div>
-            <div className="w-full bg-gray-300 h-52 rounded-lg animate-pulse duration-150"></div>
-            <div className="w-full bg-gray-300 h-52 rounded-lg animate-pulse duration-150"></div>
-            <div className="w-full bg-gray-300 h-52 rounded-lg animate-pulse duration-150"></div>
-            <div className="w-full bg-gray-300 h-52 rounded-lg animate-pulse duration-150"></div>
-          </div>
-        </div>
+        <PopularCourses />
         <div>
           <p className="text-2xl font-medium text-gray-600 my-2">Placeholder</p>
           <div className="grid grid-cols-5 gap-4">
