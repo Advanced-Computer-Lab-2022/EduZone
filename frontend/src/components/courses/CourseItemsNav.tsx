@@ -8,7 +8,7 @@ import {
 } from 'react-icons/bs';
 import { FaTrophy } from 'react-icons/fa';
 import { TbCertificate } from 'react-icons/tb';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import IconText from '../common/IconText';
 import CourseItem from './CourseItem';
 
@@ -52,6 +52,8 @@ const CourseItemsNav: React.FC<CourseItemsNavProps> = ({
     }
     return false;
   };
+
+  const { id: courseId } = useParams<{ id: string }>();
   return (
     <div>
       <div className="flex flex-col mt-4">
@@ -76,7 +78,7 @@ const CourseItemsNav: React.FC<CourseItemsNavProps> = ({
               </span>
             </p>
             {progress === 100 && !failed && (
-              <Link to="">
+              <Link to={`/courses/${courseId}/certificate`}>
                 <p className="ml-2 text-gray-500 flex gap-2 hover:text-primary ">
                   Get your certificate
                   <TbCertificate size={20} />

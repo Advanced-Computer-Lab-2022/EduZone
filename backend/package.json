@@ -42,6 +42,7 @@
     "mailgun-js": "^0.22.0",
     "mongoose": "^6.7.5",
     "nodemailer": "^6.8.0",
+    "pdf-creator-node": "^2.3.5",
     "stripe": "^11.4.0"
   }
 }

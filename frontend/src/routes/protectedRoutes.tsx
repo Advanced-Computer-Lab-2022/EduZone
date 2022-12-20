@@ -17,6 +17,7 @@ import TraineePolicy from '../pages/trainee/TraineePolicy';
 import TraineeProfile from '../pages/trainee/TraineeProfile';
 import TraineeChangePassword from '../pages/trainee/TraineeChangePassword';
 import InstructorChangePassword from '../pages/instructor/profile/InstructorChangePassword';
+import CourseCertificate from '../components/courses/Certificate';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -96,6 +97,10 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'courses/:id/learning',
     element: <LearningPage />,
+  },
+  {
+    path: 'courses/:id/certificate',
+    element: <CourseCertificate />,
   },
   {
     path: 'trainee/:id/courses',

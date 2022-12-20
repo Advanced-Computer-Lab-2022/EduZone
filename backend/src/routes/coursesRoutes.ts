@@ -1,5 +1,6 @@
 import express from 'express';
 import { JWTAccessDecoder } from '../middlewares/jwt';
+import fs from 'fs';
 import {
   addCourse,
   addSubtitleExercise,
@@ -10,6 +11,7 @@ import {
   finishCourse,
   getAllCourses,
   getCourseById,
+  getCourseCertificate,
   getMostPopularCourses,
   getSubtitleByCourseAndId,
   getTraineeCourses,
@@ -80,10 +82,30 @@ router.get('/popular', async (req, res) => {
 
 router.patch('/:id/finish', JWTAccessDecoder, async (req, res) => {
   try {
+    const { id: studentId, name, email } = req.body.token;
+    const { id: courseId } = req.params;
+    const course = await finishCourse(courseId, studentId, name, email);
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.get('/:id/certificate', JWTAccessDecoder, async (req, res) => {
+  try {
     const { id: studentId } = req.body.token;
     const { id: courseId } = req.params;
-    const course = await finishCourse(courseId, studentId);
-    return res.status(200).json(course);
+    const certificate = await getCourseCertificate(courseId, studentId);
+    console.log(certificate);
+    // const file = fs.createReadStream(`${process.cwd()}/${certificate}`);
+    // const stat = fs.statSync(`${process.cwd()}/${certificate}`);
+    // res.setHeader('Content-Length', stat.size);
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', 'attachment; filename=' + certificate);
+    // file.pipe(res);
+    return res.status(200).json({ certificate: certificate });
+    // .json({ certificate: `${process.cwd()}/${certificate}` });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: (e as any).message });

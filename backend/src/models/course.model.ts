@@ -146,6 +146,10 @@ const courseSchema = new Schema({
   enrolled: {
     type: [
       {
+        certificate: {
+          type: String,
+          required: false,
+        },
         payment: {
           id: {
             type: String,
@@ -179,6 +183,10 @@ const courseSchema = new Schema({
         },
         finished: {
           type: Boolean,
+          required: false,
+        },
+        finishedAt: {
+          type: Date,
           required: false,
         },
         completed: {
