@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import { coursesRoutes, usersRoutes, authRoutes } from './routes';
+import { coursesRoutes, usersRoutes, authRoutes, mediaRoutes } from './routes';
 
 dotenv.config();
 
@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 app.use('/courses', coursesRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
+app.use('/media', mediaRoutes);
 
 /* Error Handlers */
 app.use((req, res) => {

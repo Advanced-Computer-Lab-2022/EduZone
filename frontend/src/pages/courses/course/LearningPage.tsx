@@ -61,7 +61,7 @@ const LearningPage = () => {
 
   const finishCourse = async () => {
     const res = await axios({
-      url: '/courses/' + id + '/complete',
+      url: '/courses/' + id + '/finish',
       method: 'PATCH',
       data: {},
       headers: {
@@ -148,17 +148,28 @@ const LearningPage = () => {
         courseItems.length) *
         100
     );
-    // setScore(
-    //   course?.enrolled
-    //     ?.find((e: any) => e?.studentId === user?.id)
-    //     ?.exercises.find(
-    //       (e: any) =>
-    //         e.exerciseId ===
-    //         courseItems[currentCourseItem - 1]?.data?._id.toString()
-    //     )?.score
-    // );
 
+    if (
+      (!course?.enrolled?.find((e: any) => e?.studentId === user?.id)
+        ?.finished &&
+        progress === 100 &&
+        course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.finalExam
+          ?.score) ??
+      0 > 50
+    ) {
+      finishCourse();
+    }
     if ((score === -1 && enrolled) || refresh) {
+      // setScore(
+      //   course?.enrolled
+      //     ?.find((e: any) => e?.studentId === user?.id)
+      //     ?.exercises.find(
+      //       (e: any) =>
+      //         e.exerciseId ===
+      //         courseItems[currentCourseItem - 1]?.data?._id.toString()
+      //     )?.score
+      // );
+
       if (courseItems[currentCourseItem - 1]?.type === 'exercise') {
         setScore(
           enrolled?.exercises.find(

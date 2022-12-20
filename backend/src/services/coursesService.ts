@@ -3,6 +3,9 @@ import { CourseModel, UserModel } from '../models';
 import { ObjectId } from 'mongodb';
 import durationConverter from '../utils/duration_converter';
 import Stripe from 'stripe';
+import fs from 'fs';
+import pdf from 'pdf-creator-node';
+import sendMail from '../utils/sendMail';
 // const stripe = require('stripe')();
 
 export const getAllCourses = async (
@@ -692,7 +695,46 @@ export const completeCourseItem = async (
   return course;
 };
 
-export const finishCourse = async (courseId: string, studentId: string) => {
+const sendCertificate = (
+  studentEmail: string,
+  studentName: string,
+  courseTitle: string,
+  certificate: string
+) => {
+  // http://localhost:4000/media/certificates?url=${certificate}
+  const message = `
+  <div style='text-align:center; font-family:sans-serif;'>
+    <h1>
+      Congratulations, ${studentName}
+    </h1>
+    <h2 style="margin-bottom:50px;">
+      You have successfully completed the course: ${courseTitle}
+    </h2>
+    <a clicktracking=off style='background-color:#5087cd; padding: 12px 18px; color:white; text-decoration: none;  border-radius:5px;' href='http://localhost:4000/media/certificates?url=${certificate}' download>
+      Download your certificate
+    </a>
+    <p>If the above button is not working click this link: <a  href='http://localhost:4000/media/certificates?url=${certificate}'>
+      http://localhost:4000/media/certificates?url=${certificate}
+    </a> </p>
+  </div>
+  `;
+  try {
+    sendMail({
+      email: studentEmail,
+      subject: 'Congratulation! Course Completed',
+      html: message,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const finishCourse = async (
+  courseId: string,
+  studentId: string,
+  studentName: string,
+  studentEmail: string
+) => {
   const course = await CourseModel.findById(courseId).populate('instructor', [
     'name',
     'img',
@@ -701,6 +743,7 @@ export const finishCourse = async (courseId: string, studentId: string) => {
   if (!course) throw new Error('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
   if (!enrolled) throw new Error('Not enrolled');
+  // if (!enrolled.finished) return;
   if (!enrolled.completed)
     throw new Error('You need to complete all course items');
   if (enrolled.completed.subtitles.length !== course.subtitles.length)
@@ -713,10 +756,81 @@ export const finishCourse = async (courseId: string, studentId: string) => {
 
   if (!enrolled.completed.finalExam)
     throw new Error('You need to complete final exam');
-  if (enrolled.finalExam?.score! < 50)
+  if (enrolled.finalExam?.score && enrolled.finalExam?.score < 50)
     throw new Error('You need to pass the final exam');
 
   enrolled.finished = true;
+  enrolled.finishedAt = new Date();
   await course.save();
+  const certificate = await getCourseCertificate(courseId, studentId);
+  sendCertificate(studentEmail, studentName, course?.title, certificate);
   return course;
+};
+
+export const getCourseCertificate = async (
+  courseId: string,
+  studentId: string
+) => {
+  const user = await UserModel.findById(studentId);
+  if (!user) throw new Error('User not found');
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  if (enrolled.certificate) return enrolled.certificate;
+  if (!enrolled.finished) throw new Error('You need to finish the course');
+  console.log(process.cwd());
+  const template = fs.readFileSync(
+    `${process.cwd()}/templates/certificate.html`,
+    'utf8'
+  );
+
+  const options = {
+    format: 'A4',
+    orientation: 'landscape',
+    border: '0mm',
+    header: {
+      height: '0mm',
+      contents: '',
+    },
+    footer: {
+      height: '0mm',
+      contents: '',
+    },
+  };
+
+  const filename = `certificates/${courseId}-${studentId}.pdf`;
+  const path = `${process.cwd()}/${filename}`;
+  const bitmap = fs.readFileSync(process.cwd() + '/templates/EduZone.png');
+  const logo = bitmap.toString('base64');
+  const backbmp = fs.readFileSync(
+    process.cwd() + '/templates/certificate_base.png'
+  );
+  const background = backbmp.toString('base64');
+  const document = {
+    html: template,
+    data: {
+      name: user.name,
+      course: course.title,
+      date: new Date(enrolled.finishedAt ?? Date.now()).toLocaleDateString(),
+      logo: logo,
+      background,
+    },
+    path,
+    type: '',
+  };
+
+  pdf
+    .create(document, options)
+    .then(async (res) => {
+      // console.log(res);
+      enrolled.certificate = filename;
+      await course.save();
+    })
+    .catch((error) => {
+      console.error(error);
+      throw error;
+    });
+
+  return filename;
 };
