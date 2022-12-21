@@ -753,12 +753,12 @@ export const finishCourse = async (
     course.subtitles.reduce((acc, s) => acc + (s.exercise ? 1 : 0), 0)
   )
     throw new Error('You need to complete all exercises');
-
-  if (!enrolled.completed.finalExam)
-    throw new Error('You need to complete final exam');
-  if (enrolled.finalExam?.score && enrolled.finalExam?.score < 50)
-    throw new Error('You need to pass the final exam');
-
+  if (course?.finalExam) {
+    if (!enrolled.completed.finalExam)
+      throw new Error('You need to complete final exam');
+    if (enrolled.finalExam?.score && enrolled.finalExam?.score < 50)
+      throw new Error('You need to pass the final exam');
+  }
   enrolled.finished = true;
   enrolled.finishedAt = new Date();
   await course.save();
