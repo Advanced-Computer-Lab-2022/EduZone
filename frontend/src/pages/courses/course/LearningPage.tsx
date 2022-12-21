@@ -6,6 +6,8 @@ import IconText from '../../../components/common/IconText';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { axios } from '../../../utils';
+import { debounce } from 'lodash';
+
 import {
   BsArrowRightShort,
   BsArrowLeftShort,
@@ -30,6 +32,8 @@ const LearningPage = () => {
   const [currentSubtitle, setCurrentSubtitle] = useState(
     undefined as Subtitle | undefined
   );
+  const [notes, setNotes] = useState('');
+
   const navigate = useNavigate();
 
   const completeItem = async (
@@ -73,6 +77,7 @@ const LearningPage = () => {
       setSubtitles(res.data.subtitles);
       setCurrentSubtitle(res.data.subtitles[0]);
 
+      setInitialNotes('');
       setCourseItems([]);
       res.data.subtitles.map((s: Subtitle) => {
         setCourseItems((prev) => [
@@ -113,6 +118,7 @@ const LearningPage = () => {
   const [score, setScore] = useState(-1);
   const [refresh, setRefresh] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [initialNotes, setInitialNotes] = useState('');
 
   useEffect(() => {
     if (!course && !refresh) {
@@ -136,6 +142,25 @@ const LearningPage = () => {
         courseItems.length) *
         100
     );
+
+    setNotes(
+      course?.enrolled
+        ?.find((e: any) => e?.studentId === user?.id)
+        ?.notes.find(
+          (n: any) =>
+            n.subtitleId === courseItems[currentCourseItem - 1]?.data._id
+        )?.notes
+    );
+    if (initialNotes === '') {
+      setInitialNotes(
+        course?.enrolled
+          ?.find((e: any) => e?.studentId === user?.id)
+          ?.notes.find(
+            (n: any) =>
+              n.subtitleId === courseItems[currentCourseItem - 1]?.data._id
+          )?.notes
+      );
+    }
 
     if (
       (!course?.enrolled?.find((e: any) => e?.studentId === user?.id)
@@ -165,19 +190,49 @@ const LearningPage = () => {
   }, [course, enrolled, currentCourseItem]);
 
   const nextItem = () => {
+    setInitialNotes('');
     setScore(-1);
     if (currentCourseItem < courseItems.length)
       setCurrentCourseItem(currentCourseItem + 1);
   };
   const prevItem = () => {
+    setInitialNotes('');
     setScore(-1);
     if (currentCourseItem > 1) setCurrentCourseItem(currentCourseItem - 1);
   };
 
   const onClickItem = (index: number) => {
+    setInitialNotes('');
     setCurrentCourseItem(index + 1);
     setScore(-1);
   };
+
+  const onChangeNote = (e: string) => {
+    setNotes(e);
+  };
+
+  const saveNote = async () => {
+    const res = await axios({
+      url:
+        '/courses/' +
+        id +
+        '/subtitles/' +
+        courseItems[currentCourseItem - 1]?.data._id +
+        '/notes',
+      method: 'PUT',
+      data: {
+        notes,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setInitialNotes(notes);
+    setRefresh(true);
+  };
+
   return (
     <Layout>
       <div className="grid grid-cols-3">
@@ -202,9 +257,15 @@ const LearningPage = () => {
             }}
             courseId={course?._id}
           />
-          <SubtitleNote />
+          {courseItems[currentCourseItem - 1]?.type === 'subtitle' && (
+            <SubtitleNote
+              initialNote={initialNotes ?? ''}
+              onChangeNote={onChangeNote}
+              onSaveNote={saveNote}
+              saved={initialNotes === notes}
+            />
+          )}
         </div>
-        {/* HERE */}
         <CourseItemsNav
           nextItem={nextItem}
           prevItem={prevItem}

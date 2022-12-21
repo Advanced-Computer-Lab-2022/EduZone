@@ -165,11 +165,26 @@ const courseSchema = new Schema({
             required: true,
           },
         },
-        // paymentId: {
-        //   type: String,
-        //   required: true,
-        //   unique: true,
-        // },
+        notes: [
+          {
+            type: {
+              subtitleId: {
+                type: String,
+                required: false,
+              },
+              notes: {
+                type: String,
+                required: false,
+              },
+              lastSaved: {
+                type: Date,
+                required: false,
+                default: Date.now,
+              },
+            },
+            required: false,
+          },
+        ],
         studentId: {
           type: String,
           required: true,

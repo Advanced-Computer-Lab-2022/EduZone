@@ -4,6 +4,7 @@ import fs from 'fs';
 import {
   addCourse,
   addSubtitleExercise,
+  addSubtitleNote,
   buyCourse,
   completeCourseItem,
   createFinalExercise,
@@ -91,6 +92,31 @@ router.patch('/:id/finish', JWTAccessDecoder, async (req, res) => {
     return res.status(500).json({ error: (e as any).message });
   }
 });
+
+router.put(
+  '/:id/subtitles/:subtitleId/notes',
+  JWTAccessDecoder,
+  async (req, res) => {
+    try {
+      const { id: studentId } = req.body.token;
+      const { id: courseId, subtitleId } = req.params;
+      const { notes } = req.body;
+      if (!notes) {
+        return res.status(400).json({ error: 'Notes are required' });
+      }
+      const course = await addSubtitleNote(
+        courseId,
+        subtitleId,
+        studentId,
+        notes
+      );
+      return res.status(200).json(course);
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ error: (e as any).message });
+    }
+  }
+);
 
 router.get('/:id/certificate', JWTAccessDecoder, async (req, res) => {
   try {

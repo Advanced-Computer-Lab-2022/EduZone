@@ -362,6 +362,7 @@ export const buyCourse = async (
       id: paymentId,
       amount: course.price as number,
     },
+    notes: [],
   });
   await course.save();
 
@@ -837,4 +838,33 @@ export const getCourseCertificate = async (
     });
 
   return filename;
+};
+
+export const addSubtitleNote = async (
+  courseId: string,
+  subtitleId: string,
+  studentId: string,
+  notes: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  const subtitleNote = enrolled.notes.find((n) => n.subtitleId === subtitleId);
+  if (!subtitleNote) {
+    enrolled.notes.push({
+      subtitleId,
+      notes,
+      lastSaved: new Date(),
+    });
+  } else {
+    (subtitleNote.notes = notes), (subtitleNote.lastSaved = new Date());
+  }
+  await course.save();
+  return course;
 };
