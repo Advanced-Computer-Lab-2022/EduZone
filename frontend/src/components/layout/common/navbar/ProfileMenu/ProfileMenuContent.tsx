@@ -1,5 +1,10 @@
 import React, { LegacyRef } from 'react';
-import { FaUserAlt, FaUserEdit, FaChevronRight } from 'react-icons/fa';
+import {
+  FaUserAlt,
+  FaUserEdit,
+  FaChevronRight,
+  FaFolder,
+} from 'react-icons/fa';
 import { RiProfileFill } from 'react-icons/ri';
 import { AiFillProfile, AiTwotoneSetting } from 'react-icons/ai';
 import { CgOrganisation } from 'react-icons/cg';
@@ -43,29 +48,50 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
   };
   return (
     <div
-      className="bg-slate-100  border-zinc-200 border rounded-md absolute right-0 top-14  w-72 flex flex-col"
+      className="bg-white shadow-lg rounded-md absolute right-0 top-14  w-72 flex flex-col overflow-hidden"
       ref={ref}
     >
       {/*Profile Menu options */}
       {user?.role == 'instructor' ? (
-        <ProfileMenuItem>
-          <IconText
-            text={'Instructor Dashboard'}
-            leading={<CgOrganisation className="w-6 text-gray-400" />}
-            link={'internal'}
-            trailing={<FaChevronRight size={12} className="ml-auto" />}
-            url={`/instructor/${user.id}`}
-          />
-        </ProfileMenuItem>
+        <div>
+          <ProfileMenuItem>
+            <IconText
+              text={'Instructor Dashboard'}
+              leading={
+                <CgOrganisation className="w-6 text-gray-400 group-hover:text-primary" />
+              }
+              link={'internal'}
+              trailing={<FaChevronRight size={12} className="ml-auto" />}
+              url={`/instructor/${user.id}`}
+            />
+          </ProfileMenuItem>
+        </div>
       ) : null}
       {user?.role == 'admin' ? (
+        <div>
+          <ProfileMenuItem>
+            <IconText
+              text={'Admin Dashboard'}
+              leading={
+                <CgOrganisation className="w-6 text-gray-400 group-hover:text-primary" />
+              }
+              link={'internal'}
+              trailing={<FaChevronRight size={12} className="ml-auto" />}
+              url={`/admin`}
+            />
+          </ProfileMenuItem>
+        </div>
+      ) : null}
+      {user?.role == 'trainee' || user?.role == 'corp_trainee' ? (
         <ProfileMenuItem>
           <IconText
-            text={'Admin Dashboard'}
-            leading={<CgOrganisation className="w-6 text-gray-400" />}
+            text={'My Courses'}
+            leading={
+              <FaFolder className="w-6 text-gray-400 group-hover:text-primary" />
+            }
             link={'internal'}
             trailing={<FaChevronRight size={12} className="ml-auto" />}
-            url={`/admin`}
+            url={`/trainee/${user.id}/courses`}
           />
         </ProfileMenuItem>
       ) : null}
@@ -73,7 +99,9 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
       <ProfileMenuItem>
         <IconText
           text={user.name}
-          leading={<FaUserAlt className="w-6 text-gray-400" />}
+          leading={
+            <FaUserAlt className="w-6 text-gray-400 group-hover:text-primary" />
+          }
           trailing={<FaChevronRight size={12} className="ml-auto" />}
           link={'internal'}
           url={
@@ -86,7 +114,12 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
       <ProfileMenuItem>
         <IconText
           text="Settings"
-          leading={<AiTwotoneSetting size={20} className="w-6 text-gray-400" />}
+          leading={
+            <AiTwotoneSetting
+              size={20}
+              className="w-6 text-gray-400 group-hover:text-primary"
+            />
+          }
           // trailing={<FaChevronRight size={12} className='ml-auto' />}
         />
       </ProfileMenuItem>
@@ -95,7 +128,12 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
         <IconText
           text="Logout"
           onClick={() => handleLogout()}
-          leading={<TbLogout size={20} className="w-6 text-gray-400" />}
+          leading={
+            <TbLogout
+              size={20}
+              className="w-6 text-gray-400 group-hover:text-primary"
+            />
+          }
           // trailing={<FaChevronRight size={12} className='ml-auto' />}
         />
       </ProfileMenuItem>

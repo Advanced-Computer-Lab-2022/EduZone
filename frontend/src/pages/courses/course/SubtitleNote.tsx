@@ -25,7 +25,7 @@ const SubtitleNote: React.FC<SubtitleNoteProps> = ({
         <div className="flex items-center  gap-3">
           {!saved && <p className="text-gray-500 text-sm">Not Saved</p>}
           <button
-            className=" px-4 py-1 text-white bg-primary rounded-md flex items-center gap-2 disabled:opacity-50"
+            className=" px-4 py-2 text-white bg-primary rounded-md flex items-center gap-2 disabled:opacity-50"
             onClick={async () => {
               setLoading(true);
               await onSaveNote();
@@ -36,7 +36,7 @@ const SubtitleNote: React.FC<SubtitleNoteProps> = ({
             {loading ? (
               <CircularLoadingIndicator loading={true} />
             ) : (
-              <MdCloudUpload />
+              <MdCloudUpload size={18} />
             )}
             {saved ? 'Saved' : 'Save'}
           </button>
