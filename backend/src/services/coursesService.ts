@@ -763,7 +763,11 @@ export const finishCourse = async (
   enrolled.finishedAt = new Date();
   await course.save();
   const certificate = await getCourseCertificate(courseId, studentId);
-  sendCertificate(studentEmail, studentName, course?.title, certificate);
+  if (!enrolled.certificateSent) {
+    sendCertificate(studentEmail, studentName, course?.title, certificate);
+    enrolled.certificateSent = true;
+  }
+  await course.save();
   return course;
 };
 

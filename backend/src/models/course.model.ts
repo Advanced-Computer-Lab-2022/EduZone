@@ -150,6 +150,10 @@ const courseSchema = new Schema({
           type: String,
           required: false,
         },
+        certificateSent: {
+          type: Boolean,
+          required: false,
+        },
         payment: {
           id: {
             type: String,
