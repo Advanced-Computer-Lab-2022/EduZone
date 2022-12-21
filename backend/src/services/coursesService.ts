@@ -362,6 +362,7 @@ export const buyCourse = async (
       id: paymentId,
       amount: course.price as number,
     },
+    notes: [],
   });
   await course.save();
 
@@ -753,17 +754,21 @@ export const finishCourse = async (
     course.subtitles.reduce((acc, s) => acc + (s.exercise ? 1 : 0), 0)
   )
     throw new Error('You need to complete all exercises');
-
-  if (!enrolled.completed.finalExam)
-    throw new Error('You need to complete final exam');
-  if (enrolled.finalExam?.score && enrolled.finalExam?.score < 50)
-    throw new Error('You need to pass the final exam');
-
+  if (course?.finalExam) {
+    if (!enrolled.completed.finalExam)
+      throw new Error('You need to complete final exam');
+    if (enrolled.finalExam?.score && enrolled.finalExam?.score < 50)
+      throw new Error('You need to pass the final exam');
+  }
   enrolled.finished = true;
   enrolled.finishedAt = new Date();
   await course.save();
   const certificate = await getCourseCertificate(courseId, studentId);
-  sendCertificate(studentEmail, studentName, course?.title, certificate);
+  if (!enrolled.certificateSent) {
+    sendCertificate(studentEmail, studentName, course?.title, certificate);
+    enrolled.certificateSent = true;
+  }
+  await course.save();
   return course;
 };
 
@@ -833,4 +838,33 @@ export const getCourseCertificate = async (
     });
 
   return filename;
+};
+
+export const addSubtitleNote = async (
+  courseId: string,
+  subtitleId: string,
+  studentId: string,
+  notes: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+
+  if (!course) throw new Error('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new Error('Not enrolled');
+  const subtitleNote = enrolled.notes.find((n) => n.subtitleId === subtitleId);
+  if (!subtitleNote) {
+    enrolled.notes.push({
+      subtitleId,
+      notes,
+      lastSaved: new Date(),
+    });
+  } else {
+    (subtitleNote.notes = notes), (subtitleNote.lastSaved = new Date());
+  }
+  await course.save();
+  return course;
 };

@@ -2,11 +2,12 @@ import { AxiosResponse } from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import YouTube, { YouTubeProps } from 'react-youtube';
 import IconText from '../../../components/common/IconText';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { axios } from '../../../utils';
+import { debounce } from 'lodash';
+
 import {
   BsArrowRightShort,
   BsArrowLeftShort,
@@ -19,6 +20,9 @@ import ExerciseView from '../../../components/courses/Exercises/ExerciseView';
 import GradeView from '../../../components/courses/Exercises/GradeView';
 import { getCookie } from 'cookies-next';
 import CourseItemsNav from '../../../components/courses/CourseItemsNav';
+import LearningHeader from '../../../components/courses/Learning/LearningHeader';
+import LearningMainContent from '../../../components/courses/Learning/LearningMainContent';
+import SubtitleNote from './SubtitleNote';
 const LearningPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -28,19 +32,9 @@ const LearningPage = () => {
   const [currentSubtitle, setCurrentSubtitle] = useState(
     undefined as Subtitle | undefined
   );
-  const navigate = useNavigate();
-  const onPlayerReady: YouTubeProps['onReady'] = (event) => {
-    event.target.pauseVideo();
-  };
+  const [notes, setNotes] = useState('');
 
-  const opts: YouTubeProps['opts'] = {
-    width: '100%',
-    height: '500',
-    playerVars: {
-      autoplay: 0,
-      muted: 0,
-    },
-  };
+  const navigate = useNavigate();
 
   const completeItem = async (
     item: 'exercise' | 'subtitle' | 'finalExam',
@@ -83,6 +77,7 @@ const LearningPage = () => {
       setSubtitles(res.data.subtitles);
       setCurrentSubtitle(res.data.subtitles[0]);
 
+      setInitialNotes('');
       setCourseItems([]);
       res.data.subtitles.map((s: Subtitle) => {
         setCourseItems((prev) => [
@@ -123,14 +118,13 @@ const LearningPage = () => {
   const [score, setScore] = useState(-1);
   const [refresh, setRefresh] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [initialNotes, setInitialNotes] = useState('');
 
   useEffect(() => {
     if (!course && !refresh) {
       getCourse();
     }
-    // setCurrentSubtitle(
-    //   subtitles.find((s: Subtitle) => s.order === subtitleNumber)
-    // );
+
     if (enrolled === null || !enrolled || refresh)
       setEnrolled(
         course?.enrolled?.find((e: any) => e?.studentId === user?.id)
@@ -149,6 +143,25 @@ const LearningPage = () => {
         100
     );
 
+    setNotes(
+      course?.enrolled
+        ?.find((e: any) => e?.studentId === user?.id)
+        ?.notes.find(
+          (n: any) =>
+            n.subtitleId === courseItems[currentCourseItem - 1]?.data._id
+        )?.notes
+    );
+    if (initialNotes === '') {
+      setInitialNotes(
+        course?.enrolled
+          ?.find((e: any) => e?.studentId === user?.id)
+          ?.notes.find(
+            (n: any) =>
+              n.subtitleId === courseItems[currentCourseItem - 1]?.data._id
+          )?.notes
+      );
+    }
+
     if (
       (!course?.enrolled?.find((e: any) => e?.studentId === user?.id)
         ?.finished &&
@@ -160,16 +173,6 @@ const LearningPage = () => {
       finishCourse();
     }
     if ((score === -1 && enrolled) || refresh) {
-      // setScore(
-      //   course?.enrolled
-      //     ?.find((e: any) => e?.studentId === user?.id)
-      //     ?.exercises.find(
-      //       (e: any) =>
-      //         e.exerciseId ===
-      //         courseItems[currentCourseItem - 1]?.data?._id.toString()
-      //     )?.score
-      // );
-
       if (courseItems[currentCourseItem - 1]?.type === 'exercise') {
         setScore(
           enrolled?.exercises.find(
@@ -186,106 +189,83 @@ const LearningPage = () => {
     setRefresh(false);
   }, [course, enrolled, currentCourseItem]);
 
-  // console.log(enrolled);
-  // console.log(courseItems[currentCourseItem - 1]?.data?._id);
-  // console.log(
-  //   enrolled?.exercises.find(
-  //     (e: any) =>
-  //       e.exerciseId ===
-  //       courseItems[currentCourseItem - 1]?.data?._id.toString()
-  //   )?.score
-  // );
   const nextItem = () => {
+    setInitialNotes('');
     setScore(-1);
     if (currentCourseItem < courseItems.length)
       setCurrentCourseItem(currentCourseItem + 1);
   };
   const prevItem = () => {
+    setInitialNotes('');
     setScore(-1);
     if (currentCourseItem > 1) setCurrentCourseItem(currentCourseItem - 1);
   };
 
   const onClickItem = (index: number) => {
+    setInitialNotes('');
     setCurrentCourseItem(index + 1);
     setScore(-1);
   };
+
+  const onChangeNote = (e: string) => {
+    setNotes(e);
+  };
+
+  const saveNote = async () => {
+    const res = await axios({
+      url:
+        '/courses/' +
+        id +
+        '/subtitles/' +
+        courseItems[currentCourseItem - 1]?.data._id +
+        '/notes',
+      method: 'PUT',
+      data: {
+        notes,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setInitialNotes(notes);
+    setRefresh(true);
+  };
+
   return (
     <Layout>
       <div className="grid grid-cols-3">
         <div className="col-span-2 my-2 space-y-4 w-[95%]">
-          <div className="flex items-center justify-between ">
-            <div>
-              <span className="text-2xl font-medium">
-                {courseItems[currentCourseItem - 1]?.type === 'subtitle'
-                  ? courseItems[currentCourseItem - 1]?.data.title
-                  : `Exercise: ${
-                      courseItems[currentCourseItem - 2]?.data.title
-                    }`}
-              </span>
-              <Link to={'/courses/' + course?._id}>
-                <p className="text-gray-600 font-medium -mt-1 hover:text-primary">
-                  {course?.title}
-                </p>
-              </Link>
-            </div>
-            {courseItems[currentCourseItem - 1]?.type === 'subtitle' &&
-              !enrolled?.completed?.subtitles?.includes(
-                courseItems[currentCourseItem - 1]?.data._id
-              ) && (
-                <div className="flex items-center space-x-2">
-                  <button
-                    className="px-4 py-2 text-white bg-green-600 rounded-md"
-                    onClick={() => {
-                      completeItem(
-                        courseItems[currentCourseItem - 1]?.type,
-                        courseItems[currentCourseItem - 1]?.data._id
-                      );
-                    }}
-                  >
-                    Mark as Completed
-                  </button>
-                </div>
-              )}
-          </div>
+          <LearningHeader
+            onMarkCompleted={completeItem}
+            courseItems={courseItems}
+            currentCourseItem={currentCourseItem}
+            enrolled={enrolled}
+            title={course?.title}
+            courseId={course?._id}
+          />
 
-          <div className="overflow-hidden w-full rounded-md">
-            {courseItems[currentCourseItem - 1]?.type === 'subtitle' ? (
-              <YouTube
-                videoId={
-                  courseItems[currentCourseItem - 1].data?.youtube_url?.split(
-                    '='
-                  )[1]
-                }
-                opts={opts}
-                onReady={onPlayerReady}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center w-full h-full bg-white rounded-md  p-6">
-                {(enrolled?.exercises.find(
-                  (e: any) =>
-                    e.exerciseId ===
-                    courseItems[currentCourseItem - 1]?.data?._id.toString()
-                ) ||
-                  enrolled?.finalExam) &&
-                  score > -1 && <GradeView score={score} />}
-
-                <ExerciseView
-                  exercise={{
-                    ...courseItems[currentCourseItem - 1]?.data,
-                    type: courseItems[currentCourseItem - 1]?.type,
-                  }}
-                  subtitleId={courseItems[currentCourseItem - 2]?.data?._id}
-                  courseId={course?._id}
-                  onRefresh={() => {
-                    getCourse();
-                    setRefresh(true);
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <LearningMainContent
+            courseItems={courseItems}
+            currentCourseItem={currentCourseItem}
+            enrolled={enrolled}
+            score={score}
+            onRefresh={() => {
+              getCourse();
+              setRefresh(true);
+            }}
+            courseId={course?._id}
+          />
+          {courseItems[currentCourseItem - 1]?.type === 'subtitle' && (
+            <SubtitleNote
+              initialNote={initialNotes ?? ''}
+              onChangeNote={onChangeNote}
+              onSaveNote={saveNote}
+              saved={initialNotes === notes}
+            />
+          )}
         </div>
-        {/* HERE */}
         <CourseItemsNav
           nextItem={nextItem}
           prevItem={prevItem}
