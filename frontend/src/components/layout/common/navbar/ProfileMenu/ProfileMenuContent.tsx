@@ -4,7 +4,9 @@ import {
   FaUserEdit,
   FaChevronRight,
   FaFolder,
+  FaWallet,
 } from 'react-icons/fa';
+import { IoNotificationsSharp } from 'react-icons/io5';
 import { RiProfileFill } from 'react-icons/ri';
 import { AiFillProfile, AiTwotoneSetting } from 'react-icons/ai';
 import { CgOrganisation } from 'react-icons/cg';
@@ -19,6 +21,7 @@ import { logout } from '../../../../../redux/features/auth.reducer';
 import Divider from '../../../../common/Divider';
 import IconText from '../../../../common/IconText';
 import { RootState } from '../../../../../redux/store';
+import { MdError } from 'react-icons/md';
 
 // import { getCookie, deleteCookie } from 'cookies-next';
 // // import { useRouter } from 'next/router';
@@ -95,7 +98,7 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
           />
         </ProfileMenuItem>
       ) : null}
-      <Divider />
+
       <ProfileMenuItem>
         <IconText
           text={user.name}
@@ -111,6 +114,8 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
           }
         />
       </ProfileMenuItem>
+
+      <Divider />
       <ProfileMenuItem>
         <IconText
           text="Settings"
@@ -121,6 +126,21 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
             />
           }
           // trailing={<FaChevronRight size={12} className='ml-auto' />}
+        />
+      </ProfileMenuItem>
+      <ProfileMenuItem>
+        <IconText
+          text={'Reported Problems'}
+          leading={
+            <MdError className="w-6 text-gray-400 group-hover:text-primary" />
+          }
+          trailing={<FaChevronRight size={12} className="ml-auto" />}
+          link={'internal'}
+          url={
+            user.role === 'instructor'
+              ? `/instructor/${user.id}/reported-problems`
+              : `/trainee/${user.id}/reported-problems`
+          }
         />
       </ProfileMenuItem>
       <Divider />

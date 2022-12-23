@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import axios, { AxiosResponse } from 'axios';
 import { CourseModel, UserModel } from '../models';
 import { ObjectId } from 'mongodb';
@@ -867,4 +868,72 @@ export const addSubtitleNote = async (
   }
   await course.save();
   return course;
+};
+
+export const reportProblem = async (
+  courseId: string,
+  userId: string,
+  problemType: string,
+  problem: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+  const user = await UserModel.findById(userId);
+  if (!user) throw new Error('User not found');
+  if (!course) throw new Error('Course not found');
+  const _id = new mongoose.Types.ObjectId();
+  user.reportedProblems.push({
+    _id,
+    course: courseId,
+    problemType,
+    problem,
+    reportedAt: new Date(),
+    status: 'UNSEEN',
+  });
+  course.reportedProblems.push({
+    _id,
+    user: userId,
+    problemType,
+    problem,
+    reportedAt: new Date(),
+    status: 'UNSEEN',
+  });
+  await course.save();
+  await user.save();
+
+  return course;
+};
+
+export const problemFollowUp = async (
+  courseId: string,
+  userId: string,
+  problemId: string,
+  followUp: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+  const user = await UserModel.findById(userId);
+  if (!user) throw new Error('User not found');
+  if (!course) throw new Error('Course not found');
+
+  const problem = course.reportedProblems.find(
+    (p: any) => p._id.toString() === problemId
+  );
+  if (!problem) throw new Error('Problem not found');
+  problem.followUp = followUp;
+  const userProblem = user.reportedProblems.find(
+    (p: any) => p._id.toString() === problemId
+  );
+  if (!userProblem) throw new Error('Problem not found');
+
+  userProblem.followUp = followUp;
+  await course.save();
+  await user.save();
+  return user.reportedProblems;
 };

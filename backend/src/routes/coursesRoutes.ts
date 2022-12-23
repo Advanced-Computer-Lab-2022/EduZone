@@ -16,8 +16,10 @@ import {
   getMostPopularCourses,
   getSubtitleByCourseAndId,
   getTraineeCourses,
+  problemFollowUp,
   publishCourse,
   rateCourse,
+  reportProblem,
   reviewCourse,
   traineeSubmitFinalExam,
   traineeSubmitSubtitleExercise,
@@ -92,6 +94,71 @@ router.patch('/:id/finish', JWTAccessDecoder, async (req, res) => {
     return res.status(500).json({ error: (e as any).message });
   }
 });
+
+router.get('/:id/problems', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id: userId, role } = req.body.token;
+    const { id: courseId } = req.params;
+
+    // const course = await reportProblem(
+    //   courseId,
+    //   studentId,
+    //   problem.type,
+    //   problem.description
+    // );
+    // return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.post('/:id/problems', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id: userId } = req.body.token;
+    const { id: courseId } = req.params;
+    const { problem } = req.body;
+    if (!problem) {
+      return res.status(400).json({ error: 'Problem is required' });
+    }
+    const course = await reportProblem(
+      courseId,
+      userId,
+      problem.type,
+      problem.description
+    );
+    return res.status(201).json(course);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+router.post(
+  '/:id/problems/:problemId/followup',
+  JWTAccessDecoder,
+  async (req, res) => {
+    try {
+      const { id: userId } = req.body.token;
+      const { id: courseId, problemId } = req.params;
+      const { followup } = req.body;
+      if (!followup) {
+        return res.status(400).json({ error: 'Problem is required' });
+      }
+
+      const problems = await problemFollowUp(
+        courseId,
+        userId,
+        problemId,
+        followup
+      );
+
+      return res.status(202).json(problems);
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ error: (e as any).message });
+    }
+  }
+);
 
 router.put(
   '/:id/subtitles/:subtitleId/notes',

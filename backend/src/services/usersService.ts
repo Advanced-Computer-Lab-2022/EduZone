@@ -86,3 +86,14 @@ export const rateInstructor = async (
   await instructor.save();
   return instructor;
 };
+
+export const getReportedProblems = async (id: string) => {
+  const user = await UserModel.findById(id).populate({
+    path: 'reportedProblems.course',
+    model: 'Course',
+    select: 'title _id',
+  });
+  // console.log(user);
+  if (!user) throw new Error('user not found');
+  return user.reportedProblems;
+};

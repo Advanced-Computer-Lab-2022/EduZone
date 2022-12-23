@@ -3,6 +3,7 @@ import { JWTAccessDecoder } from '../middlewares/jwt';
 import {
   addUser,
   getAllUsers,
+  getReportedProblems,
   getUserById,
   getUserByName,
   rateInstructor,
@@ -42,6 +43,17 @@ router.get('/:id', async (req, res) => {
     return res.status(500).json({ message: (error as any).message });
   }
 });
+
+router.get('/:id/problems', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reportedProblems = await getReportedProblems(id);
+    return res.status(200).json(reportedProblems);
+  } catch (error) {
+    return res.status(500).json({ message: (error as any).message });
+  }
+});
+
 //get user by name Route
 router.get('/:name', async (req, res) => {
   try {

@@ -1,5 +1,4 @@
 import mongoose, { Schema } from 'mongoose';
-import crypto from 'crypto';
 
 const userSchema = new Schema({
   name: {
@@ -68,6 +67,46 @@ const userSchema = new Schema({
         },
         review: {
           type: String,
+        },
+      },
+    ],
+    required: false,
+  },
+  reportedProblems: {
+    type: [
+      {
+        _id: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        course: {
+          type: String,
+          required: true,
+        },
+        problemType: {
+          type: String,
+          required: true,
+        },
+        problem: {
+          type: String,
+          required: true,
+        },
+        reportedAt: {
+          type: Date,
+          required: true,
+          default: Date.now,
+        },
+        status: {
+          type: String,
+          default: 'UNSEEN',
+        },
+        followUp: {
+          type: String,
+          required: false,
+        },
+        resolvedAt: {
+          type: Date,
+          required: false,
         },
       },
     ],

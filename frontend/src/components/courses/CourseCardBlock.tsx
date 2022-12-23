@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 import { CourseCardProps } from '../../types';
@@ -7,7 +7,6 @@ import { Course } from '../../types/entities/Course';
 import { calculateCourseRating } from '../../utils';
 import Truncate from '../common/Truncate';
 import DisplayRating from './DisplayRating';
-
 const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
   const { total, rating } = calculateCourseRating(course);
   const { currency, conversion_rate } = useSelector(
@@ -25,7 +24,7 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
   return (
     <div
       key={course._id.toString()}
-      className="w-full bg-white shadow-sm hover:shadow-md  rounded-lg duration-150 flex flex-col cursor-pointer"
+      className="w-full bg-white shadow-sm hover:shadow-md  rounded-lg duration-150 flex flex-col relative cursor-pointer"
       onClick={() => navigate(`${base || ''}/courses/${course._id}`)}
     >
       <img
@@ -36,6 +35,7 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
         alt={course.title}
         className="h-48 rounded-t-lg w-full object-cover "
       />
+
       <div className="p-4 flex flex-col grow">
         <div className="text-lg font-semibold ">{course.title}</div>
         <div className="-mt-1 mb-2">
