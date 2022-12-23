@@ -1,3 +1,4 @@
+import NotFoundException from '../Exceptions/NotFoundException';
 import { UserModel } from '../models';
 
 export const addUser = (data: typeof UserModel) => {
@@ -32,7 +33,7 @@ export const getAllUsers = () => {
 export const updateUser = (id: string, data: Partial<typeof UserModel>) => {
   const user = UserModel.findByIdAndUpdate(id, data, { new: true });
   if (!user) {
-    throw new Error('User not found');
+    throw new NotFoundException('User not found');
   }
   return user;
 };
@@ -50,7 +51,7 @@ export const reviewInstructor = async (
     'img',
     'feedback',
   ]);
-  if (!instructor) throw new Error('instructor not found');
+  if (!instructor) throw new NotFoundException('instructor not found');
   const oldFeedback = instructor.feedback.find((s) => s.student === studentId);
   if (oldFeedback) {
     oldFeedback.review = review;
@@ -75,7 +76,7 @@ export const rateInstructor = async (
     'img',
     'feedback',
   ]);
-  if (!instructor) throw new Error('instructor not found');
+  if (!instructor) throw new NotFoundException('instructor not found');
   const oldFeedback = instructor.feedback.find((s) => s.student === studentId);
   if (oldFeedback) {
     oldFeedback.rating = rating;
@@ -94,6 +95,6 @@ export const getUserReportedProblems = async (id: string) => {
     select: 'title _id',
   });
   // console.log(user);
-  if (!user) throw new Error('user not found');
+  if (!user) throw new NotFoundException('user not found');
   return user.reportedProblems;
 };

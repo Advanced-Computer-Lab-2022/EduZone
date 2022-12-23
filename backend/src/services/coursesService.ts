@@ -7,6 +7,10 @@ import Stripe from 'stripe';
 import fs from 'fs';
 import pdf from 'pdf-creator-node';
 import sendMail from '../utils/sendMail';
+import NotFoundException from '../Exceptions/NotFoundException';
+import DuplicateException from '../Exceptions/DuplicateException';
+import ForbiddenException from '../Exceptions/ForbiddenException';
+import BadRequestBody from '../Exceptions/BadRequestBody';
 // const stripe = require('stripe')();
 
 export const getAllCourses = async (
@@ -277,7 +281,7 @@ export const getSubtitleByCourseAndId = async (
   subtitleId: string
 ) => {
   const course = await CourseModel.findById(courseId);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const subtitle = course?.subtitles.find(
     (s) => s._id?.toString() === subtitleId
   );
@@ -290,7 +294,7 @@ export const updateSubtitleByCourseAndId = async (
   data: any
 ) => {
   const course = await CourseModel.findById(courseId);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   let subtitle = {};
   let index = -1;
   course?.subtitles.map((s, i) => {
@@ -299,7 +303,7 @@ export const updateSubtitleByCourseAndId = async (
       index = i;
     }
   });
-  if (index === -1) throw new Error('Subtitle not found');
+  if (index === -1) throw new NotFoundException('Subtitle not found');
   course.subtitles[index] = {
     ...subtitle,
     ...data,
@@ -314,14 +318,14 @@ export const addSubtitleExercise = async (
   data: any
 ) => {
   const course = await CourseModel.findById(courseId);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const subtitle = course.subtitles.id(subtitleId);
   if (subtitle) {
     subtitle.exercise = data;
     await course.save();
     return subtitle;
   }
-  throw new Error('Subtitle not found');
+  throw new NotFoundException('Subtitle not found');
 };
 
 export const buyCourse = async (
@@ -338,9 +342,9 @@ export const buyCourse = async (
     'img',
     'feedback',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (isEnrolled) throw new Error('Already enrolled');
+  if (isEnrolled) throw new DuplicateException('Already enrolled');
 
   const success = await payForCourse(
     course.title,
@@ -383,9 +387,9 @@ export const rateCourse = async (
     'img',
     'feedback',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   enrolled.rating = rating;
   await course.save();
   return course;
@@ -403,9 +407,9 @@ export const reviewCourse = async (
     'img',
     'feedback',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   enrolled.review = review;
   console.log('Enrolled', enrolled);
   await course.save();
@@ -421,7 +425,7 @@ export const publishCourse = async (courseId: string) => {
     'img',
     'feedback',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   course.isPublished = true;
   await course.save();
   return course;
@@ -457,15 +461,15 @@ export const traineeSubmitSubtitleExercise = async (
     'feedback',
   ]);
 
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const subtitle = course.subtitles.id(subtitleId);
-  if (!subtitle) throw new Error('Subtitle not found');
+  if (!subtitle) throw new NotFoundException('Subtitle not found');
   if (!subtitle.exercise)
-    throw new Error('Subtitle does not contain an exercise');
+    throw new NotFoundException('Subtitle does not contain an exercise');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   const exercise = enrolled.exercises.find((e) => e?.exerciseId === exerciseId);
-  if (exercise) throw new Error('Already submitted');
+  if (exercise) throw new DuplicateException('Already submitted');
   if (subtitle.exercise === undefined)
     throw new Error('Subtitle contains no exercise');
 
@@ -473,7 +477,7 @@ export const traineeSubmitSubtitleExercise = async (
   if (
     questionsCount > answers.filter((a: any) => a.answerId !== undefined).length
   )
-    throw new Error('You need to answer all questions');
+    throw new ForbiddenException('You need to answer all questions');
 
   // console.log('Answers', answers);
   // console.log('Questions', subtitle.exercise?.questions);
@@ -482,7 +486,7 @@ export const traineeSubmitSubtitleExercise = async (
     const question = subtitle.exercise?.questions.find(
       (q: any) => q._id.toString() === submittedAnswer.questionId
     );
-    if (!question) throw Error('Question error');
+    if (!question) throw new NotFoundException('Question error');
     if (
       question?.answers?.find(
         (a: any) => a?._id.toString() === submittedAnswer?.answerId
@@ -527,11 +531,11 @@ export const traineeSubmitFinalExam = async (
     'img',
     'feedback',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   if (enrolled.finalExam?.submitted)
-    throw new Error('Final exam already submitted');
+    throw new DuplicateException('Final exam already submitted');
   const questionsCount = course.finalExam?.questions?.length ?? 0;
 
   console.log('Question Count', questionsCount);
@@ -544,14 +548,14 @@ export const traineeSubmitFinalExam = async (
   if (
     questionsCount > answers.filter((a: any) => a.answerId !== undefined).length
   )
-    throw new Error('You need to answer all questions');
+    throw new ForbiddenException('You need to answer all questions');
 
   let correctAnswers = 0;
   answers.map((submittedAnswer: any) => {
     const question = course.finalExam?.questions.find(
       (q: any) => q._id.toString() === submittedAnswer.questionId
     );
-    if (!question) throw Error('Question error');
+    if (!question) throw new NotFoundException('Question error');
     if (
       question?.answers?.find(
         (a: any) => a?._id.toString() === submittedAnswer?.answerId
@@ -603,7 +607,7 @@ export const payForCourse = async (
     apiVersion: '2022-11-15',
   });
   if (!courseTitle || !studentId || !email || !amount) {
-    throw new Error('Invalid parameters');
+    throw new BadRequestBody('Invalid parameters');
   }
 
   const { id: customerId }: any = await stripe.customers
@@ -665,9 +669,9 @@ export const completeCourseItem = async (
     'img',
     '_id',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   if (!enrolled.completed)
     enrolled.completed = {
       finalExam: false,
@@ -742,24 +746,24 @@ export const finishCourse = async (
     'img',
     '_id',
   ]);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   // if (!enrolled.finished) return;
   if (!enrolled.completed)
-    throw new Error('You need to complete all course items');
+    throw new ForbiddenException('You need to complete all course items');
   if (enrolled.completed.subtitles.length !== course.subtitles.length)
-    throw new Error('You need to complete all subtitles');
+    throw new ForbiddenException('You need to complete all subtitles');
   if (
     enrolled.completed.exercises.length !==
     course.subtitles.reduce((acc, s) => acc + (s.exercise ? 1 : 0), 0)
   )
-    throw new Error('You need to complete all exercises');
+    throw new ForbiddenException('You need to complete all exercises');
   if (course?.finalExam) {
     if (!enrolled.completed.finalExam)
-      throw new Error('You need to complete final exam');
+      throw new ForbiddenException('You need to complete final exam');
     if (enrolled.finalExam?.score && enrolled.finalExam?.score < 50)
-      throw new Error('You need to pass the final exam');
+      throw new ForbiddenException('You need to pass the final exam');
   }
   enrolled.finished = true;
   enrolled.finishedAt = new Date();
@@ -778,13 +782,14 @@ export const getCourseCertificate = async (
   studentId: string
 ) => {
   const user = await UserModel.findById(studentId);
-  if (!user) throw new Error('User not found');
+  if (!user) throw new NotFoundException('User not found');
   const course = await CourseModel.findById(courseId);
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   if (enrolled.certificate) return enrolled.certificate;
-  if (!enrolled.finished) throw new Error('You need to finish the course');
+  if (!enrolled.finished)
+    throw new ForbiddenException('You need to finish the course');
   console.log(process.cwd());
   const template = fs.readFileSync(
     `${process.cwd()}/templates/certificate.html`,
@@ -853,9 +858,9 @@ export const addSubtitleNote = async (
     '_id',
   ]);
 
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
   const enrolled = course.enrolled.find((s) => s.studentId === studentId);
-  if (!enrolled) throw new Error('Not enrolled');
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
   const subtitleNote = enrolled.notes.find((n) => n.subtitleId === subtitleId);
   if (!subtitleNote) {
     enrolled.notes.push({
@@ -882,8 +887,8 @@ export const reportProblem = async (
     '_id',
   ]);
   const user = await UserModel.findById(userId);
-  if (!user) throw new Error('User not found');
-  if (!course) throw new Error('Course not found');
+  if (!user) throw new NotFoundException('User not found');
+  if (!course) throw new NotFoundException('Course not found');
   const _id = new mongoose.Types.ObjectId();
   user.reportedProblems.push({
     _id,
@@ -919,18 +924,18 @@ export const problemFollowUp = async (
     '_id',
   ]);
   const user = await UserModel.findById(userId);
-  if (!user) throw new Error('User not found');
-  if (!course) throw new Error('Course not found');
+  if (!user) throw new NotFoundException('User not found');
+  if (!course) throw new NotFoundException('Course not found');
 
   const problem = course.reportedProblems.find(
     (p: any) => p._id.toString() === problemId
   );
-  if (!problem) throw new Error('Problem not found');
+  if (!problem) throw new NotFoundException('Problem not found');
   problem.followUp = followUp;
   const userProblem = user.reportedProblems.find(
     (p: any) => p._id.toString() === problemId
   );
-  if (!userProblem) throw new Error('Problem not found');
+  if (!userProblem) throw new NotFoundException('Problem not found');
 
   userProblem.followUp = followUp;
   await course.save();
@@ -967,21 +972,21 @@ export const updateProblemStatus = async (
     model: 'User',
     select: 'name email _id role',
   });
-  if (!course) throw new Error('Course not found');
+  if (!course) throw new NotFoundException('Course not found');
 
   const problem = course.reportedProblems.find(
     (p: any) => p._id.toString() === problemId
   );
   // if (!problem) throw new Error('Problem not found');
   const user = await UserModel.findById(userId);
-  if (!user) throw new Error('User not found');
+  if (!user) throw new NotFoundException('User not found');
 
   const userProblem = user.reportedProblems.find(
     (p: any) => p._id.toString() === problemId
   );
 
   console.log(userProblem);
-  if (!userProblem) throw new Error('Problem not found');
+  if (!userProblem) throw new NotFoundException('Problem not found');
   const { _id, title } = course;
   console.log(_id, title);
   userProblem!.status = status;

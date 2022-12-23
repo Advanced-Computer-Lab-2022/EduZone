@@ -132,7 +132,7 @@ const AdminReportedProblems = () => {
                     <td className="py-4 px-6 uppercase">{problemType}</td>
                     <td className="py-4 px-6">{course.title}</td>
                     <td className="py-4 px-6">
-                      {user.name} ({user.role})
+                      {user?.name} ({user?.role})
                     </td>
                     <td className="py-4 px-6">
                       {moment(new Date(reportedAt)).fromNow()}

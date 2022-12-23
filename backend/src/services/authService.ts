@@ -5,17 +5,21 @@ import { getUserById } from './usersService';
 import { userInfo } from 'os';
 import crypto from 'crypto';
 import sendMail from '../utils/sendMail';
+import NotFoundException from '../Exceptions/NotFoundException';
+import NotAuthenticated from '../Exceptions/NotAuthenticated';
+import DuplicateException from '../Exceptions/DuplicateException';
+import ForbiddenException from '../Exceptions/ForbiddenException';
 
 export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
   if (!user) {
-    throw new Error('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist'); //TODO: change to custom error
   }
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new Error('Incorrect password'); //TODO: change to custom error
+    throw new NotAuthenticated('Incorrect password'); //TODO: change to custom error
   }
 
   const { accessToken, refreshToken } = getTokens(user);
@@ -41,7 +45,7 @@ export const register = async (
   // check if email already exists
   const user = await UserModel.findOne({ $or: [{ username }, { email }] });
   if (user) {
-    throw new Error('User already exists'); //TODO: change to custom error
+    throw new DuplicateException('User already exists'); //TODO: change to custom error
   }
 
   // hash password
@@ -76,7 +80,7 @@ export const logout = async (id: string) => {
   // remove refresh token from db  (to be done)
   const user = await UserModel.findById(id);
   if (!user) {
-    throw new Error('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist'); //TODO: change to custom error
   }
   user.refreshToken = '';
   await user.save();
@@ -92,7 +96,7 @@ export const resetPassword = async (
     resetPasswordExpires: { $gt: Date.now() },
   });
   if (!user) {
-    throw new Error('Invalid token');
+    throw new ForbiddenException('Invalid token');
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   user.password = hashedPassword;
@@ -106,7 +110,7 @@ export const forgetPassword = async (email: string) => {
     email: email,
   });
   if (!user) {
-    throw new Error('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist'); //TODO: change to custom error
   }
   const resetToken = crypto.randomBytes(20).toString('hex');
   user.resetPasswordToken = crypto
@@ -151,7 +155,7 @@ export const changePassword = async (id: string, password: string) => {
     { new: true }
   );
   if (!user) {
-    throw new Error('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist');
   }
 
   return true;
@@ -160,12 +164,12 @@ export const changePassword = async (id: string, password: string) => {
 export const refreshTokens = async (userId: string, refreshToken: string) => {
   const user = await getUserById(userId);
   if (!user || !user.refreshToken)
-    throw new Error('Access Denied, Please login again');
+    throw new NotAuthenticated('Access Denied, Please login again');
   const refreshTokenMatches = await bcrypt.compare(
     refreshToken,
     user.refreshToken
   );
-  if (!refreshTokenMatches) throw new Error('Access Denied');
+  if (!refreshTokenMatches) throw new NotAuthenticated('Access Denied');
   const tokens = await getTokens(user);
   await updateRefreshToken(userId, tokens.refreshToken);
   return tokens;
@@ -177,7 +181,7 @@ const updateRefreshToken = async (userId: string, refreshToken: string) => {
   if (user) {
     user.refreshToken = hashedRefreshToken;
     await user.save();
-  } else throw new Error('User not found');
+  } else throw new NotFoundException('User not found');
   // delete user.password;
   // return user;
 };
@@ -192,7 +196,7 @@ const updateLastLoginAndRefreshToken = async (
     user.refreshToken = hashedRefreshToken;
     user.lastLogin = new Date();
     await user.save();
-  } else throw new Error('User not found');
+  } else throw new NotFoundException('User not found');
 };
 
 const hashData = async (data: string) => {
