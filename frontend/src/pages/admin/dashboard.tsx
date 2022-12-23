@@ -14,6 +14,12 @@ const AdminDashboard = () => {
           >
             Users
           </Link>
+          <Link
+            to="/admin/reported-problems"
+            className="p-2 px-4 bg-primary text-white rounded-md"
+          >
+            Reported Problems
+          </Link>
         </div>
       </div>
     </AdminLayout>

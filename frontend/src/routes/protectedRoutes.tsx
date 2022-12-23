@@ -20,6 +20,7 @@ import InstructorChangePassword from '../pages/instructor/profile/InstructorChan
 import CourseCertificate from '../components/courses/Certificate';
 import TraineeReportedProblems from '../pages/trainee/TraineeReportedProblems';
 import InstructorReportedProblems from '../pages/instructor/InstructorReportedProblems';
+import AdminReportedProblems from '../pages/admin/AdminReportedProblems';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -119,6 +120,10 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'instructor/:id/reported-problems',
     element: <InstructorReportedProblems />,
+  },
+  {
+    path: 'admin/reported-problems',
+    element: <AdminReportedProblems />,
   },
   {
     path: 'trainee/:id/profile/change-password',

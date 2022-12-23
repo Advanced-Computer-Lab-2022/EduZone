@@ -937,3 +937,61 @@ export const problemFollowUp = async (
   await user.save();
   return user.reportedProblems;
 };
+
+export const getReportedProblems = async () => {
+  const courses = await CourseModel.find({
+    reportedProblems: { $ne: null },
+  }).populate({
+    path: 'reportedProblems.user',
+    model: 'User',
+    select: 'name email _id role',
+  });
+  const problems = courses
+    .map((c) => ({
+      course: { _id: c._id, title: c.title },
+      problems: [...c.reportedProblems],
+    }))
+    .flat();
+
+  return problems;
+};
+
+export const updateProblemStatus = async (
+  courseId: string,
+  userId: string,
+  problemId: string,
+  status: string
+) => {
+  const course = await CourseModel.findById(courseId).populate({
+    path: 'reportedProblems.user',
+    model: 'User',
+    select: 'name email _id role',
+  });
+  if (!course) throw new Error('Course not found');
+
+  const problem = course.reportedProblems.find(
+    (p: any) => p._id.toString() === problemId
+  );
+  // if (!problem) throw new Error('Problem not found');
+  const user = await UserModel.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  const userProblem = user.reportedProblems.find(
+    (p: any) => p._id.toString() === problemId
+  );
+
+  console.log(userProblem);
+  if (!userProblem) throw new Error('Problem not found');
+  const { _id, title } = course;
+  console.log(_id, title);
+  userProblem!.status = status;
+  problem!.status = status;
+
+  await user.save();
+  await course.save();
+  const res = { ...problem, course: { _id, title } };
+
+  // the above object structuring upsets mongoose :/ so we need to extract what we want from it
+  return { ...(res as any)._doc, course: (res as any).course };
+  // return problem;
+};

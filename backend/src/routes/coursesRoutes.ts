@@ -25,6 +25,8 @@ import {
   traineeSubmitSubtitleExercise,
   updateCourseById,
   updateSubtitleByCourseAndId,
+  getReportedProblems,
+  updateProblemStatus,
 } from '../services';
 
 const router = express.Router();
@@ -83,6 +85,16 @@ router.get('/popular', async (req, res) => {
   }
 });
 
+router.get('/problems', JWTAccessDecoder, async (req, res) => {
+  try {
+    const problems = await getReportedProblems();
+    return res.status(200).json(problems);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
 router.patch('/:id/finish', JWTAccessDecoder, async (req, res) => {
   try {
     const { id: studentId, name, email } = req.body.token;
@@ -133,6 +145,33 @@ router.post('/:id/problems', JWTAccessDecoder, async (req, res) => {
     return res.status(500).json({ error: (e as any).message });
   }
 });
+
+router.patch('/:id/problems/:problemId', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id: courseId, problemId } = req.params;
+    const { status, userId } = req.body;
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+    if (
+      status.toLowerCase() !== 'resolved' &&
+      status.toLowerCase() !== 'unseen' &&
+      status.toLowerCase() !== 'pending'
+    )
+      return res.status(400).json({ error: 'Status is invalid' });
+    const problem = await updateProblemStatus(
+      courseId,
+      userId,
+      problemId,
+      status.toUpperCase()
+    );
+    return res.status(200).json(problem);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
 router.post(
   '/:id/problems/:problemId/followup',
   JWTAccessDecoder,

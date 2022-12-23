@@ -12,6 +12,7 @@
   },
   "proxy": "http://localhost:4000",
   "dependencies": {
+    "@popperjs/core": "^2.11.6",
     "@react-pdf-viewer/core": "^3.9.0",
     "@react-pdf-viewer/default-layout": "^3.9.0",
     "@react-pdf-viewer/get-file": "^3.9.0",
@@ -36,6 +37,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.6.0",
     "react-pdf": "^6.2.0",
+    "react-popper": "^2.3.0",
     "react-redux": "^8.0.4",
     "react-router-dom": "^6.4.2",
     "react-stripe-checkout": "^2.6.3",

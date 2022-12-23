@@ -87,7 +87,7 @@ export const rateInstructor = async (
   return instructor;
 };
 
-export const getReportedProblems = async (id: string) => {
+export const getUserReportedProblems = async (id: string) => {
   const user = await UserModel.findById(id).populate({
     path: 'reportedProblems.course',
     model: 'Course',
