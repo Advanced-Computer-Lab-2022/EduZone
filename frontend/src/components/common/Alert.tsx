@@ -15,9 +15,9 @@ const Alert = () => {
   });
   if (!message) return null;
   return (
-    <div className="absolute w-[25rem] min-h-[7rem] rounded-md bg-white z-40 right-8 top-16  border overflow-hidden">
+    <div className="absolute w-[25rem] min-h-[2rem] rounded-md bg-white z-40 right-8 top-16  border overflow-hidden">
       <div
-        className={` w-full min-h-[7rem] py-6 px-5  relative border rounded-md
+        className={` w-full min-h-[2rem] py-6 px-5  relative border rounded-md
       ${
         message?.type === 'success'
           ? 'border-green-600 bg-green-600/40 text-green-800'

@@ -188,6 +188,15 @@ const courseSchema = new Schema({
   enrolled: {
     type: [
       {
+        status: {
+          type: String,
+          required: false,
+          default: 'active', // only accepts active, blocked
+        },
+        refundRequested: {
+          type: Boolean,
+          required: false,
+        },
         certificate: {
           type: String,
           required: false,

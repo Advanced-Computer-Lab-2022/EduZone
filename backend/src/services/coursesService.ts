@@ -11,6 +11,8 @@ import NotFoundException from '../Exceptions/NotFoundException';
 import DuplicateException from '../Exceptions/DuplicateException';
 import ForbiddenException from '../Exceptions/ForbiddenException';
 import BadRequestBody from '../Exceptions/BadRequestBody';
+import RefundRequestModel from '../models/refundRequests.model';
+import AccessRequestModel from '../models/accessRequest.model';
 // const stripe = require('stripe')();
 
 export const getAllCourses = async (
@@ -368,6 +370,7 @@ export const buyCourse = async (
       amount: course.price as number,
     },
     notes: [],
+    status: 'active',
   });
   await course.save();
 
@@ -999,4 +1002,103 @@ export const updateProblemStatus = async (
   // the above object structuring upsets mongoose :/ so we need to extract what we want from it
   return { ...(res as any)._doc, course: (res as any).course };
   // return problem;
+};
+
+export const requestCourseRefund = async (
+  courseId: string,
+  studentId: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+
+  if (!course) throw new NotFoundException('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
+  if (enrolled.refundRequested)
+    throw new DuplicateException('Refund already requested');
+  enrolled.refundRequested = true;
+  enrolled.status = 'blocked';
+  const request = await RefundRequestModel.create({
+    course: courseId,
+    student: studentId,
+    requestedAt: new Date(),
+  });
+  await course.save();
+  return course;
+};
+
+export const cancelRefundRequest = async (
+  courseId: string,
+  studentId: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+
+  if (!course) throw new NotFoundException('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
+  if (!enrolled.refundRequested)
+    throw new ForbiddenException('Refund not requested');
+  const request = await RefundRequestModel.findOne({
+    course: courseId,
+    student: studentId,
+  });
+  if (!request) throw new NotFoundException('Request is not found');
+  if (request.status === 'ACCEPTED')
+    throw new ForbiddenException('Request already accepted, cannot cancel now');
+  enrolled.refundRequested = false;
+  enrolled.status = 'active';
+  request.delete();
+  await course.save();
+  return course;
+};
+
+export const getRefundRequests = async () => {
+  const requests = await RefundRequestModel.find()
+    .populate('course', ['title', 'price', '_id'])
+    .populate('student', ['name', 'email', '_id']);
+  return requests;
+};
+
+// export const resolveRefundRequest = async (courseId:string, studentId:string, requestId: string, resolving:string ) => {
+//   const request = await RefundRequestModel.findById(requestId)
+// }
+
+export const requestAccessToCourse = async (
+  courseId: string,
+  studentId: string,
+  studentRole: string
+) => {
+  if (studentRole !== 'corp_trainee')
+    throw new ForbiddenException(
+      'You are not allowed request access to this course'
+    );
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'img',
+    '_id',
+  ]);
+
+  if (!course) throw new NotFoundException('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (enrolled) throw new ForbiddenException('Already enrolled');
+  const request = await AccessRequestModel.findOne({
+    course: courseId,
+    student: studentId,
+  });
+  if (request) throw new DuplicateException('Request already sent');
+
+  const newRequest = await AccessRequestModel.create({
+    course: courseId,
+    student: studentId,
+    requestedAt: new Date(),
+  });
+  await course.save();
+  return course;
 };

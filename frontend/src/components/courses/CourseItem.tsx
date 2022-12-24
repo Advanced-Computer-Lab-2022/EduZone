@@ -22,7 +22,7 @@ const CourseItem: React.FC<CourseItemProps> = ({
   return (
     <div
       key={index}
-      className={`flex items-center justify-between p-2 my-1 border border-gray-300 rounded-md cursor-pointer  ${
+      className={`flex items-center justify-between p-2 my-1 border border-gray-300  rounded-md cursor-pointer  ${
         currentCourseItem === index + 1 ? 'bg-gray-200' : 'hover:bg-gray-200'
       }`}
       onClick={() => onClickItem(index)}

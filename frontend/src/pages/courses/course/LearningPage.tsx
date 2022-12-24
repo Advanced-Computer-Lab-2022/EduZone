@@ -233,6 +233,10 @@ const LearningPage = () => {
     setRefresh(true);
   };
 
+  const onUpdateCourse = (course: any) => {
+    setCourse(course);
+  };
+
   return (
     <Layout>
       <div className="grid grid-cols-3">
@@ -274,6 +278,7 @@ const LearningPage = () => {
           onClickItem={onClickItem}
           enrolled={enrolled}
           progress={progress}
+          onUpdateCourse={onUpdateCourse}
         />
       </div>
     </Layout>

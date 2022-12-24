@@ -8,8 +8,11 @@ import {
 } from 'react-icons/bs';
 import { FaTrophy } from 'react-icons/fa';
 import { TbCertificate } from 'react-icons/tb';
+import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
+import { RootState } from '../../redux/store';
 import IconText from '../common/IconText';
+import CourseProgress from './CourseDetails/CourseProgress';
 import CourseItem from './CourseItem';
 
 declare type CourseItemsNavProps = {
@@ -20,6 +23,7 @@ declare type CourseItemsNavProps = {
   onClickItem: (index: number) => void;
   enrolled: any;
   progress: number;
+  onUpdateCourse: (course: any) => void;
 };
 
 const CourseItemsNav: React.FC<CourseItemsNavProps> = ({
@@ -30,15 +34,17 @@ const CourseItemsNav: React.FC<CourseItemsNavProps> = ({
   onClickItem,
   enrolled,
   progress = 0,
+  onUpdateCourse,
 }) => {
   const [failed, setFailed] = useState(
     enrolled?.finalExam?.score < 50 ? true : false
   );
+  const { user } = useSelector((state: RootState) => state.auth);
+  console.log('progress', Number.isNaN(progress) ? 0 : progress);
   const isCompleted = (
     item: 'exercise' | 'subtitle' | 'finalExam',
     itemId: string
   ): boolean => {
-    console;
     if (enrolled) {
       if (item === 'exercise') {
         return enrolled?.completed?.exercises?.includes(itemId);
@@ -57,50 +63,16 @@ const CourseItemsNav: React.FC<CourseItemsNavProps> = ({
   return (
     <div>
       <div className="flex flex-col mt-4">
-        <div className="bg-white p-4 rounded-md shadow-md space-y-2 text-sm  mb-2">
-          <div className={'flex  items-center justify-between'}>
-            <p>
-              Progress:{' '}
-              <span
-                className={` font-medium ${
-                  progress === 100
-                    ? failed
-                      ? 'text-red-600'
-                      : 'text-green-600'
-                    : ''
-                }`}
-              >
-                {progress < 100
-                  ? progress + '%'
-                  : failed
-                  ? 'Failed Final'
-                  : 'Done'}
-              </span>
-            </p>
-            {progress === 100 && !failed && (
-              <Link to={`/courses/${courseId}/certificate`}>
-                <p className="ml-2 text-gray-500 flex gap-2 hover:text-primary ">
-                  Get your certificate
-                  <TbCertificate size={20} />
-                </p>
-              </Link>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 ">
-            <div className="grow bg-gray-300 h-2 rounded-full ">
-              <div
-                className="bg-primary h-full rounded-full duration-200"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            <FaTrophy
-              className={`${progress < 100 ? 'text-gray-400' : 'text-primary'}`}
-              size={20}
-            />
-          </div>
-        </div>
-        <div className="flex justify-between -mx-4 ">
+        {enrolled && enrolled.status === 'active' && (
+          <CourseProgress
+            progress={progress}
+            failed={failed}
+            courseId={courseId ?? ''}
+            enrollmentStatus={enrolled ? enrolled?.status : 'blocked'}
+            onUpdateCourse={onUpdateCourse}
+          />
+        )}
+        <div className="flex justify-between -mx-4 mt-2">
           <button className="cursor-pointer hover:text-primary">
             <IconText
               text={'Previous'}

@@ -27,7 +27,11 @@ import {
   updateSubtitleByCourseAndId,
   getReportedProblems,
   updateProblemStatus,
+  requestCourseRefund,
+  cancelRefundRequest,
+  requestAccessToCourse,
 } from '../services';
+import Exception from '../Exceptions/Exception';
 
 const router = express.Router();
 
@@ -471,6 +475,52 @@ router.patch('/:id/publish', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.post('/:id/request-access', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: studentId, role } = req.body.token;
+
+  try {
+    const course = await requestAccessToCourse(id, studentId, role);
+    return res.status(201).json(course);
+  } catch (e) {
+    if (e instanceof Exception) {
+      console.error(e);
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+router.patch('/:id/refund', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: userId } = req.body.token;
+
+  try {
+    const course = await requestCourseRefund(id, userId);
+    return res.status(201).json(course);
+  } catch (e) {
+    if (e instanceof Exception) {
+      console.error(e);
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+router.delete('/:id/refund', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: userId } = req.body.token;
+
+  try {
+    const course = await cancelRefundRequest(id, userId);
+    return res.status(200).json(course);
+  } catch (e) {
+    if (e instanceof Exception) {
+      console.error(e);
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });

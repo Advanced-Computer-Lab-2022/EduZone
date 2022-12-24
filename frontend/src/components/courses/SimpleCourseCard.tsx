@@ -10,9 +10,9 @@ import { RootState } from '../../redux/store';
 import Modal from '../common/Modal';
 import { axios } from '../../utils';
 import { getCookie } from 'cookies-next';
-const SimpleCourseCard: React.FC<{ course: Course }> = ({ course }) => {
+const SimpleCourseCard: React.FC<{ course: Course | any }> = ({ course }) => {
   const [reportOpen, setReportOpen] = useState(false);
-  const { role } = useSelector((state: RootState) => state.auth.user);
+  const { role, id } = useSelector((state: RootState) => state.auth.user);
   const [openModal, setOpenModal] = useState(false);
   const reportProblem: FormEventHandler = async (e) => {
     e.preventDefault();
@@ -110,11 +110,20 @@ const SimpleCourseCard: React.FC<{ course: Course }> = ({ course }) => {
         )}
         <div className="p-2 px-4 my-3">
           <h3 className="text-xl font-medium">{course.title}</h3>
-          <Link to={`/courses/${course._id}/learning`} className="w-full">
-            <button className="bg-primary w-full text-white px-4 py-2 rounded-md mt-4">
-              Continue Learning
-            </button>
-          </Link>
+          {course?.enrolled.find((s: any) => s.studentId === id)?.status ===
+          'active' ? (
+            <Link to={`/courses/${course._id}/learning`} className="w-full">
+              <button className="bg-primary w-full text-white px-4 py-2 rounded-md mt-4">
+                Continue Learning
+              </button>
+            </Link>
+          ) : (
+            <Link to={`/courses/${course._id}`} className="w-full">
+              <button className="bg-primary w-full text-white px-4 py-2 rounded-md mt-4">
+                Go to Course
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
