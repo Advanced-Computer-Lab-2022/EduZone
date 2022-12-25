@@ -30,6 +30,10 @@ import {
   requestCourseRefund,
   cancelRefundRequest,
   requestAccessToCourse,
+  getRefundRequests,
+  getCourseAccessRequests,
+  resolveRefundRequest,
+  resolveAccessRequest,
 } from '../services';
 import Exception from '../Exceptions/Exception';
 
@@ -45,8 +49,12 @@ router.get('/', async (req, res) => {
       limit as string
     );
     res.status(200).json(courses);
-  } catch (error) {
-    res.status(500).json({ error: (error as any).message, stack: error });
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 
@@ -60,10 +68,12 @@ router.post('/', JWTAccessDecoder, async (req, res) => {
       });
     }
     return res.status(201).json(await addCourse(data));
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: (error as any).message, stack: error });
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 
@@ -74,6 +84,9 @@ router.get('/trainee', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(courses);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -85,6 +98,9 @@ router.get('/popular', async (req, res) => {
     return res.status(200).json(courses);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -95,6 +111,97 @@ router.get('/problems', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(problems);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.get('/refund-requests', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id, role } = req.body.token;
+    const requests = await getRefundRequests(role, id);
+    return res.status(200).json(requests);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.patch(
+  '/refund-requests/:requestId',
+  JWTAccessDecoder,
+  async (req, res) => {
+    try {
+      const { role } = req.body.token;
+      if (role !== 'admin') {
+        return res
+          .status(403)
+          .json({ error: 'You are not allowed to perform this request' });
+      }
+      const { requestId } = req.params;
+      const { courseId, amount, studentId, status } = req.body;
+      const request = await resolveRefundRequest(
+        courseId,
+        studentId,
+        requestId,
+        status,
+        amount
+      );
+      return res.status(200).json(request);
+    } catch (e) {
+      if (e instanceof Exception) {
+        console.error(e);
+        return res.status(e.statusCode).json({ error: e.message });
+      }
+      return res.status(500).json({ error: (e as any).message });
+    }
+  }
+);
+router.patch(
+  '/access-requests/:requestId',
+  JWTAccessDecoder,
+  async (req, res) => {
+    try {
+      const { role } = req.body.token;
+      if (role !== 'admin') {
+        return res
+          .status(403)
+          .json({ error: 'You are not allowed to perform this request' });
+      }
+      const { requestId } = req.params;
+      const { courseId, amount, studentId, status } = req.body;
+      const request = await resolveAccessRequest(
+        courseId,
+        studentId,
+        requestId,
+        status
+      );
+      return res.status(200).json(request);
+    } catch (e) {
+      if (e instanceof Exception) {
+        console.error(e);
+        return res.status(e.statusCode).json({ error: e.message });
+      }
+      return res.status(500).json({ error: (e as any).message });
+    }
+  }
+);
+
+router.get('/access-requests', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id, role } = req.body.token;
+    const requests = await getCourseAccessRequests(role, id);
+    return res.status(200).json(requests);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -107,6 +214,9 @@ router.patch('/:id/finish', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -125,6 +235,9 @@ router.get('/:id/problems', JWTAccessDecoder, async (req, res) => {
     // return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -146,6 +259,9 @@ router.post('/:id/problems', JWTAccessDecoder, async (req, res) => {
     return res.status(201).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -172,6 +288,9 @@ router.patch('/:id/problems/:problemId', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(problem);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -197,7 +316,10 @@ router.post(
 
       return res.status(202).json(problems);
     } catch (e) {
-      console.error(e);
+      if (e instanceof Exception) {
+        console.error(e);
+        return res.status(e.statusCode).json({ error: e.message });
+      }
       return res.status(500).json({ error: (e as any).message });
     }
   }
@@ -222,7 +344,10 @@ router.put(
       );
       return res.status(200).json(course);
     } catch (e) {
-      console.error(e);
+      if (e instanceof Exception) {
+        console.error(e);
+        return res.status(e.statusCode).json({ error: e.message });
+      }
       return res.status(500).json({ error: (e as any).message });
     }
   }
@@ -244,6 +369,9 @@ router.get('/:id/certificate', JWTAccessDecoder, async (req, res) => {
     // .json({ certificate: `${process.cwd()}/${certificate}` });
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -259,8 +387,12 @@ router.get('/:id', async (req, res) => {
       });
     }
     res.status(200).json(await getCourseById(id));
-  } catch (error) {
-    res.status(500).json(error);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 
@@ -270,8 +402,12 @@ router.patch('/:id', async (req, res) => {
     const { id } = req.params;
     const data = req.body;
     res.status(200).json(await updateCourseById(id, data));
-  } catch (error) {
-    res.status(500).json(error);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 
@@ -285,8 +421,12 @@ router.delete('/:id', async (req, res) => {
       });
     }
     return res.status(200).json(deletedCourse);
-  } catch (error) {
-    return res.status(500).json(error);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 
@@ -304,6 +444,9 @@ router.patch('/:id/complete', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -326,6 +469,10 @@ router.post('/:id/exam', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 router.post('/:id/exam/submit', JWTAccessDecoder, async (req, res) => {
@@ -342,6 +489,10 @@ router.post('/:id/exam/submit', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json({ score });
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
   }
 });
 
@@ -366,7 +517,10 @@ router.post(
       }
       return res.status(200).json(subtitle);
     } catch (e) {
-      console.error(e);
+      if (e instanceof Exception) {
+        console.error(e);
+        return res.status(e.statusCode).json({ error: e.message });
+      }
       return res.status(500).json({ error: (e as any).message });
     }
   }
@@ -389,6 +543,9 @@ router.put('/:id/subtitles/:subtitleId', JWTAccessDecoder, async (req, res) => {
     return res.status(202).json(updatedSub);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -405,6 +562,9 @@ router.get('/:id/subtitles/:subtitleId', async (req, res) => {
     return res.status(200).json(subtitle);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -423,6 +583,9 @@ router.patch('/:id/buy', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -441,6 +604,9 @@ router.patch('/:id/rate', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -459,6 +625,9 @@ router.patch('/:id/review', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -475,6 +644,9 @@ router.patch('/:id/publish', JWTAccessDecoder, async (req, res) => {
     return res.status(200).json(course);
   } catch (e) {
     console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
     return res.status(500).json({ error: (e as any).message });
   }
 });
@@ -487,8 +659,8 @@ router.post('/:id/request-access', JWTAccessDecoder, async (req, res) => {
     const course = await requestAccessToCourse(id, studentId, role);
     return res.status(201).json(course);
   } catch (e) {
+    console.error(e);
     if (e instanceof Exception) {
-      console.error(e);
       return res.status(e.statusCode).json({ error: e.message });
     }
     return res.status(500).json({ error: (e as any).message });
@@ -502,8 +674,8 @@ router.patch('/:id/refund', JWTAccessDecoder, async (req, res) => {
     const course = await requestCourseRefund(id, userId);
     return res.status(201).json(course);
   } catch (e) {
+    console.error(e);
     if (e instanceof Exception) {
-      console.error(e);
       return res.status(e.statusCode).json({ error: e.message });
     }
     return res.status(500).json({ error: (e as any).message });
@@ -517,8 +689,8 @@ router.delete('/:id/refund', JWTAccessDecoder, async (req, res) => {
     const course = await cancelRefundRequest(id, userId);
     return res.status(200).json(course);
   } catch (e) {
+    console.error(e);
     if (e instanceof Exception) {
-      console.error(e);
       return res.status(e.statusCode).json({ error: e.message });
     }
     return res.status(500).json({ error: (e as any).message });
@@ -557,7 +729,9 @@ router.post(
 
       return res.status(200).json({ score });
     } catch (e) {
-      console.error(e);
+      if (e instanceof Exception) {
+        return res.status(e.statusCode).json({ error: e.message });
+      }
       return res.status(500).json({ error: (e as any).message });
     }
   }

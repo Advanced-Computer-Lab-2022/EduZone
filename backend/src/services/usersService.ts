@@ -2,7 +2,10 @@ import NotFoundException from '../Exceptions/NotFoundException';
 import { UserModel } from '../models';
 
 export const addUser = (data: typeof UserModel) => {
-  const user = UserModel.create(data);
+  const user = UserModel.create({
+    ...data,
+    wallet: { balance: 0, transactions: [] },
+  });
   return user;
 };
 

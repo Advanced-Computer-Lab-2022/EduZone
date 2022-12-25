@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { SidebarProps } from '../../../../types';
 import AdminSidebarHeader from './AdminSidebarHeader';
 const AdminSidebar: React.FC<SidebarProps> = ({
@@ -6,6 +7,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({
   handleClose,
   handleOpen,
   setWidth,
+  items,
 }) => {
   // get component width by ref
 
@@ -25,7 +27,7 @@ const AdminSidebar: React.FC<SidebarProps> = ({
     >
       <div
         className={`${
-          isOpen ? 'min-w-[12rem] w-fit' : 'w-[4rem]'
+          isOpen ? 'min-w-[15rem] w-fit' : 'w-[4rem]'
         } h-full  border-r bg-primary  duration-700 ease-in-out `}
       >
         <AdminSidebarHeader
@@ -33,6 +35,18 @@ const AdminSidebar: React.FC<SidebarProps> = ({
           handleClose={handleClose}
           handleOpen={handleOpen}
         />
+        <div className="flex flex-col py-2">
+          {items?.map((item, index) => (
+            <Link
+              key={index}
+              className="flex items-center gap-4 px-4 py-4 cursor-pointer hover:bg-white/30"
+              to={item.link}
+            >
+              <div className="text-white text-center ml-1">{item.icon}</div>
+              {isOpen && <div className="text-white">{item.name}</div>}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

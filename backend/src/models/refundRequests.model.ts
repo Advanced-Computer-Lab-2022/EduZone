@@ -16,6 +16,10 @@ const RefundRequestSchema = new Schema({
     required: true,
     default: 'PENDING',
   },
+  amount: {
+    type: Number,
+    required: false,
+  },
   requestedAt: {
     type: Date,
     required: true,

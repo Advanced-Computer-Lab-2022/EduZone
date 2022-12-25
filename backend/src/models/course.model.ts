@@ -206,14 +206,14 @@ const courseSchema = new Schema({
           required: false,
         },
         payment: {
+          required: false,
           id: {
             type: String,
-            required: true,
-            unique: true,
+            required: false,
           },
           amount: {
             type: Number,
-            required: true,
+            required: false,
           },
         },
         notes: [

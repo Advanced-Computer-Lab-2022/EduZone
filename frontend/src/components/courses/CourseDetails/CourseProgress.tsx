@@ -58,7 +58,7 @@ const CourseProgress: React.FC<CourseProgressProps> = ({
             }`}
           >
             {(Number.isNaN(progress) ? 0 : progress) < 100
-              ? (Number.isNaN(progress) ? 0 : progress) + '%'
+              ? (Number.isNaN(progress) ? 0 : Number(progress).toFixed(1)) + '%'
               : failed
               ? 'Failed Final'
               : 'Done'}

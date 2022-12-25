@@ -21,6 +21,8 @@ import CourseCertificate from '../components/courses/Certificate';
 import TraineeReportedProblems from '../pages/trainee/TraineeReportedProblems';
 import InstructorReportedProblems from '../pages/instructor/InstructorReportedProblems';
 import AdminReportedProblems from '../pages/admin/AdminReportedProblems';
+import AdminCourseAccessRequest from '../pages/admin/AdminCourseAccessRequest';
+import AdminRefundRequests from '../pages/admin/AdminRefundRequests';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -124,6 +126,14 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'admin/reported-problems',
     element: <AdminReportedProblems />,
+  },
+  {
+    path: 'admin/access-requests',
+    element: <AdminCourseAccessRequest />,
+  },
+  {
+    path: 'admin/refund-requests',
+    element: <AdminRefundRequests />,
   },
   {
     path: 'trainee/:id/profile/change-password',

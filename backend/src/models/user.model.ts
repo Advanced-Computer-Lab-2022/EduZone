@@ -1,5 +1,30 @@
 import mongoose, { Schema } from 'mongoose';
 
+const transactionSchema = new Schema({
+  amount: {
+    type: Number,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: false,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  //type as in income or expense
+});
+
+const walletSchema = new Schema({
+  balance: { type: Number, required: true },
+  transactions: [{ type: transactionSchema, required: false }],
+});
+
 const userSchema = new Schema({
   name: {
     type: String,
@@ -52,6 +77,11 @@ const userSchema = new Schema({
   img: {
     type: String,
     default: null,
+  },
+  wallet: {
+    type: walletSchema,
+    required: true,
+    default: { balance: 0, transactions: [] },
   },
   feedback: {
     type: [

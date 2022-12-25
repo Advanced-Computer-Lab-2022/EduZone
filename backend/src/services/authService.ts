@@ -58,6 +58,7 @@ export const register = async (
     email: email.toLowerCase(),
     password: hashedPassword,
     gender: gender,
+    wallet: { balance: 0, transactions: [] },
   });
 
   //generate access and refresh tokens

@@ -10,7 +10,7 @@ import sendMail from '../utils/sendMail';
 import NotFoundException from '../Exceptions/NotFoundException';
 import DuplicateException from '../Exceptions/DuplicateException';
 import ForbiddenException from '../Exceptions/ForbiddenException';
-import BadRequestBody from '../Exceptions/BadRequestBody';
+import BadRequestBodyException from '../Exceptions/BadRequestBody';
 import RefundRequestModel from '../models/refundRequests.model';
 import AccessRequestModel from '../models/accessRequest.model';
 // const stripe = require('stripe')();
@@ -610,7 +610,7 @@ export const payForCourse = async (
     apiVersion: '2022-11-15',
   });
   if (!courseTitle || !studentId || !email || !amount) {
-    throw new BadRequestBody('Invalid parameters');
+    throw new BadRequestBodyException('Invalid parameters');
   }
 
   const { id: customerId }: any = await stripe.customers
@@ -1059,16 +1059,92 @@ export const cancelRefundRequest = async (
   return course;
 };
 
-export const getRefundRequests = async () => {
+export const getRefundRequests = async (role: string, studentId: string) => {
   const requests = await RefundRequestModel.find()
-    .populate('course', ['title', 'price', '_id'])
+    .populate('course', [
+      'title',
+      'price',
+      '_id',
+      'enrolled.payment',
+      'enrolled.studentId',
+    ])
     .populate('student', ['name', 'email', '_id']);
-  return requests;
+  if (role === 'admin') {
+    return requests;
+  } else {
+    return requests.filter((r) => r.student._id.toString() === studentId);
+  }
 };
 
-// export const resolveRefundRequest = async (courseId:string, studentId:string, requestId: string, resolving:string ) => {
-//   const request = await RefundRequestModel.findById(requestId)
-// }
+export const getCourseAccessRequests = async (
+  role: string,
+  studentId: string
+) => {
+  const requests = await AccessRequestModel.find()
+    .populate('course', ['title', 'price', '_id'])
+    .populate('student', ['name', 'email', '_id']);
+  if (role === 'admin') {
+    return requests;
+  } else {
+    return requests.filter((r) => r.student._id.toString() === studentId);
+  }
+};
+
+export const resolveRefundRequest = async (
+  courseId: string,
+  studentId: string,
+  requestId: string,
+  status: string,
+  amount?: number
+) => {
+  const request = await RefundRequestModel.findById(requestId)
+    .populate('course', [
+      'title',
+      'price',
+      '_id',
+      'enrolled.payment',
+      'enrolled.studentId',
+    ])
+    .populate('student', ['name', 'email', '_id']);
+  if (!request) throw new NotFoundException('Request not found');
+  if (request.status !== 'PENDING')
+    throw new ForbiddenException('Request already resolved');
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new NotFoundException('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
+  if (status === 'ACCEPTED') {
+    if (!amount) throw new BadRequestBodyException('Amount is required');
+    //delete the student from the enrolled list
+    course.enrolled = course.enrolled.filter(
+      (s) => s.studentId !== enrolled.studentId
+    );
+    request.status = 'ACCEPTED';
+    request.resolvedAt = new Date();
+    request.amount = amount;
+
+    // refund the student
+    const user = await UserModel.findById(studentId);
+    if (!user) throw new NotFoundException('User not found');
+    user.wallet.balance += amount;
+    user.wallet.transactions.push({
+      amount,
+      type: 'income',
+      date: new Date(),
+      description: `Refund for course ${course.title}`,
+    });
+
+    await user.save();
+    await request.save();
+    await course.save();
+
+    return request;
+  }
+  request.status = 'REJECTED';
+  request.resolvedAt = new Date();
+  await request.save();
+  return request;
+};
 
 export const requestAccessToCourse = async (
   courseId: string,
@@ -1101,4 +1177,46 @@ export const requestAccessToCourse = async (
   });
   await course.save();
   return course;
+};
+
+export const resolveAccessRequest = async (
+  courseId: string,
+  studentId: string,
+  requestId: string,
+  status: string
+) => {
+  const request = await AccessRequestModel.findById(requestId)
+    .populate('course', ['title', 'price', '_id'])
+    .populate('student', ['name', 'email', '_id']);
+  if (!request) throw new NotFoundException('Request not found');
+  if (request.status !== 'PENDING')
+    throw new ForbiddenException('Request already resolved');
+  const course = await CourseModel.findById(courseId);
+  if (!course) throw new NotFoundException('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (enrolled) throw new ForbiddenException('Already enrolled');
+  if (status === 'ACCEPTED') {
+    //add the student to the enrolled list
+    const id = new mongoose.Types.ObjectId();
+    course.enrolled.push({
+      studentId,
+      exercises: [],
+      finalExam: {
+        submitted: false,
+        score: -1,
+        answers: [],
+      },
+      notes: [],
+      status: 'active',
+    });
+    await course.save();
+    request.status = 'ACCEPTED';
+    request.resolvedAt = new Date();
+    await request.save();
+    return request;
+  }
+  request.status = 'REJECTED';
+  request.resolvedAt = new Date();
+  await request.save();
+  return request;
 };
