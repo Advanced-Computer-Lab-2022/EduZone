@@ -216,6 +216,7 @@ const getTokens = (user: any) => {
     name: user.name,
     img: user.img ?? null,
     bio: user.bio ?? null,
+    wallet: user.wallet,
   };
 
   const accessToken = jwt.sign(

@@ -7,4 +7,8 @@ export declare type User = {
   lastLogin: Date;
   refreshToken: string;
   gender: 'male' | 'female';
+  wallet: {
+    balance: number;
+    transactions: any[];
+  };
 };
