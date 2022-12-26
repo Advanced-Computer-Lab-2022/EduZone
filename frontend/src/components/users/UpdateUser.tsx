@@ -72,12 +72,12 @@ const UpdateUser = () => {
             />
           </div>
         </div>
-        <div className="flex flex-col w-2/3">
+        <div className="flex flex-col w-full">
           <label htmlFor="">Bio</label>
           <textarea
             name="bio"
             id="bio"
-            className="border-2 border-gray-300 rounded-md lg:w-full  px-4 py-3"
+            className="border-2 border-gray-300 rounded-md lg:w-full  w-full px-4 py-3"
             placeholder="Enter your biography"
             value={bio}
             rows={5}

@@ -5,7 +5,9 @@ import { FaInfoCircle, FaLock, FaUserAlt, FaWallet } from 'react-icons/fa';
 import { HiMail } from 'react-icons/hi';
 import { MdEdit, MdOndemandVideo } from 'react-icons/md';
 import { useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
 import Divider from '../../components/common/Divider';
+import Modal from '../../components/common/Modal';
 import Truncate from '../../components/common/Truncate';
 import CourseCard from '../../components/courses/CourseCard';
 import Layout from '../../components/layout/Trainee/Layout';
@@ -32,12 +34,23 @@ const TraineeProfile = () => {
     setCourses(res.data);
     // console.log(res);
   };
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const navigate = useNavigate();
   useEffect(() => {
     fetchTraineeCourses();
   }, []);
 
   return (
     <Layout>
+      <Modal
+        open={modalOpen}
+        close={() => setModalOpen(false)}
+        title="Update User"
+      >
+        <UpdateUser />
+      </Modal>
       <div className="  h-[calc(100vh-10rem)] justify-center gap-5 grid grid-cols-3 my-10">
         <div className="h-full mas-h-[calc(100vh-10rem)] w-full bg-white py-10 space-y-5 px-16 rounded-lg">
           <div className="flex flex-col items-center ">
@@ -64,7 +77,10 @@ const TraineeProfile = () => {
           </div>
           <Divider />
           <div className="space-y-5 w-full flex flex-col">
-            <button className="self-end text-sm text-primary">
+            <button
+              className="self-end text-sm text-primary"
+              onClick={() => setModalOpen(true)}
+            >
               Edit Profile
             </button>
             <div>
@@ -95,9 +111,11 @@ const TraineeProfile = () => {
                 <FaLock size={18} />
                 <p>Password</p>
               </div>
-              <button className="self-end  text-primary">
-                Change Password
-              </button>
+              <Link to={'change-password'}>
+                <button className="self-end  text-primary">
+                  Change Password
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -171,12 +189,12 @@ const TraineeProfile = () => {
             {courses.map((course: any, index: number) => (
               <div
                 className="flex  w-full bg-gray-100 rounded-lg p-2 border gap-4 hover:border-primary cursor-pointer transition-all duration-300 ease-in-out"
-                // onClick={() => navigate(`${base || ''}/courses/${course._id}`)}
+                onClick={() => navigate(`/courses/${course._id}`)}
               >
                 <img
                   src={
                     course.thumbnail ??
-                    'https://via.placeholder.com/150/DEDEDE/808080?text=Thumbnail'
+                    'https://www.slntechnologies.com/wp-content/uploads/2017/08/ef3-placeholder-image.jpg'
                   }
                   alt=""
                   className="w-1/4 rounded-lg aspect-square object-cover "
