@@ -13,7 +13,7 @@ const Truncate: React.FC<TruncateProps> = ({
     if (length > text.split(' ').length) setIsTruncated(false);
     if (text) {
       const array = text.split(' ').slice(0, length);
-      console.log(array);
+      // console.log(array);
       setTruncatedText(array.join(' ') + '... ');
     }
   }, [text]);

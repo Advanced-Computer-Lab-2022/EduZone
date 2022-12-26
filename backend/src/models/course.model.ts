@@ -215,6 +215,10 @@ const courseSchema = new Schema({
             type: Number,
             required: false,
           },
+          date: {
+            type: Date,
+            required: true,
+          },
         },
         notes: [
           {

@@ -34,6 +34,7 @@ import {
   getCourseAccessRequests,
   resolveRefundRequest,
   resolveAccessRequest,
+  addBatchPromotion,
 } from '../services';
 import Exception from '../Exceptions/Exception';
 
@@ -191,6 +192,31 @@ router.patch(
     }
   }
 );
+
+router.post('/batch-promotions', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { role } = req.body.token;
+    if (role !== 'admin') {
+      return res
+        .status(403)
+        .json({ error: 'You are not allowed to perform this request' });
+    }
+    const { courseIds, amount, validFrom, validUntil } = req.body;
+    const batchPromotions = await addBatchPromotion(
+      courseIds,
+      amount,
+      validFrom,
+      validUntil
+    );
+    return res.status(200).json(batchPromotions);
+  } catch (e) {
+    if (e instanceof Exception) {
+      console.error(e);
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
 
 router.get('/access-requests', JWTAccessDecoder, async (req, res) => {
   try {

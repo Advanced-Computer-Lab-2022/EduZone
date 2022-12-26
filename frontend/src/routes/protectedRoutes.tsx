@@ -23,6 +23,7 @@ import InstructorReportedProblems from '../pages/instructor/InstructorReportedPr
 import AdminReportedProblems from '../pages/admin/AdminReportedProblems';
 import AdminCourseAccessRequest from '../pages/admin/AdminCourseAccessRequest';
 import AdminRefundRequests from '../pages/admin/AdminRefundRequests';
+import AdminCourses from '../pages/admin/AdminCourses';
 
 const ProtectedRoutes: RouteType[] = [
   {
@@ -134,6 +135,10 @@ const ProtectedRoutes: RouteType[] = [
   {
     path: 'admin/refund-requests',
     element: <AdminRefundRequests />,
+  },
+  {
+    path: 'admin/courses',
+    element: <AdminCourses />,
   },
   {
     path: 'trainee/:id/profile/change-password',

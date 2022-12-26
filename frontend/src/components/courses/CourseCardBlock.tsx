@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 import { CourseCardProps } from '../../types';
@@ -7,6 +7,7 @@ import { Course } from '../../types/entities/Course';
 import { calculateCourseRating } from '../../utils';
 import Truncate from '../common/Truncate';
 import DisplayRating from './DisplayRating';
+import moment from 'moment';
 const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
   const { total, rating } = calculateCourseRating(course);
   const { currency, conversion_rate } = useSelector(
@@ -17,15 +18,30 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
     ...course.discount,
     valid:
       course?.discount &&
-      course?.discount?.validFrom < new Date() &&
-      course?.discount?.validUntil > new Date(),
+      new Date(course?.discount?.validFrom) <= new Date() &&
+      new Date(course?.discount?.validUntil) >= new Date(),
   });
+
+  console.log(
+    course?.discount &&
+      new Date(course?.discount?.validFrom) <= new Date() &&
+      new Date(course?.discount?.validUntil) >= new Date()
+  );
+
+  useEffect(() => {
+    setDiscount({
+      ...course.discount,
+      valid:
+        course?.discount &&
+        new Date(course?.discount?.validFrom) <= new Date() &&
+        new Date(course?.discount?.validUntil) >= new Date(),
+    });
+  }, [course]);
 
   return (
     <div
       key={course._id.toString()}
       className="w-full bg-white shadow-sm hover:shadow-md  rounded-lg duration-150 flex flex-col relative cursor-pointer"
-      onClick={() => navigate(`${base || ''}/courses/${course._id}`)}
     >
       <img
         src={
@@ -66,17 +82,25 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
           By: {course.instructor?.name ?? 'Unknown Instructor'}
         </p>
         <div className=" mt-auto w-full flex items-center pt-2 font-sans justify-between">
-          <p className="text-xl font-semibold text-primary">
-            {discount.valid
-              ? Number(
-                  course?.price *
-                    (1 - (course?.discount?.amount ?? 0) / 100) *
-                    conversion_rate
-                ).toFixed(2)
-              : Number(course?.price * conversion_rate).toFixed(2)}{' '}
-            <span className="text-xs ">{currency}</span>
-          </p>
-          <Link to={`/courses/${course?._id}`}>
+          <div>
+            {discount.valid && (
+              <p className="text-sm text-gray-500 line-through">
+                {Number(course?.price * conversion_rate).toFixed(2)}{' '}
+                <span className="text-xs ">{currency}</span>
+              </p>
+            )}
+            <p className="text-xl font-semibold text-primary">
+              {discount.valid
+                ? Number(
+                    course?.price *
+                      (1 - (course?.discount?.amount ?? 0) / 100) *
+                      conversion_rate
+                  ).toFixed(2)
+                : Number(course?.price * conversion_rate).toFixed(2)}{' '}
+              <span className="text-xs ">{currency}</span>
+            </p>
+          </div>
+          <Link to={`${base || ''}/courses/${course._id}`}>
             <button className="bg-primary text-white text-sm py-2 px-4 rounded ">
               View Course
             </button>

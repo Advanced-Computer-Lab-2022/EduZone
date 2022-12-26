@@ -9,7 +9,7 @@ const DisplayRating: React.FC<{
     <div className="flex text-yellow-600 cursor-pointer">
       {[0, 1, 2, 3, 4].map((_, index) => {
         return (
-          <div id={index.toString()}>
+          <div id={index.toString()} key={index}>
             {rating >= index + 1 ? (
               <FaStar size={size} key={index} />
             ) : rating >= index + 0.5 ? (

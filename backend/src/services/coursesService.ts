@@ -22,7 +22,6 @@ export const getAllCourses = async (
 ) => {
   const { price, rating, maxPrice, minPrice, query, subject, instructor } =
     filters;
-  console.log(filters);
 
   // const search_query = [
   //   ...(title && { title: { $regex: title, $options: 'i' } }),
@@ -368,6 +367,7 @@ export const buyCourse = async (
     payment: {
       id: paymentId,
       amount: course.price as number,
+      date: new Date(),
     },
     notes: [],
     status: 'active',
@@ -1219,4 +1219,27 @@ export const resolveAccessRequest = async (
   request.resolvedAt = new Date();
   await request.save();
   return request;
+};
+
+export const addBatchPromotion = async (
+  courseIds: string[],
+  amount: number,
+  validFrom: Date,
+  validUntil: Date
+) => {
+  const courses = await CourseModel.find({ _id: { $in: courseIds } }).populate(
+    'instructor',
+    ['name', 'username', '_id', 'email', 'img', 'feedback']
+  );
+  if (!courses) throw new NotFoundException('No courses found');
+  for (const course of courses) {
+    course.discount = {
+      amount,
+      validUntil,
+      validFrom,
+    };
+    await course.save();
+  }
+
+  return courses;
 };
