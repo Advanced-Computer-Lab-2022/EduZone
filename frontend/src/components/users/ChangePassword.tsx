@@ -1,7 +1,7 @@
 import { getCookie } from 'cookies-next';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { showMessage } from '../../redux/features/ui.reducer';
 import { RootState } from '../../redux/store';
 import { axios } from '../../utils';
@@ -13,6 +13,8 @@ const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
   const dispatch = useDispatch();
   const { token } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const onResetPassword = async () => {
     if (password !== password2) {
       alert('Passwords do not match');
@@ -40,6 +42,7 @@ const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
         })
       );
       if (isReset) navigate('/login');
+      else if (location.state?.from) navigate(`/instructor/${user?.id}`);
       else navigate(-1);
     }
   };

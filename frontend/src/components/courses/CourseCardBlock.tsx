@@ -28,6 +28,11 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
       new Date(course?.discount?.validUntil) >= new Date()
   );
 
+  const [duration, setDuration] = useState({
+    hours: 0,
+    minutes: 0,
+  });
+
   useEffect(() => {
     setDiscount({
       ...course.discount,
@@ -35,6 +40,27 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
         course?.discount &&
         new Date(course?.discount?.validFrom) <= new Date() &&
         new Date(course?.discount?.validUntil) >= new Date(),
+    });
+
+    setDuration({
+      hours:
+        (course.subtitles &&
+          Math.floor(
+            course?.subtitles?.reduce(
+              (acc: any, curr: any) => acc + curr.duration,
+              0
+            )
+          )) ||
+        0,
+      minutes:
+        (course.subtitles &&
+          (course?.subtitles?.reduce(
+            (acc: any, curr: any) => acc + curr.duration,
+            0
+          ) *
+            60) %
+            60) ||
+        0,
     });
   }, [course]);
 
@@ -65,14 +91,11 @@ const CourseCardBlock: React.FC<CourseCardProps> = ({ course, base }) => {
               </span>
             </div>
           )}
-          <p className="text-sm font-medium font-sans text-gray-700">
-            {course.subtitles &&
-              Math.ceil(
-                course?.subtitles?.reduce(
-                  (acc: any, curr: any) => acc + curr.duration,
-                  0
-                )
-              ) + ' hrs'}
+          <p className="text-sm font-medium font-sans text-gray-500">
+            {duration.hours > 0 && <span>{duration.hours}h </span>}{' '}
+            {duration.minutes > 0 && (
+              <span> {Math.ceil(duration.minutes)}m</span>
+            )}
           </p>
         </div>
         <div className="text-sm text-gray-500">

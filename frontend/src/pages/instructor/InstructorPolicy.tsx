@@ -1,9 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { RootState } from '../../redux/store';
 const InstructorPolicy = () => {
   const { id } = useSelector((state: RootState) => state.auth.user);
+
   return (
     <div className="flex flex-col w-1/2 mx-auto items-center justify-center text-justify h-screen space-y-5">
       <p>
@@ -27,7 +28,8 @@ const InstructorPolicy = () => {
         SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       </p>
       <Link
-        to={`/instructor/${id}`}
+        to={`/instructor/${id}/profile/change-password`}
+        state={{ from: 'policy' }}
         className="bg-primary text-white px-4 py-2 rounded-md"
       >
         AGREE AND CONTINUE
