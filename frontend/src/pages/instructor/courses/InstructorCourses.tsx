@@ -15,9 +15,12 @@ import SearchBar from '../../../components/layout/common/navbar/trainee/SearchBa
 // import SearchBar from '../../../components/layout/Trainee/Navbar/SearchBar';
 import { axios } from '../../../utils';
 import CourseCardBlock from '../../../components/courses/CourseCardBlock';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../redux/store';
 
 const InstructorCourses = () => {
   const { id: instructorId } = useParams();
+  const { name } = useSelector((state: RootState) => state.auth.user);
   const [courses, setCourses] = useState([] as any[]);
   const [pagination, setPagination] = useState({} as any);
   const [searchParams] = useSearchParams();
@@ -47,7 +50,7 @@ const InstructorCourses = () => {
 
     try {
       const res: AxiosResponse<any, any> = await axios({
-        url: `/courses?instructor=${instructorId}&query=${query || ''}`,
+        url: `/courses?instructor=${name}&query=${query || ''}`,
         method: 'GET',
         params: params,
       });

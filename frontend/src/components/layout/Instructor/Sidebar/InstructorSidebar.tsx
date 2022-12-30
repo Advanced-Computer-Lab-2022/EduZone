@@ -27,7 +27,7 @@ const InstructorSidebar: React.FC<SidebarProps> = ({
     >
       <div
         className={`${
-          isOpen ? 'min-w-[12rem] w-fit' : 'w-[4rem]'
+          isOpen ? 'min-w-[15rem] w-fit' : 'w-[4rem]'
         } h-full  border-r bg-primary  duration-700 ease-in-out `}
       >
         <InstructorSidebarHeader

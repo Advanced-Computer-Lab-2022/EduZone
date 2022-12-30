@@ -114,7 +114,7 @@ const AdminCourseAccessRequest = () => {
                       {Number(request?.course?.price * conversion_rate).toFixed(
                         2
                       )}
-                      {currency}
+                      <span className="ml-1">{currency}</span>
                     </td>
                     <td className="py-4 px-6">
                       {moment(new Date(request.requestedAt)).fromNow()}

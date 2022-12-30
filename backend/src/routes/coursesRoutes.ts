@@ -35,6 +35,7 @@ import {
   resolveRefundRequest,
   resolveAccessRequest,
   addBatchPromotion,
+  enrollFree,
 } from '../services';
 import Exception from '../Exceptions/Exception';
 
@@ -42,7 +43,6 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   const { page, limit, ...filters } = req.query;
-
   try {
     const courses = await getAllCourses(
       filters,
@@ -601,6 +601,25 @@ router.patch('/:id/buy', JWTAccessDecoder, async (req, res) => {
     const { id: userId, email } = req.body.token;
     const { paymentId } = req.body;
     const course = await buyCourse(id, userId, email, paymentId);
+    if (!course) {
+      return res.status(404).json({
+        message: 'Course not found',
+      });
+    }
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+router.patch('/:id/enroll', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { id: userId, email } = req.body.token;
+    const course = await enrollFree(id, userId);
     if (!course) {
       return res.status(404).json({
         message: 'Course not found',

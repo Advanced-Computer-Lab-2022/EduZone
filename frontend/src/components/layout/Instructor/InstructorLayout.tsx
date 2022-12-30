@@ -17,7 +17,7 @@ const InstructorLayout = ({
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarWidth, setSideBarWidth] = useState(0);
-  const [windowWidth, setWindowWidth] = useState(500);
+  const [windowWidth, setWindowWidth] = useState(600);
 
   const { user } = useSelector((state: RootState) => state.auth);
 

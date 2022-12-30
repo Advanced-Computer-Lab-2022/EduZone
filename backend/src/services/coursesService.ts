@@ -20,8 +20,9 @@ export const getAllCourses = async (
   page?: string,
   limit?: string
 ) => {
-  const { price, rating, maxPrice, minPrice, query, subject, instructor } =
-    filters;
+  const { price, rating, maxPrice, minPrice, subject, instructor } = filters;
+
+  let { query } = filters;
 
   // const search_query = [
   //   ...(title && { title: { $regex: title, $options: 'i' } }),
@@ -32,29 +33,31 @@ export const getAllCourses = async (
   //   ...(maxPrice && { price: { $lte: maxPrice } }),
   //   ...(minPrice && { price: { $gte: minPrice } }),
   // ];
+  if (typeof query === 'object') query = query[0];
+
+  console.log('Query', query);
   let search_query: any = query
     ? [
         { title: { $regex: query, $options: 'i' } },
         { subject: { $regex: query, $options: 'i' } },
       ]
     : [];
-
   let instructorId: any = '';
-  if (query) {
+  if (instructor) {
     //get instructor id by name
     instructorId = await UserModel.findOne({
-      name: { $regex: query, $options: 'i' },
+      name: { $regex: instructor, $options: 'i' },
     }).select('_id');
     search_query = [...search_query, { instructor: instructorId?._id }];
   }
-
+  console.log(search_query);
   const filter_query = {
     ...(price && { price: price }),
     ...(rating && { rating: { $gte: rating } }),
     ...(maxPrice && { price: { $lte: maxPrice } }),
     ...(minPrice && { price: { $gte: minPrice } }),
     ...(subject && { subject: { $regex: subject, $options: 'i' } }),
-    ...(instructor && { instructor: instructor }),
+    ...(instructor && { instructor: instructorId }),
   };
 
   const full_query = query
@@ -367,6 +370,42 @@ export const buyCourse = async (
     payment: {
       id: paymentId,
       amount: course.price as number,
+      date: new Date(),
+    },
+    notes: [],
+    status: 'active',
+  });
+  await course.save();
+
+  return course;
+};
+
+export const enrollFree = async (courseId: string, studentId: string) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new NotFoundException('Course not found');
+  if (course.price && course.price > 0)
+    throw new ForbiddenException('Course is not free');
+  const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (isEnrolled) throw new DuplicateException('Already enrolled');
+
+  course.enrolled.push({
+    studentId,
+    exercises: [],
+    finalExam: {
+      submitted: false,
+      score: -1,
+      answers: [],
+    },
+    payment: {
+      id: '1',
+      amount: 0,
       date: new Date(),
     },
     notes: [],
@@ -1208,6 +1247,11 @@ export const resolveAccessRequest = async (
       },
       notes: [],
       status: 'active',
+      payment: {
+        id: '1',
+        amount: 0,
+        date: new Date(),
+      },
     });
     await course.save();
     request.status = 'ACCEPTED';

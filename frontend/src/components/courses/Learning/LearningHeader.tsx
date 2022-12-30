@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 declare type LearningHeaderProps = {
@@ -21,6 +21,19 @@ const LearningHeader: React.FC<LearningHeaderProps> = ({
   title,
   courseId,
 }) => {
+  useEffect(() => {
+    if (
+      courseItems[currentCourseItem - 1]?.type === 'subtitle' &&
+      !enrolled?.completed?.subtitles?.includes(
+        courseItems[currentCourseItem - 1]?.data._id
+      )
+    ) {
+      onMarkCompleted(
+        courseItems[currentCourseItem - 1]?.type,
+        courseItems[currentCourseItem - 1]?.data._id
+      );
+    }
+  }, [courseItems, currentCourseItem]);
   return (
     <div className="flex items-center justify-between ">
       <div>
@@ -35,7 +48,7 @@ const LearningHeader: React.FC<LearningHeaderProps> = ({
           </p>
         </Link>
       </div>
-      {courseItems[currentCourseItem - 1]?.type === 'subtitle' &&
+      {/* {courseItems[currentCourseItem - 1]?.type === 'subtitle' &&
         !enrolled?.completed?.subtitles?.includes(
           courseItems[currentCourseItem - 1]?.data._id
         ) && (
@@ -52,7 +65,7 @@ const LearningHeader: React.FC<LearningHeaderProps> = ({
               Mark as Completed
             </button>
           </div>
-        )}
+        )} */}
     </div>
   );
 };

@@ -74,6 +74,27 @@ const SingleCourse = () => {
     }
   };
 
+  const onEnroll = async () => {
+    try {
+      const res: AxiosResponse<any, any> = await axios({
+        url: '/courses/' + id + '/enroll',
+        data: {
+          paymentId: new Date().getTime(),
+        },
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+      });
+      console.log(res.data);
+      if (res.status === 200) {
+        navigate('/courses/' + id + '/learning');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
@@ -296,16 +317,20 @@ const SingleCourse = () => {
               </p>
             </div>
 
-            <p className="text-3xl text-primary font-semibold">
-              {course && discount.valid
-                ? Number(
-                    course?.price *
-                      (1 - (course?.discount?.amount ?? 0) / 100) *
-                      conversion_rate
-                  ).toFixed(2)
-                : Number(course?.price * conversion_rate).toFixed(2)}{' '}
-              {currency}
-            </p>
+            {course?.price > 0 ? (
+              <p className="text-3xl text-primary font-semibold">
+                {course && discount.valid
+                  ? Number(
+                      course?.price *
+                        (1 - (course?.discount?.amount ?? 0) / 100) *
+                        conversion_rate
+                    ).toFixed(2)
+                  : Number(course?.price * conversion_rate).toFixed(2)}{' '}
+                {currency}
+              </p>
+            ) : (
+              <p className="text-3xl text-primary font-semibold">Free</p>
+            )}
 
             <div>
               {course?.enrolled.find((s: any) => s.studentId === user.id) &&
@@ -337,6 +362,13 @@ const SingleCourse = () => {
                       onClick={() => requestCourseAccess()}
                     >
                       Request Access
+                    </button>
+                  ) : course?.price === 0 ? (
+                    <button
+                      className="w-full bg-primary text-white rounded-md py-2"
+                      onClick={() => onEnroll()}
+                    >
+                      Enroll Now
                     </button>
                   ) : (
                     <StripeCheckout

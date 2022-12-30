@@ -205,7 +205,6 @@ const hashData = async (data: string) => {
 };
 
 const getTokens = (user: any) => {
-  console.log(user);
   //generate Access token
   const accessPayload = {
     username: user.username,

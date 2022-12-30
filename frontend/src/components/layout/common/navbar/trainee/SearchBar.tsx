@@ -35,6 +35,14 @@ const SearchBar: React.FC<{ onSubmit: FormEventHandler }> = ({ onSubmit }) => {
             {/* <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></div> */}
           </div>
         </div>
+        <div className="absolute top-0 right-0 flex items-center h-full ">
+          <button
+            type="submit"
+            className="px-4 h-10 text-sm rounded-r-full bg-primary text-white flex items-center justify-center"
+          >
+            Search
+          </button>
+        </div>
       </div>
     </form>
   );

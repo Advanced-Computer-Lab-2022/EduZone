@@ -18,7 +18,7 @@ const InstructorProfile = () => {
   const getCourses = async () => {
     try {
       const res = await axios({
-        url: `/courses?instructor=${user.id}`,
+        url: `/courses?instructor=${user.name}`,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

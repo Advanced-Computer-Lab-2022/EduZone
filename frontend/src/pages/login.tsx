@@ -41,7 +41,9 @@ const LoginPage = () => {
         const user = decodeToken(res.data?.accessToken);
         dispatch(login(user));
         setLoading(false);
-        if (res.data?.lastLogin === null) {
+        if (user?.role === 'admin') {
+          navigate('/admin');
+        } else if (res.data?.lastLogin === null) {
           navigate(
             user?.role === 'instructor'
               ? '/instructor-policy'

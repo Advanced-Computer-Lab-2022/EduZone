@@ -34,7 +34,7 @@ const ReportedProblems: React.FC = () => {
       {problems.length > 0 ? (
         <div className="my-4">
           <p className="mb-2 text-lg text-gray-600">Unresolved Problems</p>
-          <div className="grid grid-cols-3 mb-6">
+          <div className="grid grid-cols-3 mb-6 space-x-5">
             {problems.filter((p) => p.status === 'UNSEEN').length > 0 ? (
               problems
                 .filter((p) => p.status === 'UNSEEN')
@@ -56,7 +56,7 @@ const ReportedProblems: React.FC = () => {
             )}
           </div>
           <p className="mb-2 text-lg text-gray-600 ">Pending Problems</p>
-          <div className="grid grid-cols-3  mb-6">
+          <div className="grid grid-cols-3  mb-6 space-x-5">
             {problems.filter((p) => p.status === 'PENDING').length > 0 ? (
               problems
                 .filter((p) => p.status === 'PENDING')
@@ -77,7 +77,7 @@ const ReportedProblems: React.FC = () => {
             )}
           </div>
           <p className="mb-2 text-lg text-gray-600">Resolved Problems</p>
-          <div className="grid grid-cols-3">
+          <div className="grid grid-cols-3 space-x-5">
             {problems.filter((p) => p.status === 'RESOLVED').length > 0 ? (
               problems
                 .filter((p) => p.status === 'RESOLVED')
