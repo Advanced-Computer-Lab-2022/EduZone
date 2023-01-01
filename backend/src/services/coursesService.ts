@@ -1173,6 +1173,12 @@ export const resolveRefundRequest = async (
       description: `Refund for course ${course.title}`,
     });
 
+    user.notifications.push({
+      title: 'Refund Request Accepted',
+      body: `Your refund request for course ${course.title} has been accepted. An amount of $${amount} was added to your wallet`,
+      date: new Date(),
+    });
+
     await user.save();
     await request.save();
     await course.save();

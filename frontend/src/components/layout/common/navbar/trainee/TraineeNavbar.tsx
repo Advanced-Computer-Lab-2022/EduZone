@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { IoNotifications } from 'react-icons/io5';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../../../../../redux/features/auth.reducer';
 import { RootState } from '../../../../../redux/store';
+import Menu from '../../Menu/Menu';
+import NotificationMenu from '../../NotificationMenu';
 import Avatar from '../ProfileMenu/Avatar';
 import ProfileMenu from '../ProfileMenu/ProfileMenu';
 import CurrencyConverter from './CurrencyConverter';
@@ -47,6 +50,7 @@ const TraineeNavbar = () => {
           // </button>
           <div className="flex gap-4 items-center">
             <CurrencyConverter />
+            <NotificationMenu />
             {/* <Avatar
               name={user?.name}
               img="https://avatars.githubusercontent.com/u/30694445?v=4"

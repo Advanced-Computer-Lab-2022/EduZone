@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import IconText from '../../../components/common/IconText';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
@@ -23,6 +23,9 @@ import CourseItemsNav from '../../../components/courses/CourseItemsNav';
 import LearningHeader from '../../../components/courses/Learning/LearningHeader';
 import LearningMainContent from '../../../components/courses/Learning/LearningMainContent';
 import SubtitleNote from './SubtitleNote';
+import { HiOutlineReceiptRefund } from 'react-icons/hi';
+import Modal from '../../../components/common/Modal';
+import { MdOutlineReport } from 'react-icons/md';
 const LearningPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
@@ -237,6 +240,27 @@ const LearningPage = () => {
     setCourse(course);
   };
 
+  const { pathname } = useLocation();
+  const requestRefund = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to request a refund?'
+    );
+    if (confirmed) {
+      const res = await axios({
+        url: `/courses/${course?._id}/refund`,
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+        data: {},
+      });
+      console.log(res.data);
+      onUpdateCourse(res.data);
+      if (pathname.includes('learning')) navigate(`/courses/${course?._id}`);
+    }
+    console.log('request refund', confirmed);
+  };
+
   return (
     <Layout>
       <div className="grid grid-cols-3">
@@ -280,6 +304,19 @@ const LearningPage = () => {
           progress={progress}
           onUpdateCourse={onUpdateCourse}
         />
+      </div>
+      <div className="py-5">
+        {Number.isNaN(progress)
+          ? 0
+          : progress < 50 && (
+              <button
+                className="ml-2 text-gray-500 flex gap-2 hover:text-primary "
+                onClick={requestRefund}
+              >
+                Request a refund
+                <HiOutlineReceiptRefund size={20} />
+              </button>
+            )}
       </div>
     </Layout>
   );

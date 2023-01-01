@@ -40,6 +40,31 @@ const userSchema = new Schema({
     enum: ['trainee', 'admin', 'corp_trainee', 'instructor'],
     default: 'trainee',
   },
+  corporate: {
+    type: String,
+    required: false,
+  },
+  notifications: {
+    type: [
+      {
+        title: {
+          type: String,
+          required: true,
+        },
+        body: {
+          type: String,
+          required: true,
+        },
+        date: {
+          type: Date,
+          required: true,
+          default: Date.now,
+        },
+      },
+    ],
+    required: false,
+  },
+
   username: {
     type: String,
     required: true,

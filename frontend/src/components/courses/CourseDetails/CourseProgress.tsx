@@ -76,17 +76,16 @@ const CourseProgress: React.FC<CourseProgressProps> = ({
           <p className="ml-2 text-gray-500 flex gap-2 hover:text-primary ">
             Pending refund...
           </p>
-        ) : (
-          (Number.isNaN(progress) ? 0 : progress) < 50 && (
-            <button
-              className="ml-2 text-gray-500 flex gap-2 hover:text-primary "
-              onClick={requestRefund}
-            >
-              Request a refund
-              <HiOutlineReceiptRefund size={20} />
-            </button>
-          )
-        )}
+        ) : // (Number.isNaN(progress) ? 0 : progress) < 50 && (
+        //   <button
+        //     className="ml-2 text-gray-500 flex gap-2 hover:text-primary "
+        //     onClick={requestRefund}
+        //   >
+        //     Request a refund
+        //     <HiOutlineReceiptRefund size={20} />
+        //   </button>
+        // )
+        null}
       </div>
       <div className="flex items-center gap-3 ">
         <div className="grow bg-gray-300 h-2 rounded-full ">

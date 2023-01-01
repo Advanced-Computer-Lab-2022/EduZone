@@ -101,3 +101,26 @@ export const getUserReportedProblems = async (id: string) => {
   if (!user) throw new NotFoundException('user not found');
   return user.reportedProblems;
 };
+
+const addNotification = async (
+  userId: string,
+  notification: {
+    title: string;
+    body: string;
+    date: Date;
+  }
+) => {
+  const user = await UserModel.findById(userId);
+  if (!user) throw new NotFoundException('user not found');
+  user.notifications.push(notification);
+  await user.save();
+  return user;
+};
+
+export const getNotifications = async (userId: string) => {
+  const user = await UserModel.findById(userId);
+  if (!user) throw new NotFoundException('user not found');
+  if (!user.notifications)
+    throw new NotFoundException('notification not found');
+  return user.notifications;
+};
