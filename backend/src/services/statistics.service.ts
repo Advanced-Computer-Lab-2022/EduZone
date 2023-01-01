@@ -193,6 +193,11 @@ export const getInstructorStatistics = async (
         },
       },
     },
+    {
+      $project: {
+        total: { $multiply: ['$total', 0.4] },
+      },
+    },
   ]);
 
   const total_income = await CourseModel.aggregate([
@@ -211,6 +216,11 @@ export const getInstructorStatistics = async (
         total: {
           $sum: '$enrolled.payment.amount',
         },
+      },
+    },
+    {
+      $project: {
+        total: { $multiply: ['$total', 0.4] },
       },
     },
   ]);
@@ -238,6 +248,25 @@ export const getInstructorStatistics = async (
   const total_courses = await CourseModel.countDocuments({
     instructor: instructorId,
   });
+
+  const average_final_grades = await CourseModel.aggregate([
+    {
+      $match: {
+        instructor: instructorId,
+      },
+    },
+    {
+      $unwind: '$enrolled',
+    },
+    {
+      $group: {
+        _id: '$title',
+        average: {
+          $avg: '$enrolled.finalExam.score',
+        },
+      },
+    },
+  ]);
   return {
     enrolled_students: {
       data: enrolled_students,
@@ -251,5 +280,6 @@ export const getInstructorStatistics = async (
       total: total_income[0].total,
     },
     total_courses,
+    average_final_grades,
   };
 };

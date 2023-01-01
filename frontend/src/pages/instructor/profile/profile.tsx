@@ -9,6 +9,7 @@ import { updateUser } from '../../../redux/features/auth.reducer';
 import { RootState } from '../../../redux/store';
 import axios from '../../../utils/axios';
 import UserProfile from '../../../components/users/UserProfile';
+import ProfileCard from '../../../components/common/ProfileCard';
 
 const InstructorProfile = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -61,6 +62,7 @@ const InstructorProfile = () => {
     <InstructorLayout>
       {/* <p className="text-2xl text-center">Welcome, {user.name} </p> */}
       <div className="flex items-start h-full justify-start">
+        <ProfileCard />
         <UserProfile />
         <div className="h-full grow p-8 space-y-5">
           <div className={'space-y-5'}>

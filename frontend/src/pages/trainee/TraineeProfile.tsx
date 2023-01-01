@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Divider from '../../components/common/Divider';
 import Modal from '../../components/common/Modal';
+import ProfileCard from '../../components/common/ProfileCard';
 import Truncate from '../../components/common/Truncate';
 import CourseCard from '../../components/courses/CourseCard';
 import Layout from '../../components/layout/Trainee/Layout';
@@ -35,8 +36,6 @@ const TraineeProfile = () => {
     // console.log(res);
   };
 
-  const [modalOpen, setModalOpen] = useState(false);
-
   const navigate = useNavigate();
   useEffect(() => {
     fetchTraineeCourses();
@@ -44,80 +43,9 @@ const TraineeProfile = () => {
 
   return (
     <Layout>
-      <Modal
-        open={modalOpen}
-        close={() => setModalOpen(false)}
-        title="Update User"
-      >
-        <UpdateUser />
-      </Modal>
       <div className="  h-[calc(100vh-10rem)] justify-center gap-5 grid grid-cols-3 my-10">
-        <div className="h-full mas-h-[calc(100vh-10rem)] w-full bg-white py-10 space-y-5 px-16 rounded-lg">
-          <div className="flex flex-col items-center ">
-            <div className="relative">
-              <div className="absolute bg-gray-100 text-primary shadow-lg rounded-full p-2 top-0 right-0">
-                <MdEdit size={25} />
-              </div>
-              {user.img ? (
-                <img
-                  src={user.img}
-                  alt="profile"
-                  className="w-32 h-32 rounded-full"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full bg-primary font-medium text-6xl flex items-center justify-center text-white">
-                  {user?.name.toUpperCase()[0]}
-                </div>
-              )}
-            </div>
-            <p className="text-xl font-medium text-gray-800  mt-4">
-              {user.name.toUpperCase()}
-            </p>
-            <p className=" text-gray-500">@{user.username}</p>
-          </div>
-          <Divider />
-          <div className="space-y-5 w-full flex flex-col">
-            <button
-              className="self-end text-sm text-primary"
-              onClick={() => setModalOpen(true)}
-            >
-              Edit Profile
-            </button>
-            <div>
-              <div className="flex items-baseline gap-2 text-gray-500 text-sm">
-                <FaUserAlt />
-                <p>Name</p>
-              </div>
-              <p className="text-lg">{user.name}</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 text-gray-500  text-sm">
-                <HiMail size={20} />
-                <p>Email</p>
-              </div>
-              <p className="text-lg">{user.email}</p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 text-gray-500  text-sm">
-                <FaInfoCircle size={18} />
-                <p>Bio</p>
-              </div>
-              <p className=" text-gray-800">
-                {user.bio ?? "You haven't added a bio yet"}
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 text-gray-500  text-sm">
-                <FaLock size={18} />
-                <p>Password</p>
-              </div>
-              <Link to={'change-password'}>
-                <button className="self-end  text-primary">
-                  Change Password
-                </button>
-              </Link>
-            </div>
-          </div>
+        <div className="h-full max-h-[calc(100vh-10rem)]  bg-white  rounded-lg">
+          <ProfileCard />
         </div>
         <div className="h-full w-full flex flex-col space-y-5">
           <div className="h-1/2 bg-white rounded-lg px-10 py-10 space-y-5">
