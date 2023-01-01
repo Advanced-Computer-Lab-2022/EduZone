@@ -51,7 +51,7 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
   };
   return (
     <div
-      className="bg-white shadow-lg rounded-md absolute right-0 top-14  w-72 flex flex-col overflow-hidden"
+      className="bg-white shadow-lg rounded-md absolute right-0 top-14 z-50 w-72 flex flex-col overflow-hidden"
       ref={ref}
     >
       {/*Profile Menu options */}

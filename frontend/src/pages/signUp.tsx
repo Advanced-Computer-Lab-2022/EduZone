@@ -1,13 +1,13 @@
 import React, { FormEventHandler, useState } from 'react';
 import RefInputField from '../components/common/RefInputField';
 import Hero from './../assets/illustrations/login-hero-with-corner.svg';
-import { MdEmail } from 'react-icons/md';
+import { MdEmail, MdOutlineErrorOutline } from 'react-icons/md';
 import { FaKey, FaUserAlt } from 'react-icons/fa';
 import { BiUserCircle } from 'react-icons/bi';
 import { Link, useNavigate } from 'react-router-dom';
 import { axios, decodeToken } from '../utils';
 import { setCookie } from 'cookies-next';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { useDispatch } from 'react-redux';
 import { login } from '../redux/features/auth.reducer';
 import CircularLoadingIndicator from '../components/common/CircularLoadingIndicator';
@@ -26,7 +26,7 @@ const SignUp = () => {
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const confirmPasswordRef = React.useRef<HTMLInputElement>(null);
   const [gender, setGender] = useState('');
-
+  const [error, setError] = useState({ show: false, message: '' });
   const onRegister = async () => {
     setLoading(true);
 
@@ -34,12 +34,11 @@ const SignUp = () => {
     const confirmPassword = confirmPasswordRef.current?.value;
 
     if (password !== confirmPassword) {
-      dispatch(
-        showMessage({
-          text: 'Password does not match',
-          type: 'error',
-        })
-      );
+      setLoading(false);
+      setError({
+        show: true,
+        message: 'Passwords do not match',
+      });
       return;
     }
     const firstName = firstRef.current?.value;
@@ -87,6 +86,11 @@ const SignUp = () => {
         // }
       }
     } catch (err) {
+      setLoading(false);
+      setError({
+        show: true,
+        message: (err as any)?.response?.data?.message,
+      });
       console.log(err);
     }
   };
@@ -210,7 +214,7 @@ const SignUp = () => {
           <label htmlFor="gender" className="text-gray-600">
             Choose your Gender
           </label>
-          <div className="flex w-full gap-4">
+          <div className="flex w-full gap-4 pb-4">
             <div className="w-full">
               <input
                 type="radio"
@@ -253,7 +257,12 @@ const SignUp = () => {
               </label>
             </div>
           </div>
-
+          {error.show && (
+            <div className=" bg-red-400/30 text-red-500 border p-3 px-5 border-red-500 flex gap-2 items-center">
+              <MdOutlineErrorOutline size={20} />
+              <p className=" text-sm">{error.message}</p>
+            </div>
+          )}
           <div className="flex flex-col space-y-6 pt-4">
             <button
               onClick={() => onRegister()}
@@ -262,6 +271,14 @@ const SignUp = () => {
               <CircularLoadingIndicator loading={loading} />
               Submit
             </button>
+          </div>
+          <div>
+            <p className="text-center mt-4 text-gray-500">
+              Already have an account?{' '}
+              <Link to={'/login'} className="text-blue-600 hover:underline">
+                Login
+              </Link>
+            </p>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import React, { FormEventHandler, useState } from 'react';
 import InputField from '../components/common/InputField';
 import Hero from './../assets/illustrations/login-hero-with-corner.svg';
-import { MdEmail } from 'react-icons/md';
+import { MdEmail, MdOutlineErrorOutline } from 'react-icons/md';
 import { FaKey } from 'react-icons/fa';
 
 import { Link, useNavigate } from 'react-router-dom';
@@ -58,9 +58,12 @@ const LoginPage = () => {
         console.log(res);
       }
     } catch (err) {
+      setLoading(false);
+      setError(true);
       console.log(err);
     }
   };
+  const [error, setError] = useState(false);
   return (
     <div className="h-screen from-secondary-dark to-primary bg-gradient-to-br flex">
       <div className="relative h-full  w-2/5">
@@ -82,6 +85,12 @@ const LoginPage = () => {
             </p>
           </div>
           <div className="space-y-4">
+            {error && (
+              <div className="bg-red-400/30 text-red-500 border p-3 px-5 border-red-500 flex gap-2 items-center">
+                <MdOutlineErrorOutline size={20} />
+                <p className=" text-sm">Invalid username or password</p>
+              </div>
+            )}
             <InputField
               placeholder="Enter your username"
               icon={
@@ -97,10 +106,12 @@ const LoginPage = () => {
               }
               name="password"
             />
+
             <button className="bg-primary text-white w-full py-3 rounded-sm flex items-center justify-center">
               <CircularLoadingIndicator loading={loading} />
               Login
             </button>
+
             <p className="text-center mt-4 text-zinc-500 hover:underline underline-offset-1">
               <Link to={'/forget-password'}>Forgot Password</Link>
             </p>

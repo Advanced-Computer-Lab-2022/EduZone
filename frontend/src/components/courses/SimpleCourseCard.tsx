@@ -88,7 +88,7 @@ const SimpleCourseCard: React.FC<{ course: Course | any }> = ({ course }) => {
           onClick={() => navigate(`/courses/${course._id}`)}
         />
         {role !== 'admin' && (
-          <div className=" absolute z-30 top-2 right-2 space-y-2 text-gray-600">
+          <div className=" absolute z-20 top-2 right-2 space-y-2 text-gray-600">
             <div
               className="ml-auto flex items-center justify-center bg-white w-fit  p-1 shadow-md rounded-md  cursor-pointer "
               onClick={() => setReportOpen((s) => !s)}
