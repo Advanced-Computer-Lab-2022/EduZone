@@ -32,7 +32,7 @@ The MERN stack is a popular stack of technologies for building web applications.
 4. Node.js: A JavaScript runtime that allows developers to run JavaScript on the server-side.
 
 ## Features
-You can find the features in the [FEATURES]('FEATURES')
+You can find the features in the [FEATURES](FEATURES)
 
 ## Extra Features
 
@@ -304,4 +304,4 @@ STRIPE_SECRET_KEY='<stripe-secret-key>'
 
 ## License
 
-This project is licensed under the Apache 2.0 License For further information, please refer to the [LICENSE]('LICENSE') file.
+This project is licensed under the Apache 2.0 License For further information, please refer to the [LICENSE](LICENSE) file.
