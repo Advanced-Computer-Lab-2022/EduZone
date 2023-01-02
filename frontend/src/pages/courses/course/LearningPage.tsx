@@ -1,34 +1,73 @@
 import { AxiosResponse } from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
-import YouTube, { YouTubeProps } from 'react-youtube';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import IconText from '../../../components/common/IconText';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { axios } from '../../../utils';
-import { BsArrowRightShort, BsArrowLeftShort } from 'react-icons/bs';
+import { debounce } from 'lodash';
+
+import {
+  BsArrowRightShort,
+  BsArrowLeftShort,
+  BsFileEarmarkText,
+  BsPencilSquare,
+  BsPlayFill,
+} from 'react-icons/bs';
 import { Subtitle } from '../../../types/entities/Subtitle';
+import ExerciseView from '../../../components/courses/Exercises/ExerciseView';
+import GradeView from '../../../components/courses/Exercises/GradeView';
+import { getCookie } from 'cookies-next';
+import CourseItemsNav from '../../../components/courses/CourseItemsNav';
+import LearningHeader from '../../../components/courses/Learning/LearningHeader';
+import LearningMainContent from '../../../components/courses/Learning/LearningMainContent';
+import SubtitleNote from './SubtitleNote';
+import { HiOutlineReceiptRefund } from 'react-icons/hi';
+import Modal from '../../../components/common/Modal';
+import { MdOutlineReport } from 'react-icons/md';
 const LearningPage = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
   const [subtitleNumber, setSubtitleNumber] = useState(1);
   const [subtitles, setSubtitles] = useState([] as Subtitle[]);
+  const [enrolled, setEnrolled] = useState(null as any);
   const [currentSubtitle, setCurrentSubtitle] = useState(
     undefined as Subtitle | undefined
   );
+  const [notes, setNotes] = useState('');
+
   const navigate = useNavigate();
-  const onPlayerReady: YouTubeProps['onReady'] = (event) => {
-    event.target.pauseVideo();
+
+  const completeItem = async (
+    item: 'exercise' | 'subtitle' | 'finalExam',
+    itemId: string
+  ) => {
+    const res = await axios({
+      url: '/courses/' + id + '/complete?item=' + item + '&itemId=' + itemId,
+      method: 'PATCH',
+      data: {},
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setRefresh(true);
   };
 
-  const opts: YouTubeProps['opts'] = {
-    width: '95%',
-    height: '500',
-    playerVars: {
-      autoplay: 0,
-      muted: 0,
-    },
+  const finishCourse = async () => {
+    const res = await axios({
+      url: '/courses/' + id + '/finish',
+      method: 'PATCH',
+      data: {},
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setRefresh(true);
   };
 
   const getCourse = async () => {
@@ -40,6 +79,36 @@ const LearningPage = () => {
       setCourse(res.data);
       setSubtitles(res.data.subtitles);
       setCurrentSubtitle(res.data.subtitles[0]);
+
+      setInitialNotes('');
+      setCourseItems([]);
+      res.data.subtitles.map((s: Subtitle) => {
+        setCourseItems((prev) => [
+          ...prev,
+          {
+            type: 'subtitle',
+            data: s,
+          },
+        ]);
+        if (s.exercise) {
+          setCourseItems((prev) => [
+            ...prev,
+            {
+              type: 'exercise',
+              data: s.exercise,
+            },
+          ]);
+        }
+      });
+      if (res.data?.finalExam) {
+        setCourseItems((prev) => [
+          ...prev,
+          {
+            type: 'finalExam',
+            data: res.data.finalExam,
+          },
+        ]);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -47,80 +116,207 @@ const LearningPage = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
+  const [courseItems, setCourseItems] = useState([] as any[]);
+  const [currentCourseItem, setCurrentCourseItem] = useState(1);
+  const [score, setScore] = useState(-1);
+  const [refresh, setRefresh] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [initialNotes, setInitialNotes] = useState('');
+
   useEffect(() => {
-    if (!course) getCourse();
-    setCurrentSubtitle(
-      subtitles.find((s: Subtitle) => s.order === subtitleNumber)
+    if (!course && !refresh) {
+      getCourse();
+    }
+
+    if (enrolled === null || !enrolled || refresh)
+      setEnrolled(
+        course?.enrolled?.find((e: any) => e?.studentId === user?.id)
+      );
+
+    setProgress(
+      ((course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.completed
+        ?.exercises?.length +
+        course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.completed
+          ?.subtitles?.length +
+        (course?.enrolled?.find((e: any) => e?.studentId === user?.id)
+          ?.completed?.finalExam
+          ? 1
+          : 0)) /
+        courseItems.length) *
+        100
     );
-  }, [course, subtitleNumber]);
+
+    setNotes(
+      course?.enrolled
+        ?.find((e: any) => e?.studentId === user?.id)
+        ?.notes.find(
+          (n: any) =>
+            n.subtitleId === courseItems[currentCourseItem - 1]?.data._id
+        )?.notes
+    );
+    if (initialNotes === '') {
+      setInitialNotes(
+        course?.enrolled
+          ?.find((e: any) => e?.studentId === user?.id)
+          ?.notes.find(
+            (n: any) =>
+              n.subtitleId === courseItems[currentCourseItem - 1]?.data._id
+          )?.notes
+      );
+    }
+
+    if (
+      (!course?.enrolled?.find((e: any) => e?.studentId === user?.id)
+        ?.finished &&
+        progress === 100 &&
+        course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.finalExam
+          ?.score) ??
+      0 > 50
+    ) {
+      finishCourse();
+    }
+    if ((score === -1 && enrolled) || refresh) {
+      if (courseItems[currentCourseItem - 1]?.type === 'exercise') {
+        setScore(
+          enrolled?.exercises.find(
+            (e: any) =>
+              e.exerciseId ===
+              courseItems[currentCourseItem - 1]?.data?._id.toString()
+          )?.score ?? -1
+        );
+      } else if (courseItems[currentCourseItem - 1]?.type === 'finalExam') {
+        setScore(enrolled?.finalExam?.score ?? -1);
+        console.log(enrolled?.finalExam?.score);
+      }
+    }
+    setRefresh(false);
+  }, [course, enrolled, currentCourseItem]);
+
+  const nextItem = () => {
+    setInitialNotes('');
+    setScore(-1);
+    if (currentCourseItem < courseItems.length)
+      setCurrentCourseItem(currentCourseItem + 1);
+  };
+  const prevItem = () => {
+    setInitialNotes('');
+    setScore(-1);
+    if (currentCourseItem > 1) setCurrentCourseItem(currentCourseItem - 1);
+  };
+
+  const onClickItem = (index: number) => {
+    setInitialNotes('');
+    setCurrentCourseItem(index + 1);
+    setScore(-1);
+  };
+
+  const onChangeNote = (e: string) => {
+    setNotes(e);
+  };
+
+  const saveNote = async () => {
+    const res = await axios({
+      url:
+        '/courses/' +
+        id +
+        '/subtitles/' +
+        courseItems[currentCourseItem - 1]?.data._id +
+        '/notes',
+      method: 'PUT',
+      data: {
+        notes,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + getCookie('access-token'),
+      },
+    });
+    setCourse(res.data);
+    setInitialNotes(notes);
+    setRefresh(true);
+  };
+
+  const onUpdateCourse = (course: any) => {
+    setCourse(course);
+  };
+
+  const { pathname } = useLocation();
+  const requestRefund = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to request a refund?'
+    );
+    if (confirmed) {
+      const res = await axios({
+        url: `/courses/${course?._id}/refund`,
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+        data: {},
+      });
+      console.log(res.data);
+      onUpdateCourse(res.data);
+      if (pathname.includes('learning')) navigate(`/courses/${course?._id}`);
+    }
+    console.log('request refund', confirmed);
+  };
+
   return (
     <Layout>
       <div className="grid grid-cols-3">
-        <div className="col-span-2 my-2 space-y-4">
-          <div>
-            <span className="text-2xl font-medium">
-              {currentSubtitle?.title}
-            </span>
-            <p className="text-gray-600 font-medium -mt-1">{course?.title}</p>
-          </div>
+        <div className="col-span-2 my-2 space-y-4 w-[95%]">
+          <LearningHeader
+            onMarkCompleted={completeItem}
+            courseItems={courseItems}
+            currentCourseItem={currentCourseItem}
+            enrolled={enrolled}
+            title={course?.title}
+            courseId={course?._id}
+          />
 
-          <div className="overflow-hidden w-full rounded-md">
-            <YouTube
-              videoId={currentSubtitle?.youtube_url?.split('=')[1]}
-              opts={opts}
-              onReady={onPlayerReady}
+          <LearningMainContent
+            courseItems={courseItems}
+            currentCourseItem={currentCourseItem}
+            enrolled={enrolled}
+            score={score}
+            onRefresh={() => {
+              getCourse();
+              setRefresh(true);
+            }}
+            courseId={course?._id}
+          />
+          {courseItems[currentCourseItem - 1]?.type === 'subtitle' && (
+            <SubtitleNote
+              initialNote={initialNotes ?? ''}
+              onChangeNote={onChangeNote}
+              onSaveNote={saveNote}
+              saved={initialNotes === notes}
             />
-          </div>
+          )}
         </div>
-        <div>
-          <div className="flex flex-col mt-4">
-            <div className="flex justify-between -mx-4 ">
-              {/* Next and prev */}
-
-              <button className="cursor-pointer hover:text-primary">
-                <IconText
-                  text={'Previous'}
-                  leading={<BsArrowLeftShort size={25} />}
-                  onClick={() =>
-                    subtitleNumber > 1
-                      ? setSubtitleNumber(subtitleNumber - 1)
-                      : null
-                  }
-                />
-              </button>
-              <button className="cursor-pointer hover:text-primary">
-                <IconText
-                  text={'Next'}
-                  trailing={<BsArrowRightShort size={25} />}
-                  onClick={() =>
-                    subtitleNumber < course.subtitles.length
-                      ? setSubtitleNumber(subtitleNumber + 1)
-                      : null
-                  }
-                />
-              </button>
-            </div>
-            {course?.subtitles.map((subtitle: any, index: number) => (
-              <div
-                key={index}
-                className={`flex items-center justify-between p-2 my-1 border border-gray-300 rounded-md cursor-pointer  ${
-                  subtitleNumber === index + 1
-                    ? 'bg-gray-200'
-                    : 'hover:bg-gray-200'
-                }`}
-                onClick={() => setSubtitleNumber(index + 1)}
+        <CourseItemsNav
+          nextItem={nextItem}
+          prevItem={prevItem}
+          courseItems={courseItems}
+          currentCourseItem={currentCourseItem}
+          onClickItem={onClickItem}
+          enrolled={enrolled}
+          progress={progress}
+          onUpdateCourse={onUpdateCourse}
+        />
+      </div>
+      <div className="py-5">
+        {Number.isNaN(progress)
+          ? 0
+          : progress < 50 && (
+              <button
+                className="ml-2 text-gray-500 flex gap-2 hover:text-primary "
+                onClick={requestRefund}
               >
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                  <div className="ml-2">
-                    <p className="text-sm font-semibold">{subtitle.title}</p>
-                    <p className="text-xs text-gray-500">{subtitle.duration}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+                Request a refund
+                <HiOutlineReceiptRefund size={20} />
+              </button>
+            )}
       </div>
     </Layout>
   );

@@ -4,6 +4,10 @@ import SingleCourse from '../pages/courses/course/singleCourse';
 import Home from '../pages/home';
 import LoginPage from '../pages/login';
 import { RouteType } from '../types';
+import ForgetPassword from '../pages/ForgetPassword';
+import ResetPassword from '../pages/ResetPassword';
+import SignUp from '../pages/signUp';
+import CoursePayment from '../components/courses/CoursePayment';
 
 const UnProtectedRoutes: RouteType[] = [
   {
@@ -35,7 +39,22 @@ const UnProtectedRoutes: RouteType[] = [
   {
     path: '/register',
     parent: false,
-    element: <h1>Register</h1>,
+    element: <SignUp />,
+  },
+  {
+    path: 'reset-password/:token',
+    parent: false,
+    element: <ResetPassword />,
+  },
+  {
+    path: '/forget-password',
+    parent: false,
+    element: <ForgetPassword />,
+  },
+  {
+    path: '/courses/:id/buy',
+    parent: false,
+    element: <CoursePayment />,
   },
 ];
 

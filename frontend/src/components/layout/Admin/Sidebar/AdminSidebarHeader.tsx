@@ -11,20 +11,14 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   return (
     <div
       className={`${
-        isOpen ? 'justify-between' : 'flex-col gap-4 py-2'
-      } min-h-[3.5rem] flex items-center justify-center  py-1 pl-4 pr-2 text-white`}
+        isOpen ? 'justify-between' : 'flex-col gap-4 '
+      } min-h-[3.5rem] flex items-center justify-center  text-white border-b border-white`}
     >
-      {isOpen && (
-        <svg height="30" width="30" className="fill-white border border-white">
-          <circle cx="30" cy="30" r="20" />
-        </svg>
-      )}
-      <div className="p-2 cursor-pointer">
-        {isOpen ? (
-          <RiMenuFoldFill size={20} onClick={() => handleClose()} />
-        ) : (
-          <RiMenuUnfoldFill size={20} onClick={() => handleOpen()} />
-        )}
+      <div
+        className="p-4 cursor-pointer ml-auto"
+        onClick={() => (isOpen ? handleClose() : handleOpen())}
+      >
+        {isOpen ? <RiMenuFoldFill size={20} /> : <RiMenuUnfoldFill size={20} />}
       </div>
     </div>
   );

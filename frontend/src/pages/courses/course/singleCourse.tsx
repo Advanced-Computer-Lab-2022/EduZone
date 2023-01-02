@@ -1,28 +1,34 @@
-import { AxiosResponse } from 'axios';
-import React, { FormEventHandler, useEffect, useState } from 'react';
-import { FaPlay } from 'react-icons/fa';
-import { useSelector } from 'react-redux';
+import { AxiosError, AxiosResponse } from 'axios';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import Avatar from '../../../components/layout/navbar/common/ProfileMenu/Avatar';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
-import { Course } from '../../../types/entities/Course';
 import { Subtitle } from '../../../types/entities/Subtitle';
-import { axios } from '../../../utils';
+import { axios, calculateCourseRating } from '../../../utils';
 import YouTube, { YouTubeProps } from 'react-youtube';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import IconText from '../../../components/common/IconText';
-import { MdEditNote } from 'react-icons/md';
 import { getCookie } from 'cookies-next';
 import RatingBox from '../../../components/courses/RatingBox';
+import StripeCheckout, { Token } from 'react-stripe-checkout';
+import { TbCertificate } from 'react-icons/tb';
+import InstructorDetails from '../../../components/courses/CourseDetails/InstructorDetails';
+import CourseHeader from '../../../components/courses/CourseDetails/CourseHeader';
+import CourseSummary from '../../../components/courses/CourseDetails/CourseSummary';
+import CourseProgress from '../../../components/courses/CourseDetails/CourseProgress';
+import DisplayRating from '../../../components/courses/DisplayRating';
+import CourseFeedback from '../../../components/courses/CourseDetails/CourseFeedback';
+import { showMessage } from '../../../redux/features/ui.reducer';
 
 const SingleCourse = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
-  const [withPromotion, setWithPromotion] = useState(false);
-  const [addPromotionOpen, setAddPromotionOpen] = useState(false);
   const [rating, setRating] = useState(undefined as number | undefined);
+
+  const [review, setReview] = useState('');
+  const [paymentToken, setPaymentToken] = useState(
+    undefined as Token | undefined
+  );
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
     null as Date | null
   );
@@ -41,29 +47,49 @@ const SingleCourse = () => {
   };
 
   const calculateRating = () => {
-    let total = 0;
-    let sum = 0;
-    course?.enrolled?.map((s: any) => {
-      if (s.rating) {
-        sum += s.rating;
-        total++;
-      }
-    });
+    const { total, rating } = calculateCourseRating(course);
 
     if (total === 0) setRating(undefined);
-    else setRating(sum / total);
+    else setRating(rating);
   };
 
-  const onBuyCourse = async () => {
+  const onBuyCourse = async (token: Token) => {
     try {
       const res: AxiosResponse<any, any> = await axios({
         url: '/courses/' + id + '/buy',
+        data: {
+          paymentId: token.id,
+        },
         method: 'PATCH',
         headers: {
           Authorization: 'Bearer ' + getCookie('access-token'),
         },
       });
-      navigate('/courses/' + id + '/learning');
+      console.log(res.data);
+      if (res.status === 200) {
+        navigate('/courses/' + id + '/learning');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onEnroll = async () => {
+    try {
+      const res: AxiosResponse<any, any> = await axios({
+        url: '/courses/' + id + '/enroll',
+        data: {
+          paymentId: new Date().getTime(),
+        },
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+      });
+      console.log(res.data);
+      if (res.status === 200) {
+        navigate('/courses/' + id + '/learning');
+      }
     } catch (error) {
       console.log(error);
     }
@@ -72,6 +98,10 @@ const SingleCourse = () => {
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
+  const [discount, setDiscount] = useState({} as any);
+  const [progress, setProgress] = useState(0);
+  const [courseItems, setCourseItems] = useState([] as any[]);
+  const [failed, setFailed] = useState(false);
   const getCourse = async () => {
     try {
       const res: AxiosResponse<any, any> = await axios({
@@ -79,21 +109,47 @@ const SingleCourse = () => {
         method: 'GET',
       });
       setCourse(res.data);
-      setWithPromotion(
-        (res.data.discount &&
-          new Date(res.data.discount.validUntil) >= new Date()) ||
-          false
-      );
+
       setPromotionExpiryDate(
         new Date(res.data?.discount?.validUntil || new Date())
       );
+      setDiscount({
+        ...res.data?.discount,
+        valid:
+          res.data?.discount &&
+          res.data?.discount?.validFrom < new Date() &&
+          res.data?.discount?.validUntil > new Date(),
+      });
 
-      // setRating(
-      //   res.data.enrolled?.reduce(
-      //     (acc: any, curr: any) => (acc + curr.rating || 0) / 2,
-      //     0
-      //   )
-      // );
+      setCourseItems([]);
+      res.data.subtitles.map((s: Subtitle) => {
+        setCourseItems((prev) => [
+          ...prev,
+          {
+            type: 'subtitle',
+            data: s,
+          },
+        ]);
+        if (s.exercise) {
+          setCourseItems((prev) => [
+            ...prev,
+            {
+              type: 'exercise',
+              data: s.exercise,
+            },
+          ]);
+        }
+      });
+      if (res.data?.finalExam) {
+        setCourseItems((prev) => [
+          ...prev,
+          {
+            type: 'finalExam',
+            data: res.data.finalExam,
+          },
+        ]);
+      }
+
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -102,134 +158,140 @@ const SingleCourse = () => {
 
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const rateCourse = async (rating: number) => {
-    try {
-      const res = await axios({
-        url: '/courses/' + id + '/rate',
-        method: 'PATCH',
-        headers: {
-          Authorization: 'Bearer ' + getCookie('access-token'),
-        },
-        data: {
-          rating,
-        },
-      });
-      setCourse(res.data);
-      // setWithPromotion(
-      //   (res.data.discount &&
-      //     new Date(res.data.discount.validUntil) >= new Date()) ||
-      //     false
-      // );
-      // setPromotionExpiryDate(
-      //   new Date(res.data?.discount?.validUntil || new Date())
-      // );
+  const updateCourseInstructor = async (instructor: any) => {
+    setCourse({ ...course, instructor });
+  };
 
-      // setRating(
-      //   res.data.enrolled?.reduce(
-      //     (acc: any, curr: any) => acc + curr.rating || 0,
-      //     0
-      //   )
-      // );
-    } catch (error) {
-      console.log(error);
-    }
+  const updateCourse = (course: any) => {
+    setCourse(course);
   };
 
   useEffect(() => {
     if (!course) getCourse();
-    setWithPromotion(
-      (course?.discount &&
-        new Date(course?.discount.validUntil) >= new Date()) ||
-        false
-    );
     setPromotionExpiryDate(
       new Date(course?.discount?.validUntil || new Date())
     );
+    setReview(
+      course?.enrolled?.find((s: any) => s.studentId === user.id)?.review || ''
+    );
+
+    setProgress(
+      ((course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.completed
+        ?.exercises?.length +
+        course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.completed
+          ?.subtitles?.length +
+        (course?.enrolled?.find((e: any) => e?.studentId === user?.id)
+          ?.completed?.finalExam
+          ? 1
+          : 0)) /
+        courseItems.length) *
+        100
+    );
+    setFailed(
+      course?.enrolled?.find((e: any) => e?.studentId === user?.id)?.finalExam
+        ?.score < 50
+        ? true
+        : false
+    );
+
+    setDiscount({
+      ...course?.discount,
+      valid:
+        course?.discount &&
+        course?.discount?.validFrom < new Date() &&
+        course?.discount?.validUntil > new Date(),
+    });
 
     calculateRating();
     console.log(rating);
   }, [course]);
+
+  const handleToken = (token: Token) => {
+    console.log(token);
+    setPaymentToken(token);
+  };
+
+  const onUpdateCourse = (course: any) => {
+    setCourse(course);
+  };
+
+  const cancelRefundRequest = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to cancel the refund request?'
+    );
+    if (confirmed) {
+      const res = await axios({
+        url: `/courses/${course?._id}/refund`,
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+        data: {},
+      });
+      console.log(res.data);
+      onUpdateCourse(res.data);
+    }
+    console.log('request refund', confirmed);
+  };
+
+  const dispatch = useDispatch();
+
+  const requestCourseAccess = async () => {
+    try {
+      const res = await axios({
+        url: `/courses/${course?._id}/request-access`,
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+        data: {},
+      });
+      console.log(res.data);
+      onUpdateCourse(res.data);
+      if (res.status === 201) {
+        dispatch(showMessage({ text: 'Request sent', type: 'success' }));
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof AxiosError) {
+        dispatch(
+          showMessage({ text: error.response?.data.error, type: 'error' })
+        );
+      } else {
+        dispatch(
+          showMessage({ text: (error as Error).message, type: 'error' })
+        );
+      }
+    }
+  };
+
   return (
     <Layout>
       <div className="grid grid-cols-3 gap-6 my-4 ">
         <div className="col-span-2">
-          <div className=" justify-between items-center">
-            <p className="text-4xl font-medium">{course?.title}</p>
-            <p className="text-sm text-gray-500">
-              Rating: {rating || 'No Rating yet'}
-            </p>
-          </div>
-          <div
-            className="flex items-center py-2 group cursor-pointer w-fit"
-            // onClick={()=>navigate(`/instructor/${course?.instructor._id}/profile`)}
-          >
-            <div className="group-hover:border-blue-500 border-2 border-white rounded-full">
-              <Avatar
-                name={course?.instructor?.name || ''}
-                img={course?.instructor?.img}
-              />
-            </div>
-            <div className="ml-2 flex flex-col">
-              <p className="text-lg font-medium group-hover:text-blue-500 text-gray-700">
-                {course?.instructor?.name}
-              </p>
-              <p className="text-sm font-medium group-hover:font-semibold -mt-1 text-gray-500">
-                Instructor
-              </p>
-            </div>
-          </div>
-          <p className="text-gray-600 font-medium">
-            Course Duration ≈{' '}
-            {course?.subtitles &&
-              Math.ceil(
-                course?.subtitles?.reduce(
-                  (acc: any, curr: any) => acc + curr.duration,
-                  0
-                )
-              )}{' '}
-            hours
-          </p>
-          <div className="mt-4">
-            <p className="text-xl font-medium">Summary</p>
-            <p className="m text-gray-500">{course?.summary}</p>
-          </div>
-          <div className="mt-4">
-            <p className="text-2xl font-medium my-2">Course Sections</p>
-            <hr />
-            <div className="">
-              {course?.subtitles?.map((section: Subtitle, index: number) => (
-                <div className=" hover:bg-gray-200 p-2" key={index}>
-                  <div className="flex items-center justify-between">
-                    <p className="text-lg font-medium">{section.title}</p>
-                    <p className="text-sm text-gray-500">
-                      {section.duration} Hrs
-                    </p>
-                  </div>
-                  <p className="text-sm text-gray-600">{section.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Instructor */}
+          <CourseHeader title={course?.title ?? ''} rating={rating} />
+          <InstructorDetails
+            instructor={course?.instructor}
+            enrolled={course?.enrolled}
+            updateCourseInstructor={updateCourseInstructor}
+          />
+          <CourseSummary course={course} />
         </div>
         <div className=" space-y-4 w-full">
-          {course?.enrolled.find((s: any) => s.studentId === user.id) && (
-            <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
-              <p className="text-xl text-center">
-                You are enrolled in this course
-              </p>
-              <div className="flex justify-between">
-                <p>Rate this course: </p>
-                <RatingBox
-                  rating={
-                    course?.enrolled.find((s: any) => s.studentId === user.id)
-                      .rating || -1
-                  }
-                  onClick={rateCourse}
-                />
-              </div>
-            </div>
-          )}
+          {course?.enrolled.find((s: any) => s.studentId === user.id) &&
+            course?.enrolled.find((s: any) => s.studentId === user.id)
+              .status === 'active' && (
+              <CourseProgress
+                progress={progress}
+                failed={failed}
+                courseId={course?._id}
+                enrollmentStatus={
+                  course?.enrolled.find((s: any) => s.studentId === user.id)
+                    .status
+                }
+                onUpdateCourse={onUpdateCourse}
+              />
+            )}
           <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
             {/* <img
                 src={course?.thumbnail}
@@ -247,44 +309,99 @@ const SingleCourse = () => {
             <div>
               <p className="text-lg font-medium">{course?.title}</p>
               <p className="text-sm text-gray-500">
-                Rating: {rating || 'No Rating yet'}
+                {rating ? (
+                  <DisplayRating rating={rating ?? 0} />
+                ) : (
+                  'No Rating yet'
+                )}
               </p>
             </div>
 
-            <p className="text-3xl text-primary font-semibold">
-              {course &&
-                Number(
-                  course?.price *
-                    (withPromotion
-                      ? 1 - (course?.discount?.amount ?? 0) / 100
-                      : 1) *
-                    conversion_rate
-                ).toFixed(2)}{' '}
-              {currency}
-            </p>
+            {course?.price > 0 ? (
+              <p className="text-3xl text-primary font-semibold">
+                {course && discount.valid
+                  ? Number(
+                      course?.price *
+                        (1 - (course?.discount?.amount ?? 0) / 100) *
+                        conversion_rate
+                    ).toFixed(2)
+                  : Number(course?.price * conversion_rate).toFixed(2)}{' '}
+                {currency}
+              </p>
+            ) : (
+              <p className="text-3xl text-primary font-semibold">Free</p>
+            )}
 
             <div>
-              {course?.enrolled.find((s: any) => s.studentId === user.id) ? (
-                <Link to={`learn`}>
+              {course?.enrolled.find((s: any) => s.studentId === user.id) &&
+              course?.enrolled.find((s: any) => s.studentId === user.id)
+                ?.status === 'active' ? (
+                <Link to={`learning`}>
                   <button className="w-full bg-primary text-white  py-2 rounded-md">
                     Start Learning
                   </button>
                 </Link>
+              ) : course?.enrolled.find((s: any) => s.studentId === user.id)
+                  ?.status === 'blocked' ? (
+                <div className="w-full flex justify-between px-4">
+                  <p className=" text-gray-500 rounded-md py-2">
+                    Processing your refund
+                  </p>
+                  <button
+                    className="text-primary"
+                    onClick={() => cancelRefundRequest()}
+                  >
+                    Cancel Request
+                  </button>
+                </div>
               ) : (
                 <div className=" w-full space-y-2">
-                  <button
-                    className="w-full bg-primary text-white rounded-md py-2"
-                    onClick={() => onBuyCourse()}
-                  >
-                    Buy Now
-                  </button>
-                  <button className="w-full border border-primary text-primary rounded-md py-2 hover:text-white hover:bg-primary">
-                    Add to Wishlist
-                  </button>
+                  {user.role === 'corp_trainee' ? (
+                    <button
+                      className="w-full bg-primary text-white rounded-md py-2"
+                      onClick={() => requestCourseAccess()}
+                    >
+                      Request Access
+                    </button>
+                  ) : course?.price === 0 ? (
+                    <button
+                      className="w-full bg-primary text-white rounded-md py-2"
+                      onClick={() => onEnroll()}
+                    >
+                      Enroll Now
+                    </button>
+                  ) : (
+                    <StripeCheckout
+                      stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+                      token={onBuyCourse}
+                      name=""
+                      panelLabel={`Pay`}
+                      currency="USD"
+                      amount={course?.price * 100}
+                      ComponentClass="div"
+                    >
+                      <button className="w-full bg-primary text-white rounded-md py-2">
+                        Buy Now
+                      </button>
+                    </StripeCheckout>
+                  )}
                 </div>
               )}
             </div>
           </div>
+          {course?.enrolled.find((s: any) => s.studentId === user.id) &&
+            course?.enrolled.find((s: any) => s.studentId === user.id)
+              .status === 'active' && (
+              <CourseFeedback
+                updateCourse={updateCourse}
+                courseId={course?._id}
+                review={review}
+                rating={
+                  course?.enrolled.find((s: any) => s.studentId === user.id)
+                    .rating || -1
+                }
+              />
+            )}
         </div>
       </div>
     </Layout>

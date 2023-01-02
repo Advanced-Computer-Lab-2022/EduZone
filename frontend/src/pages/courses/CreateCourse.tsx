@@ -6,6 +6,8 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { axios } from '../../utils';
 import { Subtitle } from '../../types/entities/Subtitle';
 import { getCookie } from 'cookies-next';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
 
 //import axios from '../utils';
 
@@ -44,6 +46,7 @@ const AdminCreateUser = () => {
     }
     setSubtitles(subtitles.slice(0, -1));
   };
+  const { conversion_rate } = useSelector((state: RootState) => state.currency);
   const onSubmit: FormEventHandler = async (e) => {
     console.log('Here');
     e.preventDefault();
@@ -53,7 +56,11 @@ const AdminCreateUser = () => {
     const formDataObject = Object.fromEntries(
       [...formData.entries()].filter(([key]) => !key.includes('subtitle'))
     );
-    const data = { ...formDataObject, subtitles };
+    const data = {
+      ...formDataObject,
+      subtitles,
+      price: Number(formDataObject.price) / conversion_rate,
+    };
     // const data = { ...Object.fromEntries(formData), instructor: instructorId };
     // console.log(
     //   Object.entries(Object.fromEntries(formData)).map(([key, value]) => {

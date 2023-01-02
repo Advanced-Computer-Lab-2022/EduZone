@@ -4,6 +4,7 @@ import { persistReducer, persistStore } from 'redux-persist';
 import thunk from 'redux-thunk';
 import authReducer from './features/auth.reducer';
 import currencyReducer from './features/currency.reducer';
+import uiReducer from './features/ui.reducer';
 
 const persistConfig = {
   key: 'root',
@@ -19,6 +20,7 @@ export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     currency: persistedCurrencyReducer,
+    ui: uiReducer,
   },
   middleware: [thunk],
 });

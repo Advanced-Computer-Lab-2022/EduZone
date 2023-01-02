@@ -15,6 +15,12 @@ const ExerciseSchema = new Schema({
   questions: {
     type: [
       {
+        // questionId: {
+        //   type: String,
+        //   required: false,
+        //   unique: true,
+        //   default: mongoose.Types.ObjectId,
+        // },
         question: {
           type: String,
           required: true,
@@ -69,7 +75,6 @@ const courseSchema = new Schema({
     type: Number,
     require: true,
   },
-  //TODO change to refrence a user with role instructor
   instructor: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -112,7 +117,14 @@ const courseSchema = new Schema({
         min: 0,
         max: 100,
       },
-      validUntil: Date,
+      validUntil: {
+        type: Date,
+        required: true,
+      },
+      validFrom: {
+        type: Date,
+        required: false,
+      },
     },
     required: false,
   },
@@ -120,9 +132,114 @@ const courseSchema = new Schema({
     type: ExerciseSchema,
     required: false,
   },
+  views: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: false,
+      },
+    ],
+    required: false,
+  },
+
+  reportedProblems: {
+    type: [
+      {
+        _id: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        user: {
+          type: String,
+          required: true,
+        },
+        problemType: {
+          type: String,
+          required: true,
+        },
+        problem: {
+          type: String,
+          required: true,
+        },
+        reportedAt: {
+          type: Date,
+          required: true,
+          default: Date.now,
+        },
+        status: {
+          type: String,
+          required: false,
+          default: 'UNSEEN',
+        },
+        followUp: {
+          type: String,
+          required: false,
+        },
+        resolvedAt: {
+          type: Date,
+          required: false,
+        },
+      },
+    ],
+    required: false,
+  },
+
   enrolled: {
     type: [
       {
+        status: {
+          type: String,
+          required: false,
+          default: 'active', // only accepts active, blocked
+        },
+        refundRequested: {
+          type: Boolean,
+          required: false,
+        },
+        certificate: {
+          type: String,
+          required: false,
+        },
+        certificateSent: {
+          type: Boolean,
+          required: false,
+        },
+        payment: {
+          required: false,
+          id: {
+            type: String,
+            required: false,
+          },
+          amount: {
+            type: Number,
+            required: false,
+          },
+          date: {
+            type: Date,
+            required: true,
+          },
+        },
+        notes: [
+          {
+            type: {
+              subtitleId: {
+                type: String,
+                required: false,
+              },
+              notes: {
+                type: String,
+                required: false,
+              },
+              lastSaved: {
+                type: Date,
+                required: false,
+                default: Date.now,
+              },
+            },
+            required: false,
+          },
+        ],
         studentId: {
           type: String,
           required: true,
@@ -134,9 +251,111 @@ const courseSchema = new Schema({
           max: 5,
           required: false,
         },
+        review: {
+          type: String,
+          required: false,
+        },
+        finished: {
+          type: Boolean,
+          required: false,
+        },
+        finishedAt: {
+          type: Date,
+          required: false,
+        },
+        completed: {
+          type: {
+            exercises: {
+              type: [String],
+              unique: true,
+              required: false,
+            },
+            finalExam: {
+              type: Boolean,
+              required: false,
+              unique: true,
+            },
+            subtitles: {
+              type: [String],
+              required: false,
+            },
+          },
+          required: false,
+        },
+        exercises: {
+          required: false,
+          type: [
+            {
+              exerciseId: {
+                type: String,
+                required: false,
+              },
+              answers: {
+                type: [
+                  {
+                    // answerId
+                    type: String,
+                    required: false,
+                  },
+                ],
+                required: false,
+              },
+              score: {
+                type: Number,
+                required: false,
+              },
+              submittedAt: {
+                type: Date,
+                required: false,
+                default: Date.now,
+              },
+              viewedCorrectAnswers: {
+                type: Boolean,
+                required: false,
+                default: false,
+              },
+            },
+          ],
+        },
+        finalExam: {
+          type: {
+            submitted: {
+              type: Boolean,
+              required: false,
+            },
+            answers: {
+              type: [
+                {
+                  // answerId
+                  type: String,
+                  required: false,
+                },
+              ],
+              required: false,
+            },
+            score: {
+              type: Number,
+              required: false,
+            },
+            submittedAt: {
+              type: Date,
+              required: false,
+            },
+            viewedCorrectAnswers: {
+              type: Boolean,
+              required: false,
+            },
+          },
+          required: false,
+        },
       },
     ],
     required: false,
+  },
+  isPublished: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 

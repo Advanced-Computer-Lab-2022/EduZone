@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { AiFillDollarCircle } from 'react-icons/ai';
+import { BiCategoryAlt } from 'react-icons/bi';
+import { FaStar } from 'react-icons/fa';
+import { MdCategory } from 'react-icons/md';
+import { RiMoneyDollarCircleFill } from 'react-icons/ri';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { RootState } from '../../redux/store';
@@ -61,16 +66,20 @@ const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
   };
 
   return (
-    <div className="w-full bg-gray-100 border shadow-md max-h-fit rounded-lg p-4 space-y-5">
-      <p> Filter</p>
+    <div className="w-full bg-white border shadow-md max-h-fit rounded-lg p-5 space-y-5">
+      <p className="text-lg font-medium  text-center"> Filters</p>
       <div>
-        <p>Subject</p>
+        <div className="flex items-center gap-1 mb-2 text-gray-600 font-medium">
+          <MdCategory size={20} />
+          <p>Subject</p>
+        </div>
         <select
           onChange={(e) => {
             setSubjectFilter(e.target.value || 'all');
             setFiltered(true);
           }}
           defaultValue={subjectFilter || 'all'}
+          className="w-full p-2 border"
         >
           <option value="all">All</option>
           <option value="eco">Economics</option>
@@ -78,45 +87,77 @@ const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
           <option value="cs">Computer Science</option>
         </select>
       </div>
+
       <div>
-        <p>Price:</p>
+        <div className="flex items-center gap-1 mb-2 text-gray-600 font-medium">
+          <AiFillDollarCircle size={20} />
+          <p>Price</p>
+        </div>
         <div className="space-y-1">
           <form
             onChange={(e) => {
               setPriceFilter((e.target as any).value || 'all');
               setFiltered(true);
             }}
-            className="flex justify-between w-full"
+            className="flex space-x-2 w-full flex-wrap"
           >
             <span>
               <input
                 type="radio"
                 name="price"
                 value="all"
-                id=""
+                id="all"
+                className="hidden peer"
+                required
                 defaultChecked={priceFilter ? priceFilter === 'all' : true}
               />
-              All
+              <label
+                htmlFor={'all'}
+                className="inline-flex justify-between items-center px-5 rounded-full w-full text-gray-500  border border-gray-200 cursor-pointer  peer-checked:text-white peer-checked:bg-primary hover:text-gray-600 hover:bg-gray-100 bg-gray-200 "
+              >
+                <div className="w-full flex items-center gap-4">
+                  <span>All</span>
+                </div>
+              </label>
             </span>
+
             <span>
               <input
                 type="radio"
                 name="price"
                 value="free"
-                id=""
+                id="free"
                 defaultChecked={priceFilter === 'free'}
+                className="hidden peer"
+                required
               />
-              Free
+              <label
+                htmlFor={'free'}
+                className="inline-flex justify-between items-center px-3 rounded-full w-full text-gray-500  border border-gray-200 cursor-pointer  peer-checked:text-white peer-checked:bg-primary hover:text-gray-600 hover:bg-gray-100 bg-gray-200 "
+              >
+                <div className="w-full flex items-center gap-4">
+                  <span>Free</span>
+                </div>
+              </label>
             </span>
             <span>
               <input
                 type="radio"
                 name="price"
                 value="exact"
-                id=""
+                id="exact"
                 defaultChecked={priceFilter === 'exact'}
+                className="hidden peer"
+                required
               />
-              Exact
+              <label
+                htmlFor={'exact'}
+                className="inline-flex justify-between items-center px-3 rounded-full w-full text-gray-500  border border-gray-200 cursor-pointer  peer-checked:text-white peer-checked:bg-primary hover:text-gray-600 hover:bg-gray-100 bg-gray-200 "
+              >
+                <div className="w-full flex items-center gap-4">
+                  <span>Exact</span>
+                </div>
+              </label>
             </span>
 
             <span>
@@ -124,10 +165,19 @@ const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
                 type="radio"
                 name="price"
                 value="range"
-                id=""
+                id="range"
                 defaultChecked={priceFilter === 'range'}
+                className="hidden peer"
+                required
               />
-              Range
+              <label
+                htmlFor={'range'}
+                className="inline-flex justify-between items-center px-3 rounded-full w-full text-gray-500  border border-gray-200 cursor-pointer  peer-checked:text-white peer-checked:bg-primary hover:text-gray-600 hover:bg-gray-100 bg-gray-200 "
+              >
+                <div className="w-full flex items-center gap-4">
+                  <span>Range</span>
+                </div>
+              </label>
             </span>
           </form>
           {priceFilter === 'exact' && (
@@ -135,6 +185,7 @@ const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
               <input
                 type="number"
                 placeholder="Enter price"
+                className="w-full p-2 border rounded-md mt-3"
                 onChange={(e) => {
                   setPriceValue(e.target.value);
                   setFiltered(true);
@@ -147,11 +198,13 @@ const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
               <input
                 type="number"
                 placeholder="Min Price"
+                className="w-full p-2 border rounded-md mt-3"
                 onChange={(e) => setMinPrice(parseInt(e.target.value))}
               />
               <input
                 type="number"
                 placeholder="Max Price"
+                className="w-full p-2 border rounded-md mt-3"
                 onChange={(e) => setMaxPrice(parseInt(e.target.value))}
               />
             </div>
@@ -159,12 +212,17 @@ const FilterBox: React.FC<{ navigate_path: string }> = ({ navigate_path }) => {
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <p>Min Rating:</p>
+      <div className="">
+        <div className="flex items-center gap-1 mb-2 text-gray-600 font-medium">
+          <FaStar size={20} />
+          <p>Min Rating</p>
+        </div>
         <input
           type="number"
           min={0}
           max={5}
+          placeholder="Enter rating"
+          className="w-full p-2 border rounded-md"
           onChange={(e) => {
             setRatingFilter(e.target.value);
             setFiltered(true);

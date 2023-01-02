@@ -6,21 +6,28 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { MdEditNote } from 'react-icons/md';
+import { FaGlobe } from 'react-icons/fa';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
-import Avatar from '../../../components/layout/navbar/common/ProfileMenu/Avatar';
+import Avatar from '../../../components/layout/common/navbar/ProfileMenu/Avatar';
 import Layout from '../../../components/layout/Trainee/Layout';
 import { RootState } from '../../../redux/store';
 import { Subtitle } from '../../../types/entities/Subtitle';
 import { axios } from '../../../utils';
 import IconText from '../../../components/common/IconText';
+import RatingBox from '../../../components/courses/RatingBox';
+import InstructorLayout from '../../../components/layout/Instructor/InstructorLayout';
+import { getCookie } from 'cookies-next';
 const InstructorSingleCourse = () => {
   const { courseId, instructorId } = useParams();
   const [course, setCourse] = useState(undefined as any | undefined);
   const [withPromotion, setWithPromotion] = useState(false);
   const [addPromotionOpen, setAddPromotionOpen] = useState(false);
+  const [openViewReviews, setOpenViewReviews] = useState(false);
   const navigate = useNavigate();
   const [promotionExpiryDate, setPromotionExpiryDate] = useState(
+    null as Date | null
+  );
+  const [promotionStartDate, setPromotionStartDate] = useState(
     null as Date | null
   );
   const onPlayerReady: YouTubeProps['onReady'] = (event) => {
@@ -76,12 +83,17 @@ const InstructorSingleCourse = () => {
           discount: {
             amount: data.amount,
             validUntil: promotionExpiryDate,
+            validFrom: promotionStartDate,
           },
         },
       });
       setCourse({
         ...res.data,
-        discount: { amount: data.amount, validUntil: promotionExpiryDate },
+        discount: {
+          amount: data.amount,
+          validUntil: promotionExpiryDate,
+          validFrom: promotionStartDate,
+        },
       });
       setAddPromotionOpen(false);
     } catch (error) {
@@ -89,6 +101,22 @@ const InstructorSingleCourse = () => {
     }
   };
 
+  const publishCourse = async () => {
+    try {
+      const res: AxiosResponse<any, any> = await axios({
+        url: '/courses/' + courseId + '/publish',
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getCookie('access-token')}`,
+        },
+      });
+      setCourse(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const [discount, setDiscount] = useState({} as any);
   useEffect(() => {
     if (!course) getCourse();
     setWithPromotion(
@@ -100,23 +128,35 @@ const InstructorSingleCourse = () => {
     setPromotionExpiryDate(
       new Date(course?.discount?.validUntil || new Date())
     );
+    setPromotionStartDate(new Date(course?.discount?.validFrom || new Date()));
+    setDiscount({
+      ...course?.discount,
+      valid:
+        course?.discount &&
+        course?.discount?.validFrom < new Date() &&
+        course?.discount?.validUntil > new Date(),
+    });
     calculateRating();
   }, [course]);
   return (
-    <AdminLayout>
+    <InstructorLayout>
       <div className="my-4 space-y-4  max-w-[90%] mx-auto">
         <div className="flex justify-between items-center">
-          <p className="text-3xl font-medium">{course?.title}</p>
-          {user.id === course?.instructor?._id && (
-            <Link
-              to={`/courses/${course?._id}/edit`}
-              className=" bg-primary text-white rounded-md"
-            >
+          <div>
+            <p className="text-3xl font-medium">{course?.title}</p>
+            <p className="text-sm text-gray-600 font-medium">
+              {course?.isPublished ? 'Published' : 'Not Published'} º{' '}
+              {course?.enrolled?.length} students enrolled
+            </p>
+          </div>
+          {user.id === course?.instructor?._id && !course.isPublished && (
+            <button className=" bg-secondary text-white rounded-md">
               <IconText
-                text={'Edit Course'}
-                leading={<MdEditNote size={20} />}
+                text={'Publish'}
+                leading={<FaGlobe size={20} />}
+                onClick={() => publishCourse()}
               />
-            </Link>
+            </button>
           )}
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -198,7 +238,7 @@ const InstructorSingleCourse = () => {
                   <Link
                     to={`/instructor/${instructorId}/courses/${courseId}/exam`}
                   >
-                    <button className="bg-blue-500 text-white w-full py-2 rounded-md">
+                    <button className="bg-secondary text-white w-full py-2 rounded-md">
                       {course?.finalExam ? 'Edit Final Exam' : 'Add Final Exam'}
                     </button>
                   </Link>
@@ -206,30 +246,22 @@ const InstructorSingleCourse = () => {
               </div>
             )}
             <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
-              <img
+              {/* <img
                 src={course?.thumbnail}
                 alt=""
                 className="overflow-hidden rounded-md"
-              />
-              <div>
-                <p className="text-lg font-medium">{course?.title}</p>
-                <p className="text-sm text-gray-500">
-                  Rating: {rating || 'No Rating yet'}
-                </p>
-              </div>
-
+              /> */}
+              <p className="text-xl font-medium">{course?.title}</p>
               <p className="text-3xl text-primary font-semibold">
-                {course &&
-                  Number(
-                    course?.price *
-                      (withPromotion
-                        ? 1 - (course?.discount?.amount ?? 0) / 100
-                        : 1) *
-                      conversion_rate
-                  ).toFixed(2)}{' '}
+                {course && discount.valid
+                  ? Number(
+                      course?.price *
+                        (1 - (course?.discount?.amount ?? 0) / 100) *
+                        conversion_rate
+                    ).toFixed(2)
+                  : Number(course?.price * conversion_rate).toFixed(2)}{' '}
                 {currency}
               </p>
-
               {user.id !== course?.instructor?._id ? (
                 <div className=" w-full space-y-2">
                   <button className="w-full bg-primary text-white rounded-md py-2">
@@ -253,6 +285,13 @@ const InstructorSingleCourse = () => {
                           </span>
                         </p>
                         <span className="text-gray-500">
+                          Valid from{'  '}
+                          {new Date(
+                            course?.discount?.validFrom || ''
+                          ).toLocaleDateString()}
+                        </span>
+                        {'  -  '}
+                        <span className="text-gray-500">
                           Valid until{' '}
                           {new Date(
                             course?.discount?.validUntil || ''
@@ -262,7 +301,7 @@ const InstructorSingleCourse = () => {
                     ) : (
                       <div>
                         Promotion:
-                        <span className="text-red-700">Inactive</span>
+                        <span className="text-red-700"> Inactive</span>
                       </div>
                     )}
                   </p>
@@ -286,15 +325,35 @@ const InstructorSingleCourse = () => {
                         max={100}
                         required
                       />
-                      <label htmlFor="validUntil">Valid Until</label>
-                      <DatePicker
-                        name="validUntil"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
-                        selected={promotionExpiryDate}
-                        onChange={(date: Date) => setPromotionExpiryDate(date)}
-                        required
-                        minDate={new Date()}
-                      />
+                      <div className="flex gap-2">
+                        <div>
+                          <label htmlFor="validFrom">Valid From</label>
+                          <DatePicker
+                            name="validFrom"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
+                            selected={promotionStartDate}
+                            onChange={(date: Date) =>
+                              setPromotionStartDate(date)
+                            }
+                            required
+                            minDate={new Date()}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="validUntil">Valid Until</label>
+                          <DatePicker
+                            name="validUntil"
+                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-sm focus:ring-primary focus:border-primary outline-primary block w-full p-3 mb-3"
+                            selected={promotionExpiryDate}
+                            onChange={(date: Date) =>
+                              setPromotionExpiryDate(date)
+                            }
+                            required
+                            minDate={promotionStartDate ?? new Date()}
+                          />
+                        </div>
+                      </div>
 
                       <button className="w-full bg-primary text-white rounded-md py-2 mb-2">
                         Save
@@ -310,10 +369,69 @@ const InstructorSingleCourse = () => {
                 </div>
               )}
             </div>
+            <div>
+              <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
+                <p className="text-xl font-medium">Course Reviews</p>
+                <div className="text text-gray-500 flex justify-between">
+                  <span> Rating: </span>
+                  <span>
+                    {rating ? (
+                      <div className="flex items-center gap-2">
+                        <RatingBox
+                          fixed={true}
+                          rating={rating}
+                          onClick={() => ''}
+                        />
+                        <span className="">{rating}</span>
+                      </div>
+                    ) : (
+                      'No Reviews'
+                    )}
+                  </span>
+                </div>
+                <div className="text text-gray-500 flex flex-col justify-between ">
+                  <div className="flex justify-between">
+                    <p>
+                      Total Reviews:{' '}
+                      <span className="font-medium">
+                        {
+                          course?.enrolled?.filter(
+                            (s: any) => s.review !== undefined
+                          ).length
+                        }
+                      </span>
+                    </p>
+                    <span
+                      className="text-primary text-sm hover:underline cursor-pointer"
+                      onClick={() => {
+                        setOpenViewReviews((s) => !s);
+                      }}
+                    >
+                      {openViewReviews ? 'Close' : 'View All'}
+                    </span>
+                  </div>
+                  <div>
+                    {openViewReviews && (
+                      <div className="w-full pl-4">
+                        {course?.enrolled?.map((s: any) => {
+                          if (s.review) {
+                            return (
+                              <li className="text-sm text-gray-500">
+                                {s.review}
+                              </li>
+                            );
+                          }
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </InstructorLayout>
   );
 };
 

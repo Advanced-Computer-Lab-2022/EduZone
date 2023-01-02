@@ -15,10 +15,17 @@ export declare type Course = {
   discount?: {
     amount: number;
     validUntil: Date;
+    validFrom: Date;
   };
   enrolled: { studentId: string; rating?: number }[];
   createdAt: Date;
   finalExam?: {
     questions: Question[];
+  };
+  isPublished?: boolean;
+  completed?: {
+    exercises: string[];
+    finalExam: boolean;
+    subtitles: boolean;
   };
 };

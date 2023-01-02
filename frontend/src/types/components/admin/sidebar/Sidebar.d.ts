@@ -12,4 +12,9 @@ import { SidebarHeaderProps } from './SidebarHeader';
 // };
 export declare type SidebarProps = SidebarHeaderProps & {
   setWidth: (number) => void;
+  items?: Array<{
+    name: string;
+    icon: JSX.Element;
+    link: string;
+  }>;
 };
