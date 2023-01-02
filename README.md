@@ -426,7 +426,7 @@ If there is an error we can view the error message and debug the code
 ## Contributing
 
 Contributions are always welcome!
-Find more information about the project in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+Find more information about the project in the [contributing.md](contributing.md) file.
 
 ## License
 
