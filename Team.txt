@@ -1,0 +1,5 @@
+Mohamed Medhat 49-0720 -> Advanced Frontend Components and Advanced Backend Routes
+Hazem Sameh 49-0257 -> Course Model and Basic Routes
+Basel Mohamed 49-1123 -> UI/UX Design and Frontend
+Mahmoud Moamen 49-0365 -> Frontend authentication
+Marwan Ashraf 49-16200 -> backend authentication
