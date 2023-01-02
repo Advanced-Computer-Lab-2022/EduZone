@@ -277,7 +277,7 @@ export const getInstructorStatistics = async (
         courses: courses_income,
         monthly: monthly_income,
       },
-      total: total_income[0].total,
+      total: total_income[0]?.total || 0,
     },
     total_courses,
     average_final_grades,

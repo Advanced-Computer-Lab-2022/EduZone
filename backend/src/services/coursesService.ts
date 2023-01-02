@@ -943,12 +943,12 @@ export const getCourseCertificate = async (
 
   pdf
     .create(document, options)
-    .then(async (res) => {
+    .then(async (res: any) => {
       // console.log(res);
       enrolled.certificate = filename;
       await course.save();
     })
-    .catch((error) => {
+    .catch((error: any) => {
       console.error(error);
       throw error;
     });

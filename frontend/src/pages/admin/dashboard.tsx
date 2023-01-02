@@ -54,7 +54,7 @@ const AdminDashboard = () => {
                 {
                   stats?.reported_problems?.data.find(
                     (d: any) => d._id === 'UNSEEN'
-                  ).total
+                  )?.total
                 }
               </p>
             </div>

@@ -9,6 +9,8 @@ import {
   mediaRoutes,
   statisticsRoutes,
 } from './routes';
+import swaggerUi from 'swagger-ui-express';
+import swaggerFile from './swagger_output.json';
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.use('/auth', authRoutes);
 app.use('/users', usersRoutes);
 app.use('/media', mediaRoutes);
 app.use('/statistics', statisticsRoutes);
+
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 /* Error Handlers */
 app.use((req, res) => {

@@ -8,7 +8,15 @@ Eduzone was founded with the vision of fostering the sharing of knowledge and ex
 
 ## Build Status
 
+### Project Status
+
 Eduzone is currently in the development phase, during which we are actively creating and improving the various features of the platform.
+
+### Bugs and issues are being fixed
+
+- Some frontend components redirect to different pages then what it should be
+- Some menus are not working properly
+- Students cannot view the correct answers to an exercise
 
 ## Code Style
 
@@ -31,7 +39,14 @@ The MERN stack is a popular stack of technologies for building web applications.
 3. React: A JavaScript library for building user interfaces.
 4. Node.js: A JavaScript runtime that allows developers to run JavaScript on the server-side.
 
+## Technologies
+
+1. Tailwindcss
+2. Redux
+3. Typescript
+
 ## Features
+
 You can find the features in the [FEATURES](FEATURES)
 
 ## Extra Features
@@ -87,27 +102,7 @@ As the project is already huge so we can check a sample of the code, for example
 
 in the above code we can see the course card component which is used to display the course in the trainee profile and the instructor dashboard page. The component is a simple card that displays the course thumbnail, title, instructor name, and duration.
 
-## Installation
-
-To install the project and all its dependencies run:
-
-```bash
-    npm install:all
-```
-
-if anything went wrong run the following:
-
-```bash
-    npm install
-    cd frontend/
-    npm install
-    cd ../backend
-    npm install
-```
-
-## API References
-
-Since the backend routes are huge we will take a look at a sample of the routes: The Buy Course Route
+Backend route example:
 
 ```ts
 router.patch('/:id/buy', JWTAccessDecoder, async (req, res) => {
@@ -257,17 +252,29 @@ export const payForCourse = async (
 };
 ```
 
-## Tests
+## Installation
 
-The testing phase of the project has not yet begun, so no tests have been run.
+To install the project and all its dependencies run:
 
-## How to use
+```bash
+    npm install:all
+```
+
+if anything went wrong run the following:
+
+```bash
+    npm install
+    cd frontend/
+    npm install
+    cd ../backend
+    npm install
+```
 
 To start the project in development mode run
 
 ```bash
     npm run dev
-    #this starts the develpoment servers for both frontend and backend
+    #this starts the development servers for both frontend and backend
 ```
 
 to start the project in production mode run:
@@ -283,7 +290,7 @@ to start the project in production mode run:
 #### Frontend
 
 ```bash
-REACT_APP_BASE_URL='http://localhost:4000' #or your base url
+REACT_APP_BASE_URL='http://localhost:4000' #or your backend base url
 REACT_APP_EXCONVERTER_API_KEY='<exconvert-currency-converter-api-key>'
 VITE_STRIPE_PUBLISHABLE_KEY = '<stripe-publishable-key>'
 VITE_TINY_API_KEY='<tinymce-richtext-editor-api-key>'
@@ -301,6 +308,43 @@ MAILER_USER='<mailgun-user>'
 MAILER_PASS='<mailgun-pass>'
 STRIPE_SECRET_KEY='<stripe-secret-key>'
 ```
+
+## API References
+
+Here are some of the API endpoints
+
+<img src='images/api/login.png' />
+<img src='images/api/reg.png' />
+<img src='images/api/courses.png' />
+
+## Tests
+
+To test our routes we used POSTMAN. We tested all the routes and made sure that they work as expected.
+An example of a test is shown below:
+
+- we enter the url and the method of the request
+
+<img src='./images/postman-url.png'  />
+
+- we enter the search parameters if any
+
+<img src='./images/params.png'  />
+
+- we can view the response body
+
+<img src='./images/res-body.png'  />
+
+If there is an error we can view the error message and debug the code
+
+## Credits
+
+- <a href='https://www.youtube.com/watch?v=7CqJlxBYj-M&t=1082s'>FreeCodeCamp Crash Course</a>
+- <a href='https://www.youtube.com/watch?v=98BzS5Oz5E4&list=PL4cUxeGkcC9iJ_KkrkBZWZRHVwnzLIoUE' >The Net Ninja Youtube Channel </a>
+
+## Contributing
+
+Contributions are always welcome!
+Find more information about the project in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## License
 

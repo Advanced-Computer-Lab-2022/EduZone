@@ -99,7 +99,7 @@ const ProtectedRoutes: RouteType[] = [
     parent: false,
   },
   {
-    path: 'instructor/:id/profile/change-password',
+    path: 'instructor/:id/change-password',
     element: <InstructorChangePassword />,
     parent: false,
     roles: ['instructor'],
