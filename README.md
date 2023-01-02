@@ -419,15 +419,17 @@ You can navigate to access requests page and view the access requests and accept
 <img src='images/how-to/27-admin-access.jpg' width='30%' />
 <img src='images/how-to/28-admin-resolve.jpg' width='30%' />
 
+## Contributing
+
+Contributions are always welcome!
+Find more information about the project in the [contributing.md](contributing.md) file.
+
+
 ## Credits
 
 - <a href='https://www.youtube.com/watch?v=7CqJlxBYj-M&t=1082s'>FreeCodeCamp Crash Course</a>
 - <a href='https://www.youtube.com/watch?v=98BzS5Oz5E4&list=PL4cUxeGkcC9iJ_KkrkBZWZRHVwnzLIoUE' >The Net Ninja Youtube Channel </a>
 
-## Contributing
-
-Contributions are always welcome!
-Find more information about the project in the [contributing.md](contributing.md) file.
 
 ## License
 
