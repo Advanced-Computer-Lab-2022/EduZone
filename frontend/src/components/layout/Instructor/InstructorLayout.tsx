@@ -32,11 +32,11 @@ const InstructorLayout = ({
       icon: <MdOndemandVideo size={25} />,
       link: `/instructor/${user.id}/courses`,
     },
-    {
-      name: 'Profile',
-      icon: <MdPerson size={25} />,
-      link: `/instructor/${user.id}/profile`,
-    },
+    // {
+    //   name: 'Profile',
+    //   icon: <MdPerson size={25} />,
+    //   link: `/instructor/${user.id}/profile`,
+    // },
     {
       name: 'Preview Courses',
       icon: <MdRemoveRedEye size={25} />,

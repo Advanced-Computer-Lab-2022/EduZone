@@ -99,7 +99,7 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
         </ProfileMenuItem>
       ) : null}
 
-      {user.role !== 'instructor' && user.role !== 'admin ' && (
+      {
         <ProfileMenuItem>
           <IconText
             text={user.name}
@@ -110,12 +110,14 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
             link={'internal'}
             url={
               user.role === 'instructor'
-                ? `/instructor/${user.id}/profile`
+                ? `/instructor/${user.id}`
+                : user.role === 'admin'
+                ? `/admin`
                 : `/trainee/${user.id}/profile`
             }
           />
         </ProfileMenuItem>
-      )}
+      }
 
       <Divider />
       <ProfileMenuItem>

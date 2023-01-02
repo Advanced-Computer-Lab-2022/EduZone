@@ -62,7 +62,7 @@ const Courses = () => {
   return (
     <Layout>
       <div className="py-4">
-        {!searchParams.get('query') && <CategoryCards />}
+        {/* {!searchParams.get('query') && <CategoryCards />} */}
         <div className="flex justify-between mt-4  gap-4 items-center">
           {searchParams.get('query') && (
             <div className="grow">

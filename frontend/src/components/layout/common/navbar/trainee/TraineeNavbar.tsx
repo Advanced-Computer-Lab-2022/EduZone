@@ -35,13 +35,16 @@ const TraineeNavbar = () => {
             }}
           />
         </div>
-        <div>
-          <Link to={`/trainee/${user.id}/courses`}>
-            <button className="text-sm text-gray-500 font-medium hover:text-primary">
-              My Courses
-            </button>
-          </Link>
-        </div>
+        {user?.role === 'trainee' ||
+          (user?.role === 'corp_trainee' && (
+            <div>
+              <Link to={`/trainee/${user.id}/courses`}>
+                <button className="text-sm text-gray-500 font-medium hover:text-primary">
+                  My Courses
+                </button>
+              </Link>
+            </div>
+          ))}
         {isAuthenticated ? (
           // <button
           //   onClick={() => {

@@ -16,6 +16,11 @@ The Eduzone project is structured with a frontend and backend. The backend consi
 
 ## Screenshots
 
+<img src='./images/home.png' />
+<img src='./images/404.png' />
+<img src='./images/profile.png' />
+<img src='./images/inst-dashboard.png' />
+
 ## Framework
 
 The framework used in development is the MERN stack.
