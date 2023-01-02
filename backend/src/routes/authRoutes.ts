@@ -101,8 +101,8 @@ router.post('/forget-password', async (req, res) => {
 router.put('/change-password', JWTAccessDecoder, async (req, res) => {
   try {
     const { id } = req.body.token;
-    const { password } = req.body;
-    const success = await changePassword(id, password);
+    const { password, oldPassword } = req.body;
+    const success = await changePassword(id, oldPassword, password);
     return res.status(202).json({ message: 'Password changed successfully' });
   } catch (error) {
     return res.status(400).json({ message: (error as Error).message });

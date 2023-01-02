@@ -37,6 +37,7 @@ import {
   addBatchPromotion,
   enrollFree,
   deleteReview,
+  assignBatchCourses,
 } from '../services';
 import Exception from '../Exceptions/Exception';
 
@@ -627,6 +628,21 @@ router.patch('/:id/enroll', JWTAccessDecoder, async (req, res) => {
       });
     }
     return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+router.post('/batch-courses', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { courseIds, userIds } = req.body;
+    await assignBatchCourses(courseIds, userIds);
+
+    return res.status(200).json({ message: 'Successfully Added' });
   } catch (e) {
     console.error(e);
     if (e instanceof Exception) {

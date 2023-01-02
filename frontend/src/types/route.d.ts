@@ -3,4 +3,5 @@ export declare type RouteType = {
   parent?: boolean;
   element: ReactElement<any, any>;
   children?: Partial<RouteType>[];
+  roles?: string[];
 };

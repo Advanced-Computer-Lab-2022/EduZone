@@ -27,63 +27,71 @@ import AdminCourses from '../pages/admin/AdminCourses';
 
 const ProtectedRoutes: RouteType[] = [
   {
-    path: 'invoices',
-    element: <h1>Invoices </h1>,
-    parent: false,
-  },
-  {
     path: 'admin',
     element: <AdminDashboard />,
     parent: false,
+    roles: ['admin'],
   },
   {
     path: 'admin/users',
     element: <AdminUsers />,
     parent: false,
+    roles: ['admin'],
   },
   {
     path: 'admin/users/create',
     element: <AdminCreateUser />,
     parent: false,
+    roles: ['admin'],
   },
   {
     path: 'instructor-policy',
     element: <InstructorPolicy />,
+    roles: ['instructor'],
   },
   {
     path: 'trainee-policy',
     element: <TraineePolicy />,
+    roles: ['trainee', 'corp_trainee'],
   },
 
   {
     path: 'instructor/:id',
     element: <InstructorDashboard />,
     parent: false,
+    roles: ['instructor'],
   },
   {
     path: 'instructor/:id/courses',
     element: <InstructorCourses />,
     parent: false,
+    roles: ['instructor'],
   },
   {
     path: 'instructor/:instructorId/courses/:courseId',
     element: <InstructorSingleCourse />,
     parent: false,
+    roles: ['instructor'],
   },
   {
     path: 'instructor/:instructorId/courses/:courseId/exam',
     element: <InstructorCourseExam />,
+    parent: false,
+    roles: ['instructor'],
   },
 
   {
     path: 'instructor/:instructorId/courses/:courseId/subtitles/:subtitleId',
     element: <InstructorSubtitlePage />,
+    parent: false,
+    roles: ['instructor'],
   },
 
   {
     path: 'courses/create',
     element: <CreateCourse />,
     parent: false,
+    roles: ['instructor'],
   },
   {
     path: 'instructor/:id/profile',
@@ -94,55 +102,68 @@ const ProtectedRoutes: RouteType[] = [
     path: 'instructor/:id/profile/change-password',
     element: <InstructorChangePassword />,
     parent: false,
+    roles: ['instructor'],
   },
   {
     path: 'courses/:id/edit',
     element: <EditCourse />,
     parent: false,
+    roles: ['instructor'],
   },
   {
     path: 'courses/:id/learning',
     element: <LearningPage />,
+    roles: ['trainee', 'corp_trainee'],
   },
   {
     path: 'courses/:id/certificate',
     element: <CourseCertificate />,
+    roles: ['trainee', 'corp_trainee'],
   },
   {
     path: 'trainee/:id/courses',
     element: <TraineeCourses />,
+    roles: ['trainee', 'corp_trainee'],
   },
   {
     path: 'trainee/:id/profile',
     element: <TraineeProfile />,
+    roles: ['trainee', 'corp_trainee'],
   },
   {
     path: 'trainee/:id/reported-problems',
     element: <TraineeReportedProblems />,
+    roles: ['trainee', 'corp_trainee'],
   },
   {
     path: 'instructor/:id/reported-problems',
     element: <InstructorReportedProblems />,
+    roles: ['instructor'],
   },
   {
     path: 'admin/reported-problems',
     element: <AdminReportedProblems />,
+    roles: ['admin'],
   },
   {
     path: 'admin/access-requests',
     element: <AdminCourseAccessRequest />,
+    roles: ['admin'],
   },
   {
     path: 'admin/refund-requests',
     element: <AdminRefundRequests />,
+    roles: ['admin'],
   },
   {
     path: 'admin/courses',
     element: <AdminCourses />,
+    roles: ['admin'],
   },
   {
     path: 'trainee/:id/profile/change-password',
     element: <TraineeChangePassword />,
+    roles: ['trainee', 'corp_trainee'],
   },
 ];
 

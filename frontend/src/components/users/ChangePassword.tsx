@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { getCookie } from 'cookies-next';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +11,7 @@ const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
   const dispatch = useDispatch();
   const { token } = useParams();
   const navigate = useNavigate();
@@ -26,29 +28,62 @@ const ChangePassword: React.FC<{ isReset?: boolean }> = ({ isReset }) => {
     const headers = isReset
       ? {}
       : { Authorization: `Bearer ${getCookie('access-token')}` };
-    const res = await axios({
-      url,
-      method: 'PUT',
-      data: {
-        password,
-      },
-      headers,
-    });
-    if (res.status === 202) {
-      dispatch(
-        showMessage({
-          text: 'Password Changed Successfully',
-          type: 'success',
-        })
-      );
-      if (isReset) navigate('/login');
-      else if (location.state?.from) navigate(`/instructor/${user?.id}`);
-      else navigate(-1);
+    try {
+      const res = await axios({
+        url,
+        method: 'PUT',
+        data: {
+          password,
+          oldPassword,
+        },
+        headers,
+      });
+
+      if (res.status === 202) {
+        dispatch(
+          showMessage({
+            text: 'Password Changed Successfully',
+            type: 'success',
+          })
+        );
+        if (isReset) navigate('/login');
+        else if (location.state?.from) navigate(`/instructor/${user?.id}`);
+        else navigate(-1);
+      } else {
+        dispatch(
+          showMessage({
+            text: 'Something went wrong',
+            type: 'error',
+          })
+        );
+      }
+    } catch (err) {
+      const { response } = err as AxiosError;
+      if (response?.status === 400) {
+        dispatch(
+          showMessage({
+            text: ((err as AxiosError).response?.data as any)?.message,
+            type: 'error',
+          })
+        );
+      }
     }
   };
   return (
     <div className="flex flex-col items-center justify-center mt-[20%]">
       <div className="flex flex-col gap-4 w-1/3 items-center">
+        {!isReset && (
+          <div className="flex flex-col">
+            <label htmlFor="">Old Password</label>
+            <input
+              type="password"
+              className="px-4 border-2 border-gray-300 rounded-md p-2 w-96"
+              placeholder="Old Password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+            />
+          </div>
+        )}
         <div className="flex flex-col">
           <label htmlFor="">Password</label>
           <input

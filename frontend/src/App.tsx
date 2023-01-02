@@ -6,9 +6,13 @@ import Home from './pages/home';
 import { RootState } from './redux/store';
 import { ProtectedRoutes, UnProtectedRoutes } from './routes';
 import Alert from './components/common/Alert';
+import NotFoundPage from './pages/404';
 
 function App() {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const role = user?.role;
   return (
     <div className="App">
       <Alert />
@@ -38,7 +42,7 @@ function App() {
 
         {isAuthenticated ? (
           ProtectedRoutes.map((route) => {
-            if (!route.parent)
+            if (route.roles?.includes(role))
               return (
                 <Route
                   key={route.path}
@@ -46,23 +50,12 @@ function App() {
                   element={route.element}
                 />
               );
-
-            return (
-              <Route key={route.path} path={route.path} element={route.element}>
-                {route.children?.map((child) => (
-                  <Route
-                    key={child.path}
-                    path={child.path}
-                    element={child.element}
-                  />
-                ))}
-              </Route>
-            );
+            return null;
           })
         ) : (
           <Route path="/auth" element={<Navigate to="/login" />}></Route>
         )}
-        <Route path="*" element={<h1>404</h1>} />
+        <Route path="*" element={<NotFoundPage />} />
         {/* <Route path="login" element={<LoginPage />} /> */}
         {/*<Route path="invoices" element={<Invoices />} /> */}
       </Routes>

@@ -458,6 +458,57 @@ export const reviewCourse = async (
   return course;
 };
 
+export const assignBatchCourses = async (courseIds: any[], userIds: []) => {
+  const courses = await CourseModel.find({ _id: { $in: courseIds } });
+  const users = await UserModel.find({ _id: { $in: userIds } });
+  if (courses.length !== courseIds.length)
+    throw new NotFoundException('Course not found');
+  if (users.length !== userIds.length)
+    throw new NotFoundException('User not found');
+  courses.map((course) => {
+    users.map(async (user) => {
+      if (!course.enrolled.find((e) => e.studentId === user._id.toString())) {
+        course.enrolled.push({
+          studentId: user._id.toString(),
+          exercises: [],
+          finalExam: {
+            submitted: false,
+            score: -1,
+            answers: [],
+          },
+          payment: {
+            id: '1',
+            amount: 0,
+            date: new Date(),
+          },
+          notes: [],
+          status: 'active',
+        });
+        await course.save();
+      }
+    });
+  });
+
+  /**
+   * course.enrolled.push({
+    studentId,
+    exercises: [],
+    finalExam: {
+      submitted: false,
+      score: -1,
+      answers: [],
+    },
+    payment: {
+      id: '1',
+      amount: 0,
+      date: new Date(),
+    },
+    notes: [],
+    status: 'active',
+  });
+  await course.save();
+   */
+};
 export const deleteReview = async (courseId: string, studentId: string) => {
   const course = await CourseModel.findById(courseId).populate('instructor', [
     'name',

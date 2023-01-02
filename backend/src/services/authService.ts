@@ -14,12 +14,12 @@ export const login = async (username: string, password: string) => {
   // check if user exists
   const user = await UserModel.findOne({ username: username });
   if (!user) {
-    throw new NotFoundException('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist');
   }
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
-    throw new NotAuthenticated('Incorrect password'); //TODO: change to custom error
+    throw new NotAuthenticated('Incorrect password');
   }
 
   const { accessToken, refreshToken } = getTokens(user);
@@ -45,7 +45,7 @@ export const register = async (
   // check if email already exists
   const user = await UserModel.findOne({ $or: [{ username }, { email }] });
   if (user) {
-    throw new DuplicateException('User already exists'); //TODO: change to custom error
+    throw new DuplicateException('User already exists');
   }
 
   // hash password
@@ -81,7 +81,7 @@ export const logout = async (id: string) => {
   // remove refresh token from db  (to be done)
   const user = await UserModel.findById(id);
   if (!user) {
-    throw new NotFoundException('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist');
   }
   user.refreshToken = '';
   await user.save();
@@ -111,7 +111,7 @@ export const forgetPassword = async (email: string) => {
     email: email,
   });
   if (!user) {
-    throw new NotFoundException('User does not exist'); //TODO: change to custom error
+    throw new NotFoundException('User does not exist');
   }
   const resetToken = crypto.randomBytes(20).toString('hex');
   user.resetPasswordToken = crypto
@@ -148,16 +148,27 @@ export const forgetPassword = async (email: string) => {
   return true;
 };
 
-export const changePassword = async (id: string, password: string) => {
+export const changePassword = async (
+  id: string,
+  oldPassword: string,
+  password: string
+) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await UserModel.findByIdAndUpdate(
-    id,
-    { password: hashedPassword },
-    { new: true }
-  );
+  // const user = await UserModel.findByIdAndUpdate(
+  //   id,
+  //   { password: hashedPassword },
+  //   { new: true }
+  // );
+  const user = await UserModel.findById(id);
   if (!user) {
     throw new NotFoundException('User does not exist');
   }
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) {
+    throw new NotAuthenticated('Incorrect password');
+  }
+  user.password = hashedPassword;
+  await user.save();
 
   return true;
 };

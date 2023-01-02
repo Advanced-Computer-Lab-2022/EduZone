@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
 import { FaUsers } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import Modal from '../../../components/common/Modal';
+import AdminBatchCourses from '../../../components/courses/AdminBatchCourses';
+import AdminBatchPromotion from '../../../components/courses/AdminBatchPromotion';
 import AdminLayout from '../../../components/layout/Admin/AdminLayout';
 import { axios } from '../../../utils';
+import courses from '../../courses/courses';
 
 const AdminUsers = () => {
   const [users, setUsers] = React.useState([] as any[]);
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedCorporate, setSelectedCorporate] = useState('all');
   const [filteredUsers, setFilteredUsers] = useState([] as any[]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState([] as any[]);
+  const [selectedCourses, setSelectedCourses] = useState([] as any[]);
   const [usersStats, setUsersStats] = useState({
     total: 0,
     trainees: 0,
     instructors: 0,
     corp_trianees: 0,
   });
+  const [courses, setCourses] = useState([] as any[]);
+  const [loading, setLoading] = useState(false);
+  const getAllCourses = async () => {
+    setLoading(true);
+    const res = await axios({
+      method: 'GET',
+      url: '/courses',
+    });
+    setCourses(res.data.courses);
+    console.log(res.data.courses);
+    setLoading(false);
+  };
   const getUsers = async () => {
     try {
       const { data } = await axios({ url: '/users' });
@@ -35,8 +54,30 @@ const AdminUsers = () => {
       console.log(error);
     }
   };
+  const onSelect = (value: string) => {
+    if (selectedCourses.includes(value)) {
+      setSelectedCourses(
+        (selectedCourses as string[]).filter((item) => item !== value)
+      );
+    } else {
+      setSelectedCourses([...selectedCourses, value]);
+    }
+  };
+  const onRemove = (value: string) => {
+    setSelectedCourses(
+      (selectedCourses as string[]).filter((item) => item !== value)
+    );
+  };
 
+  const selectAll = () => {
+    if (selectedCourses.length === courses.length) {
+      setSelectedCourses([]);
+    } else {
+      setSelectedCourses(courses.map((course) => course._id.toString()));
+    }
+  };
   React.useEffect(() => {
+    if (courses.length === 0) getAllCourses();
     if (users.length === 0) getUsers();
     else {
       setFilteredUsers(
@@ -58,6 +99,27 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
+      <Modal
+        title="Add Courses"
+        open={modalOpen}
+        close={() => {
+          setModalOpen(false);
+          setSelectedCourses([]);
+        }}
+      >
+        <AdminBatchCourses
+          selectedUsers={selectedUser}
+          courses={courses}
+          closeModal={() => {
+            setModalOpen(false);
+            setSelectedCourses([]);
+          }}
+          selected={selectedCourses}
+          onSelect={onSelect}
+          onRemove={onRemove}
+          selectAll={selectAll}
+        />
+      </Modal>
       <div className="flex w-full justify-between items-center">
         <div className="flex items-center">
           <FaUsers className="text-2xl mr-2" />
@@ -108,6 +170,13 @@ const AdminUsers = () => {
           </div>
         </div>
         <div>
+          <button
+            className=" p-2 px-4 text-white bg-primary rounded mb-5 mr-5 disabled:opacity-50"
+            disabled={selectedUser.length === 0}
+            onClick={() => setModalOpen(true)}
+          >
+            Add Courses
+          </button>
           <button className=" p-2 px-4 text-white bg-primary rounded mb-5">
             <Link to="/admin/users/create">Create User</Link>
           </button>
@@ -118,6 +187,19 @@ const AdminUsers = () => {
         <table className="w-full text-sm text-left text-gray-500 ">
           <thead className="text-xs text-gray-700 uppercase bg-gray-200  ">
             <tr>
+              <th scope="col" className="w-10 px-5">
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedUser(filteredUsers.map((user) => user._id));
+                    } else {
+                      setSelectedUser([]);
+                    }
+                  }}
+                  checked={selectedUser.length === filteredUsers.length}
+                />
+              </th>
               <th scope="col" className="py-3 px-6">
                 Name
               </th>
@@ -152,9 +234,24 @@ const AdminUsers = () => {
                     className="bg-white border-b  hover:bg-gray-50 "
                     key={user?._id}
                   >
+                    <td scope="col" className="w-10 px-5">
+                      <input
+                        type="checkbox"
+                        checked={selectedUser.includes(user._id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedUser([...selectedUser, user._id]);
+                          } else {
+                            setSelectedUser(
+                              selectedUser.filter((id) => id !== user._id)
+                            );
+                          }
+                        }}
+                      />
+                    </td>
                     <th
                       scope="row"
-                      className="py-4 px-6 font-medium text-gray-900  "
+                      className="py-4 pr-6 font-medium text-gray-900  "
                     >
                       <div className="flex break-normal	items-center">
                         <img
