@@ -64,7 +64,7 @@ const AdminUsers = () => {
           <h1 className="text-2xl font-semibold">
             Users
             <span className="text-gray-500 ml-2 text-base">
-              ({usersStats.total})
+              ({filteredUsers.length})
             </span>
           </h1>
         </div>

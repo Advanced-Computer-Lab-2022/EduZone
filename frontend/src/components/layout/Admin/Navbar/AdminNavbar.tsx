@@ -11,32 +11,6 @@ const AdminNavbar: React.FC<{ sidebarWidth: number; windowWidth: number }> = ({
   sidebarWidth,
   windowWidth,
 }) => {
-  // const handleRefresh = async () => {
-  //   axios
-  //     .get(process.env.NEXT_PUBLIC_CORE_BASE_URL + '/auth/refresh', {
-  //       headers: {
-  //         Authorization: 'Bearer ' + getCookie('refresh-token'),
-  //         'content-type': 'application/json',
-  //       },
-  //     })
-  //     .then((response) => {
-  //       console.log(response);
-  //       setCookie('access-token', response.data.accessToken);
-  //       setCookie('refresh-token', response.data.refreshToken);
-  //     });
-  // };
-  // async function handleFetchUsers() {
-  //   axios
-  //     .patch(process.env.NEXT_PUBLIC_CORE_BASE_URL + '/users/1', {
-  //       headers: {
-  //         Authorization: 'Bearer ' + getCookie('access-token'),
-  //         'content-type': 'application/json',
-  //       },
-  //     })
-  //     .then((response) => {
-  //       console.table(response.data);
-  //     });
-  // }
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
@@ -49,7 +23,10 @@ const AdminNavbar: React.FC<{ sidebarWidth: number; windowWidth: number }> = ({
     >
       <div className="w-full px-6 flex items-center justify-between mx-auto h-full ">
         <Link to="/" className="text-lg text-primary font-medium ">
-          Placeholder
+          <span className="flex items-center gap-2">
+            <img src="/favicon.png" alt="logo" className="w-10 h-10" />
+            <p className="text-primary text-lg font-medium">EduZone</p>
+          </span>
         </Link>
 
         {isAuthenticated ? (

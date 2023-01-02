@@ -20,7 +20,10 @@ const TraineeNavbar = () => {
     <div className="h-14 bg-white flex items-center justify-center shadow-md fixed w-full z-30">
       <div className="container md:max-w-[70%] xl:max-w-[80%] px-6 flex items-center justify-between mx-auto h-full ">
         <Link to="/" className="text-lg text-primary font-medium ">
-          Placeholder
+          <span className="flex items-center gap-2">
+            <img src="/favicon.png" alt="logo" className="w-10 h-10" />
+            <p className="text-primary text-lg font-medium">EduZone</p>
+          </span>
         </Link>
         <div className="w-3/5">
           <SearchBar

@@ -36,6 +36,7 @@ import {
   resolveAccessRequest,
   addBatchPromotion,
   enrollFree,
+  deleteReview,
 } from '../services';
 import Exception from '../Exceptions/Exception';
 
@@ -662,6 +663,27 @@ router.patch('/:id/review', JWTAccessDecoder, async (req, res) => {
   const { review } = req.body;
   try {
     const course = await reviewCourse(id, userId, review);
+    if (!course) {
+      return res.status(404).json({
+        message: 'Course not found',
+      });
+    }
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+
+//delete review
+router.delete('/:id/review', JWTAccessDecoder, async (req, res) => {
+  const { id } = req.params;
+  const { id: userId } = req.body.token;
+  try {
+    const course = await deleteReview(id, userId);
     if (!course) {
       return res.status(404).json({
         message: 'Course not found',

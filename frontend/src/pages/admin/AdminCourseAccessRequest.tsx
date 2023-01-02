@@ -11,6 +11,9 @@ import { axios } from '../../utils';
 
 const AdminCourseAccessRequest = () => {
   const [requests, setRequests] = useState([] as any[]);
+  const [filteredRequests, setFilteredRequests] = useState([] as any[]);
+
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   const getRequests = async () => {
     const res = await axios({
@@ -22,13 +25,23 @@ const AdminCourseAccessRequest = () => {
     });
     console.log(res.data);
     setRequests(res.data);
+    setFilteredRequests(res.data);
   };
   const { currency, conversion_rate } = useSelector(
     (state: RootState) => state.currency
   );
   useEffect(() => {
     if (requests.length === 0) getRequests();
-  }, []);
+    else {
+      if (selectedStatus === 'all') setFilteredRequests(requests);
+      else {
+        const filtered = requests.filter(
+          (request) => request.status === selectedStatus
+        );
+        setFilteredRequests(filtered);
+      }
+    }
+  }, [selectedStatus]);
 
   const handleRequest = async (
     courseId: string,
@@ -54,15 +67,34 @@ const AdminCourseAccessRequest = () => {
       return request;
     });
     setRequests(newRequests);
+    setFilteredRequests(newRequests);
   };
 
   return (
     <AdminLayout>
       <div>
-        <h1 className="my-5 text-2xl font-medium text-gray-700 flex items-center gap-2">
-          <TbLockAccess size={30} />
-          <p>Course Access Requests</p> ({requests.length})
-        </h1>
+        <div className="flex justify-between">
+          <h1 className="my-5 text-2xl font-medium text-gray-700 flex items-center gap-2">
+            <TbLockAccess size={30} />
+            <p>Course Access Requests</p> ({filteredRequests.length})
+          </h1>
+
+          <div className="flex items-center gap-2">
+            <p className="text-gray-700">Filter by status:</p>
+            <select
+              className="px-3 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedStatus}
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+              }}
+            >
+              <option value="all">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="ACCEPTED">Accepted</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+        </div>
 
         <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
           <table className="w-full text-sm text-left text-gray-500 ">
@@ -90,7 +122,7 @@ const AdminCourseAccessRequest = () => {
               </tr>
             </thead>
             <tbody>
-              {requests.map((request) => {
+              {filteredRequests.map((request) => {
                 const amount_paid = request?.course.enrolled?.find(
                   (e: any) => e.studentId === request.student._id
                 )?.payment.amount;

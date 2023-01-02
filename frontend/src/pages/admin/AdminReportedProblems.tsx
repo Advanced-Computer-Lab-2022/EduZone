@@ -10,6 +10,8 @@ import { axios } from '../../utils';
 const AdminReportedProblems = () => {
   //  const { id } = useSelector((state: RootState) => state.auth.user);
   const [problems, setProblems] = useState([] as any[]);
+  const [filteredProblems, setFilteredProblems] = useState([] as any[]);
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const getReportedProblems = async () => {
     const res = await axios({
       url: `/courses/problems`,
@@ -30,15 +32,26 @@ const AdminReportedProblems = () => {
     });
     console.log(data);
     setProblems(data);
+    setFilteredProblems(data);
   };
 
   const [refresh, setRefresh] = useState(false);
   useEffect(() => {
     if (problems.length === 0) getReportedProblems();
+    else {
+      if (selectedStatus === 'all') setFilteredProblems(problems);
+      else {
+        const filtered = problems.filter(
+          (problem) => problem.status === selectedStatus
+        );
+        setFilteredProblems(filtered);
+      }
+    }
+
     if (refresh) {
       setRefresh(false);
     }
-  }, [refresh]);
+  }, [refresh, selectedStatus]);
 
   const handleMarkAs = async (
     courseId: string,
@@ -64,15 +77,35 @@ const AdminReportedProblems = () => {
       return p;
     });
     setProblems(newProblems);
+    setFilteredProblems(newProblems);
   };
 
   return (
     <AdminLayout>
       <div>
-        <h1 className="my-5 text-2xl font-medium text-gray-700 flex items-center gap-2">
-          <MdReportProblem />
-          <p> Reported Problems</p>
-        </h1>
+        <div className="flex justify-between">
+          <h1 className="my-5 text-2xl font-medium text-gray-700 flex items-center gap-2">
+            <MdReportProblem />
+            <p> Reported Problems</p>
+          </h1>
+
+          <div className="flex items-center gap-2">
+            <p className="text-gray-700">Filter by status:</p>
+            <select
+              className="px-3 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={selectedStatus}
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+              }}
+            >
+              <option value="all">All</option>
+              <option value="UNSEEN">Unseen</option>
+              <option value="PENDING">Pending</option>
+              <option value="RESOLVED">Resolved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+        </div>
 
         <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
           <table className="w-full text-sm text-left text-gray-500 ">
@@ -104,7 +137,7 @@ const AdminReportedProblems = () => {
               </tr>
             </thead>
             <tbody>
-              {problems.map(
+              {filteredProblems?.map(
                 ({
                   _id,
                   problem,

@@ -45,11 +45,11 @@ const UpdateUser = () => {
   return (
     <div>
       <div className="flex flex-col flex-wrap w-2/3 mx-auto justify-center items-center">
-        <Link to={'change-password'}>
+        {/* <Link to={'change-password'}>
           <button className="text-primary hover:underline">
             Change Password
           </button>
-        </Link>
+        </Link> */}
         <div className="flex-col gap-4 my-4 justify-center flex-wrap  lg:flex">
           <div className="flex flex-col ">
             <label htmlFor="">Name</label>

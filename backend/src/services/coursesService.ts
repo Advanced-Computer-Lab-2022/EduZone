@@ -458,6 +458,23 @@ export const reviewCourse = async (
   return course;
 };
 
+export const deleteReview = async (courseId: string, studentId: string) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new NotFoundException('Course not found');
+  const enrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (!enrolled) throw new ForbiddenException('Not enrolled');
+  enrolled.review = '';
+  await course.save();
+  return course;
+};
+
 export const publishCourse = async (courseId: string) => {
   const course = await CourseModel.findById(courseId).populate('instructor', [
     'name',

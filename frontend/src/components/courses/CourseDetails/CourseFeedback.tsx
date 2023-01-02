@@ -1,5 +1,6 @@
 import { getCookie } from 'cookies-next';
 import React, { useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import { axios } from '../../../utils';
@@ -56,6 +57,22 @@ const CourseFeedback: React.FC<CourseFeedbackProps> = ({
       console.log(error);
     }
   };
+
+  const deleteReview = async () => {
+    try {
+      const res = await axios({
+        url: '/courses/' + courseId + '/review',
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer ' + getCookie('access-token'),
+        },
+      });
+      updateCourse(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="bg-gray-200 p-4 rounded-lg shadow border border-gray-300 space-y-3">
       <p className="text-xl text-center">Give us your feedback!</p>
@@ -76,16 +93,24 @@ const CourseFeedback: React.FC<CourseFeedbackProps> = ({
             <div>
               <span className="font-medium">Your review: </span>
               {!openReview && (
-                <span className="text-sm text-gray-500 hover:underline cursor-pointer">
+                <span className="ml-1 text-sm text-gray-500 hover:underline cursor-pointer grow">
                   {review}
                 </span>
               )}
-              <p
-                className="text-sm text-right  text-primary hover:underline cursor-pointer"
-                onClick={() => setOpenReview((s) => !s)}
-              >
-                {openReview ? 'Cancel' : 'Edit your review'}
-              </p>
+              <div className="flex items-center justify-between">
+                <p
+                  className="text-sm text-left  text-red-600 hover:underline cursor-pointer"
+                  onClick={() => deleteReview()}
+                >
+                  Delete Review
+                </p>
+                <p
+                  className="text-sm text-right  text-primary hover:underline cursor-pointer"
+                  onClick={() => setOpenReview((s) => !s)}
+                >
+                  {openReview ? 'Cancel' : 'Edit your review'}
+                </p>
+              </div>
             </div>
           )}
         </div>

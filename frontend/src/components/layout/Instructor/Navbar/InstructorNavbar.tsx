@@ -25,7 +25,10 @@ const InstructorNavbar: React.FC<{
     >
       <div className="w-full px-6 flex items-center justify-between mx-auto h-full ">
         <Link to="/" className="text-lg text-primary font-medium ">
-          Placeholder
+          <span className="flex items-center gap-2">
+            <img src="/favicon.png" alt="logo" className="w-10 h-10" />
+            <p className="text-primary text-lg font-medium">EduZone</p>
+          </span>
         </Link>
 
         {isAuthenticated ? (
