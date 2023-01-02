@@ -309,6 +309,88 @@ MAILER_PASS='<mailgun-pass>'
 STRIPE_SECRET_KEY='<stripe-secret-key>'
 ```
 
+## How to use
+
+When you first visit our website you can explore courses and view their details and you can also login or register.
+
+<img src='images/how-to/0-login.png' width='30%' />
+<img src='images/how-to/1-login-page.jpg' width='30%' />
+<img src='images/how-to/2-reg.jpg' width='30%' />
+
+You can also view the course details and the course content
+buy the course as a trainee or request access as a corporate trainee.
+
+<img src='images/how-to/4-courses-page.jpg' width='30%' />
+<img src='images/how-to/4.1-access.jpg' width='30%' />
+<img src='images/how-to/5-pay.jpg' width='30%' />
+
+after you buy or have access the course content and take notes
+
+<img src='images/how-to/6-learn.jpg' width='30%' />
+<img src='images/how-to/8-subtitles.jpg' width='30%' />
+<img src='images/how-to/7-notes.jpg' width='30%' />
+
+you can also solve the exercises of the course
+
+<img src='images/how-to/9-exercise.jpg' width='30%' />
+
+you can view you progress and download the certificate when you finish the course
+
+<img src='images/how-to/10-progress.jpg' width='30%' />
+<img src='images/how-to/11-cert.jpg' width='30%' />
+
+You can view your profile menu from the top right corner
+
+<img src='images/how-to/12-avatar.jpg' width='30%' />
+
+you can view your profile and edit it, view the amount of money you have in your wallet and view your courses
+
+<img src='images/how-to/13-prof-1.jpg' width='30%' />
+<img src='images/how-to/14-wallet.jpg' width='30%' />
+<img src='images/how-to/15-my-courses.jpg' width='30%' />
+
+---
+
+### Not lets see the instructor dashboard
+
+The instructor can view some statistics about his courses and earnings as well as view his profile and edit it
+
+<img src='images/how-to/16-inst-dash.jpg' width='60%' />
+
+You can navigate to the courses page and view the courses you have created from the left side menu and create a new course
+
+<img src='images/how-to/17-inst-courses.jpg' width='45%' />
+<img src='images/how-to/18-inst-create-course.jpg' width='30%' />
+
+<br/>
+After you create a course you can view the course details and edit them by clicking on a subtitle
+
+As an instructor you can add exercises to the subtitles
+
+<img src='images/how-to/19-course-page.jpg' width='30%' />
+<img src='images/how-to/20-sub.jpg' width='30%' />
+<img src='images/how-to/21-subtitle-details.jpg' width='30%' />
+
+---
+
+### Now lets see the admin dashboard
+
+The admin can view some statistics about the website and the users as well as view his profile and edit it
+
+<img src='images/how-to/22-admin-dashboard.jpg' width='40%' />
+<img src='images/how-to/23-admin-prof.jpg' width='30%' />
+
+You can navigate to the users page and view users, create a new user and add courses to users, you can also filter users by their role and corporate
+
+<img src='images/how-to/24-admin-users.jpg' width='30%' />
+<img src='images/how-to/25-admin-create-user.jpg' width='30%' />
+<img src='images/how-to/26-admin-filter.jpg' width='30%' />
+
+You can navigate to access requests page and view the access requests and accept or reject them and same for reported problems and refund requests
+
+<img src='images/how-to/27-admin-access.jpg' width='30%' />
+<img src='images/how-to/28-admin-resolve.jpg' width='30%' />
+
 ## API References
 
 Here are some of the API endpoints
