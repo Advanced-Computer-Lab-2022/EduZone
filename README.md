@@ -351,7 +351,7 @@ you can view your profile and edit it, view the amount of money you have in your
 
 ---
 
-### Not lets see the instructor dashboard
+### Now lets see the instructor dashboard
 
 The instructor can view some statistics about his courses and earnings as well as view his profile and edit it
 
