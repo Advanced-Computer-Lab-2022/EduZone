@@ -309,6 +309,34 @@ MAILER_PASS='<mailgun-pass>'
 STRIPE_SECRET_KEY='<stripe-secret-key>'
 ```
 
+
+## API References
+
+Here are some of the API endpoints
+
+<img src='images/api/login.png' />
+<img src='images/api/reg.png' />
+<img src='images/api/courses.png' />
+
+## Tests
+
+To test our routes we used POSTMAN. We tested all the routes and made sure that they work as expected.
+An example of a test is shown below:
+
+- we enter the url and the method of the request
+
+<img src='./images/postman-url.png'  />
+
+- we enter the search parameters if any
+
+<img src='./images/params.png'  />
+
+- we can view the response body
+
+<img src='./images/res-body.png'  />
+
+If there is an error we can view the error message and debug the code
+
 ## How to use
 
 When you first visit our website you can explore courses and view their details and you can also login or register.
@@ -390,33 +418,6 @@ You can navigate to access requests page and view the access requests and accept
 
 <img src='images/how-to/27-admin-access.jpg' width='30%' />
 <img src='images/how-to/28-admin-resolve.jpg' width='30%' />
-
-## API References
-
-Here are some of the API endpoints
-
-<img src='images/api/login.png' />
-<img src='images/api/reg.png' />
-<img src='images/api/courses.png' />
-
-## Tests
-
-To test our routes we used POSTMAN. We tested all the routes and made sure that they work as expected.
-An example of a test is shown below:
-
-- we enter the url and the method of the request
-
-<img src='./images/postman-url.png'  />
-
-- we enter the search parameters if any
-
-<img src='./images/params.png'  />
-
-- we can view the response body
-
-<img src='./images/res-body.png'  />
-
-If there is an error we can view the error message and debug the code
 
 ## Credits
 
