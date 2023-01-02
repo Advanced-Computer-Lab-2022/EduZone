@@ -12,7 +12,16 @@ const AdminBatchPromotion: React.FC<{
   selected: string[];
   onSelect: (value: string) => void;
   onRemove: (value: string) => void;
-}> = ({ courses, closeModal, updateCourse, selected, onSelect, onRemove }) => {
+  selectAll: () => void;
+}> = ({
+  courses,
+  closeModal,
+  updateCourse,
+  selected,
+  onSelect,
+  onRemove,
+  selectAll,
+}) => {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -49,7 +58,23 @@ const AdminBatchPromotion: React.FC<{
     <div className="bg-white p-4 rounded-md">
       <form onSubmit={onSubmit}>
         <div className="mb-5">
-          <label htmlFor="courses">Courses</label>
+          <div className="flex justify-between">
+            <label htmlFor="courses">Courses</label>
+            <div className="flex gap-3">
+              <div className="text-sm text-gray-500">
+                {selected.length} selected
+              </div>
+              º
+              <p
+                className="text-sm text-primary cursor-pointer"
+                onClick={() => selectAll()}
+              >
+                {selected.length === courses.length
+                  ? 'Deselect all'
+                  : 'Select all'}
+              </p>
+            </div>
+          </div>
           <SelectSearch
             items={courses?.map((c) => ({ _id: c._id, name: c.title }))}
             multiple={true}

@@ -41,9 +41,18 @@ const AdminCourses = () => {
     if (courses.length === 0) getAllCourses();
   }, []);
 
+  const selectAll = () => {
+    if (selected.length === courses.length) {
+      setSelected([]);
+    } else {
+      setSelected(courses.map((course) => course._id.toString()));
+    }
+  };
+
   return (
     <AdminLayout>
       <Modal
+        title="Add Promotions"
         open={modalOpen}
         close={() => {
           setModalOpen(false);
@@ -60,10 +69,16 @@ const AdminCourses = () => {
           selected={selected}
           onSelect={onSelect}
           onRemove={onRemove}
+          selectAll={selectAll}
         />
       </Modal>
-      <h1 className="text-3xl font-medium">Courses</h1>
-      <div>
+      <div className="flex justify-between items-center">
+        <h1 className="flex items-center text-3xl font-medium">
+          <p>Courses</p>
+          <span className="text-gray-500 ml-2 text-base">
+            ({courses.length})
+          </span>
+        </h1>
         <button
           className="bg-primary text-white px-4 py-2 rounded-sm"
           onClick={() => setModalOpen(true)}

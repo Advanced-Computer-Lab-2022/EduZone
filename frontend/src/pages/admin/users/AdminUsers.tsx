@@ -138,7 +138,10 @@ const AdminUsers = () => {
           <tbody>
             {filteredUsers.length === 0 ? (
               <tr className="">
-                <td className="bg-white border-b   py-4 px-6 font-medium" colSpan={5}>
+                <td
+                  className="bg-white border-b   py-4 px-6 font-medium"
+                  colSpan={5}
+                >
                   No Users Found
                 </td>
               </tr>

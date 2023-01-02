@@ -106,7 +106,9 @@ const AdminCreateUser = () => {
           <div className="w-full">
             <p className="mr">Corporate</p>
             <select name="corporate" id="" className="w-full p-2 border">
-              <option value="choose" disabled>-- Choose a corporate -- </option>
+              <option value="choose" disabled>
+                -- Choose a corporate --{' '}
+              </option>
               <option value="Benya">Benya</option>
               <option value="Brightskies">Brightskies</option>
               <option value="TMG">Talaat Mostafa Group</option>
