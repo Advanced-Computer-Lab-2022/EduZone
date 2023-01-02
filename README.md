@@ -31,6 +31,9 @@ The MERN stack is a popular stack of technologies for building web applications.
 3. React: A JavaScript library for building user interfaces.
 4. Node.js: A JavaScript runtime that allows developers to run JavaScript on the server-side.
 
+## Features
+You can find the features in the [FEATURES]('FEATURES')
+
 ## Extra Features
 
 - User authentication and authorization
@@ -301,4 +304,4 @@ STRIPE_SECRET_KEY='<stripe-secret-key>'
 
 ## License
 
-This project is licensed under the MIT License. For further information, please refer to the LICENSE file.
+This project is licensed under the Apache 2.0 License For further information, please refer to the [LICENSE]('LICENSE') file.
