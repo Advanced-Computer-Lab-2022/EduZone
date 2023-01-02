@@ -33,7 +33,56 @@ The MERN stack is a popular stack of technologies for building web applications.
 
 ## Extra Features
 
+- User authentication and authorization
+- User profile management
+- Admin dashboard
+- Instructor dashboard
+- Statistics Routes
+
 ## Code Example
+
+As the project is already huge so we can check a sample of the code, for example the simple course card component:
+
+```tsx
+<div
+  className="flex  w-full bg-gray-100 rounded-lg p-2 border gap-4 hover:border-primary cursor-pointer transition-all duration-300 ease-in-out"
+  onClick={() => navigate(`/courses/${course._id}`)}
+>
+  <img
+    src={
+      course.thumbnail ??
+      'https://www.slntechnologies.com/wp-content/uploads/2017/08/ef3-placeholder-image.jpg'
+    }
+    alt=""
+    className="w-1/4 rounded-lg aspect-square object-cover "
+  />
+  <div className=" w-full py-1">
+    <div className="flex justify-between w-full mb-2">
+      <div className="text-xl font-medium ">{course.title}</div>
+    </div>
+    <div className="flex justify-between w-full text-sm">
+      {course?.instructor?.name && (
+        <div className="flex items-center gap-2 text-gray-500 ">
+          <FaUserAlt />
+          <p className=" ">{course?.instructor?.name}</p>
+        </div>
+      )}
+    </div>
+    <div className="mt-1 text-sm text-gray-500 font-medium">
+      Duration ≈{' '}
+      {course.subtitles &&
+        Math.ceil(
+          course?.subtitles?.reduce(
+            (acc: any, curr: any) => acc + curr.duration,
+            0
+          )
+        ) + ' hrs'}
+    </div>
+  </div>
+</div>
+```
+
+in the above code we can see the course card component which is used to display the course in the trainee profile and the instructor dashboard page. The component is a simple card that displays the course thumbnail, title, instructor name, and duration.
 
 ## Installation
 
@@ -54,6 +103,156 @@ if anything went wrong run the following:
 ```
 
 ## API References
+
+Since the backend routes are huge we will take a look at a sample of the routes: The Buy Course Route
+
+```ts
+router.patch('/:id/buy', JWTAccessDecoder, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { id: userId, email } = req.body.token;
+    const { paymentId } = req.body;
+    const course = await buyCourse(id, userId, email, paymentId);
+    if (!course) {
+      return res.status(404).json({
+        message: 'Course not found',
+      });
+    }
+    return res.status(200).json(course);
+  } catch (e) {
+    console.error(e);
+    if (e instanceof Exception) {
+      return res.status(e.statusCode).json({ error: e.message });
+    }
+    return res.status(500).json({ error: (e as any).message });
+  }
+});
+```
+
+In the above code we can see the buy course route which is used to buy a course by the trainee. The route is a patch route that takes the course id and the payment id as parameters and returns the updated course.
+
+The controller for this route is
+
+```ts
+export const buyCourse = async (
+  courseId: string,
+  studentId: string,
+  studentEmail: string,
+  paymentId: string
+) => {
+  const course = await CourseModel.findById(courseId).populate('instructor', [
+    'name',
+    'username',
+    '_id',
+    'email',
+    'img',
+    'feedback',
+  ]);
+  if (!course) throw new NotFoundException('Course not found');
+  const isEnrolled = course.enrolled.find((s) => s.studentId === studentId);
+  if (isEnrolled) throw new DuplicateException('Already enrolled');
+
+  //we check if the student is already enrolled in the course
+
+  //then we perform the payment
+  const success = await payForCourse(
+    course.title,
+    studentId,
+    studentEmail,
+    course.price as number,
+    paymentId
+  );
+
+  //  if the payment is not successful we throw an error
+  if (!success) throw new Error('Payment failed');
+
+  //if the payment is successful we add the student to the enrolled list
+  course.enrolled.push({
+    studentId,
+    exercises: [],
+    finalExam: {
+      submitted: false,
+      score: -1,
+      answers: [],
+    },
+    payment: {
+      id: paymentId,
+      amount: course.price as number,
+      date: new Date(),
+    },
+    notes: [],
+    status: 'active',
+  });
+  await course.save();
+
+  return course;
+};
+```
+
+Payment is done using stripe and the payment is done using the stripe payment id.
+
+```ts
+export const payForCourse = async (
+  courseTitle: string,
+  studentId: string,
+  email: string,
+  amount: number,
+  paymentId: string
+) => {
+  //we initialize the stripe client
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2022-11-15',
+  });
+
+  //we check if the parameters are valid
+  if (!courseTitle || !studentId || !email || !amount) {
+    throw new BadRequestBodyException('Invalid parameters');
+  }
+
+  //we create a customer in stripe
+  const { id: customerId }: any = await stripe.customers
+    .create({
+      email: email,
+      source: paymentId,
+    })
+    .catch((e: Error) => {
+      console.log(e);
+      return null;
+    });
+
+  //if the customer is not created we return false
+  if (!customerId) {
+    return false;
+  }
+
+  //we create a charge for the customer
+  const invoiceId = `${email}-${Math.random().toString()}-${Date.now().toString()}`;
+
+  //we create a charge for the customer
+  const charge = await stripe.charges
+    .create(
+      {
+        amount: amount * 100,
+        currency: 'USD',
+        customer: customerId,
+        receipt_email: email,
+        description: `Course Payment: ${courseTitle}`,
+      },
+      { idempotencyKey: invoiceId }
+    )
+    .catch((e: Error) => {
+      console.log(e);
+      return null;
+    });
+
+  if (!charge) {
+    return false;
+  }
+
+  //if the charge is successful we return true
+  return true;
+};
+```
 
 ## Tests
 
