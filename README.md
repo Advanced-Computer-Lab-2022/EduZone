@@ -47,7 +47,7 @@ The MERN stack is a popular stack of technologies for building web applications.
 
 ## Features
 
-You can find the features in the [FEATURES](FEATURES)
+You can find the features in the [FEATURES](FEATURES.txt)
 
 ## Extra Features
 
