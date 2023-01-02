@@ -1,9 +1,13 @@
 import NotFoundException from '../Exceptions/NotFoundException';
 import { UserModel } from '../models';
+import bcrypt from 'bcrypt';
 
 export const addUser = (data: typeof UserModel) => {
+  const password = (data as any).password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const user = UserModel.create({
     ...data,
+    password: hashedPassword,
     wallet: { balance: 0, transactions: [] },
   });
   return user;

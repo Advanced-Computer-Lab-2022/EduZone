@@ -89,7 +89,7 @@ const LearningHeader: React.FC<LearningHeaderProps> = ({
                 );
               }}
             >
-              Mark as Completed
+              Mark as Completed ```
             </button>
           </div>
         )} */}

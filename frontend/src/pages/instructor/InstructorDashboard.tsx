@@ -95,7 +95,7 @@ const InstructorDashboard = () => {
               <p className="text-xl">Total Earnings</p>
               <p className="text-3xl">
                 {Humanize.formatNumber(
-                  stats?.income?.total * conversion_rate ?? 0,
+                  stats?.income?.total * conversion_rate || 0,
                   2
                 )}
                 <span className="text-base text-gray-400 ml-1">{currency}</span>

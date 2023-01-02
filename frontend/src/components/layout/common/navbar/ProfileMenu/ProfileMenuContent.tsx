@@ -99,21 +99,23 @@ const ProfileMenuContent = React.forwardRef<HTMLDivElement, any>((any, ref) => {
         </ProfileMenuItem>
       ) : null}
 
-      <ProfileMenuItem>
-        <IconText
-          text={user.name}
-          leading={
-            <FaUserAlt className="w-6 text-gray-400 group-hover:text-primary" />
-          }
-          trailing={<FaChevronRight size={12} className="ml-auto" />}
-          link={'internal'}
-          url={
-            user.role === 'instructor'
-              ? `/instructor/${user.id}/profile`
-              : `/trainee/${user.id}/profile`
-          }
-        />
-      </ProfileMenuItem>
+      {user.role !== 'instructor' && user.role !== 'admin ' && (
+        <ProfileMenuItem>
+          <IconText
+            text={user.name}
+            leading={
+              <FaUserAlt className="w-6 text-gray-400 group-hover:text-primary" />
+            }
+            trailing={<FaChevronRight size={12} className="ml-auto" />}
+            link={'internal'}
+            url={
+              user.role === 'instructor'
+                ? `/instructor/${user.id}/profile`
+                : `/trainee/${user.id}/profile`
+            }
+          />
+        </ProfileMenuItem>
+      )}
 
       <Divider />
       <ProfileMenuItem>
